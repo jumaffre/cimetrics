@@ -6,7 +6,7 @@ pool:
 steps:
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '3.6'
+    versionSpec: '3.7'
 
 - script: pip install -r requirements.txt
   displayName: 'Install Python dependencies'
@@ -14,14 +14,17 @@ steps:
 - script: python app/main.py
   displayName: 'Run app and collect metrics'
 
-#- script: python pymetrics/render_graphs.py _pymetrics
-#  displayName: 'Render metrics graphs'
-#
-#- task: PublishBuildArtifacts@1
-#  inputs:
-#    pathtoPublish: _metrics 
-#    artifactName: metrics
-#  displayName: 'Publish metrics graphs as build artifact'
+- script: mkdir _pymetrics
+  displayName: 'Make output directory'
+
+- script: python pymetrics/plot.py
+  displayName: 'Plot metrics'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: _pymetrics
+    artifactName: metrics
+  displayName: 'Publish metrics graphs as build artifact'
 
 #- script: python pymetrics/post_to_github.py _pymetrics
 #  displayName: 'Post metrics graphs as PR comment'
