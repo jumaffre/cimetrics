@@ -1,19 +1,34 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- master
+trigger: ['master']
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.7'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- script: pip install -r requirements.txt
+  displayName: 'Install Python dependencies'
+
+- script: python app/main.py
+  env:
+    METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
+  displayName: 'Run app and collect metrics'
+
+- script: mkdir _pymetrics
+  displayName: 'Make output directory'
+
+- script: python pymetrics/plot.py
+  env:
+    METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
+  displayName: 'Plot metrics'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: _pymetrics
+    artifactName: metrics
+  displayName: 'Publish metrics graphs as build artifact'
+
+#- script: python pymetrics/post_to_github.py _pymetrics
+#  displayName: 'Post metrics graphs as PR comment'
