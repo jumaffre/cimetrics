@@ -1,19 +1,28 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- master
+# Only enable PR builds.
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.6'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- script: pip install -r requirements.txt
+  displayName: 'Install Python dependencies'
+
+- script: python app/main.py
+  displayName: 'Run app and collect metrics'
+
+#- script: python pymetrics/render_graphs.py _pymetrics
+#  displayName: 'Render metrics graphs'
+#
+#- task: PublishBuildArtifacts@1
+#  inputs:
+#    pathtoPublish: _metrics 
+#    artifactName: metrics
+#  displayName: 'Publish metrics graphs as build artifact'
+
+#- script: python pymetrics/post_to_github.py _pymetrics
+#  displayName: 'Post metrics graphs as PR comment'
