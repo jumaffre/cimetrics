@@ -4,6 +4,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- script: |
+    echo '##vso[task.setvariable variable=METRICS_MONGO_CONNECTION]$(METRICS_MONGO_CONNECTION)'
+  displayName: 'Make METRICS_MONGO_CONNECTION available'
+
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.7'
