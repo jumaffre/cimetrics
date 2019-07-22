@@ -1,0 +1,3 @@
+db: 'metrics'
+collection: 'metrics'
+main_branch: 'master'
