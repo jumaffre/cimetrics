@@ -1,4 +1,4 @@
-pyaml
-matplotlib
 pymongo
+matplotlib
+pyyaml
 numpy
