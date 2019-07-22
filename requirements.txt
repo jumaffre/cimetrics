@@ -1,0 +1,4 @@
+pyaml
+matplotlib
+pymongo
+numpy
