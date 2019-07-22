@@ -1,0 +1,3 @@
+db: 'metrics'
+collection: 'metrics_my_app'
+main_branch: 'master'

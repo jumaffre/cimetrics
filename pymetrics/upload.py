@@ -1,12 +1,21 @@
 import os
 import sys
 import datetime
+import yaml
 import pymongo
 
-ENV_METRICS_PROJECT = 'METRICS_PROJECT'
-ENV_METRICS_MONGO_CONNECTION = 'METRICS_MONGO_CONNECTION'
+def get_mongo_connection_string():
+    return os.environ['METRICS_MONGO_CONNECTION']
 
 # For now, only Azure Pipeline's environment variables are supported.
+
+def get_settings():
+    root = os.getenv('BUILD_SOURCEDIRECTORY')
+    if not root:
+        raise NotImplementedError('Repository root folder not found')
+    with open(os.path.join(root, 'metrics.yml')) as fp:
+        cfg = yaml.safe_load(fp)
+        return cfg
 
 def get_build_id():
     build_id = os.environ.get('BUILD_BUILDID')
@@ -32,11 +41,8 @@ def get_commit():
     raise NotImplementedError('Commit info not found')
 
 class Metrics(object):
-    def __init__(self, project=None) -> None:
-        if project:
-            self.project = project
-        else:
-            self.project = os.environ[ENV_METRICS_PROJECT]
+    def __init__(self) -> None:
+        self.settings = get_settings()
         self.metrics = {}
     
     def put(self, name: str, value: float) -> None:
@@ -48,9 +54,9 @@ class Metrics(object):
         if not is_pull_request():
             print('Not a pull request, not submitting metrics')
             return
-        client = pymongo.MongoClient(os.environ[ENV_METRICS_MONGO_CONNECTION])
-        db = client.metrics
-        coll = db['metrics_' + self.project]
+        client = pymongo.MongoClient(get_mongo_connection_string())
+        db = client[self.settings['db']]
+        coll = db[self.settings['collection']]
         coll.insert_one({
             "created": datetime.datetime.now(),
             "build_id": get_build_id(),
