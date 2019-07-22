@@ -16,6 +16,12 @@ def get_settings():
     cfg = yaml.safe_load(fp)
     return cfg
 
+def get_branch():
+  branch = os.environ.get('BUILD_SOURCEBRANCH')
+  if branch:
+    return branch
+  raise NotImplementedError('Source branch info not found')
+
 CFG = get_settings()
 
 class Metrics:
@@ -47,7 +53,7 @@ class Metrics:
 
 if __name__ == '__main__':
   m = Metrics()
-  BRANCH = 'foo'
+  BRANCH = get_branch()
   branch, main, ticks = m.bars(BRANCH, CFG['main_branch'])
   fig, ax = plt.subplots()
   index = np.arange(len(ticks))
@@ -63,4 +69,4 @@ if __name__ == '__main__':
   ax.set_xticks(index + bar_width / 2)
   ax.set_xticklabels(ticks)
   ax.legend()
-  plt.savefig('diff.png')
+  plt.savefig('_pymetrics/diff.png')
