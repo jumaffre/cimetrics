@@ -20,6 +20,8 @@ steps:
   displayName: 'Make output directory'
 
 - script: python pymetrics/plot.py
+  env:
+    METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Plot metrics'
 
 - task: PublishBuildArtifacts@1
