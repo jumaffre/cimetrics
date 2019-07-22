@@ -18,7 +18,7 @@ def get_settings():
         return cfg
 
 def get_build_id():
-    build_id = os.environ.get('BUILD_BUILDID')
+    build_id = os.getenv('BUILD_BUILDID')
     if build_id:
         return build_id
     raise NotImplementedError('Build ID info not found')
@@ -29,7 +29,7 @@ def is_pull_request():
     return AZURE_PR_SOURCE_BRANCH_ENV in os.environ
 
 def get_branch():
-    branch = os.environ.get('BUILD_SOURCEBRANCH')
+    branch = os.getenv('BUILD_SOURCEBRANCH')
     if branch:
         return branch
     raise NotImplementedError('Source branch info not found')
@@ -42,7 +42,7 @@ def should_skip(settings):
     return True
 
 def get_commit():
-    commit = os.environ.get('BUILD_SOURCEVERSION')
+    commit = os.getenv('BUILD_SOURCEVERSION')
     if commit:
         return commit
     raise NotImplementedError('Commit info not found')
