@@ -9,7 +9,7 @@ def get_mongo_connection_string():
   return os.environ['METRICS_MONGO_CONNECTION']
 
 def get_settings():
-  root = os.getenv('BUILD_SOURCEDIRECTORY')
+  root = os.getenv('BUILD_SOURCESDIRECTORY')
   if not root:
     raise NotImplementedError('Repository root folder not found')
   with open(os.path.join(root, 'metrics.yml')) as fp:
