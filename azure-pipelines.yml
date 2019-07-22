@@ -1,5 +1,4 @@
-# Only enable PR builds.
-trigger: none
+trigger: master
 
 pool:
   vmImage: 'ubuntu-latest'

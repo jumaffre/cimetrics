@@ -28,11 +28,18 @@ AZURE_PR_SOURCE_BRANCH_ENV = 'SYSTEM_PULLREQUEST_SOURCEBRANCH'
 def is_pull_request():
     return AZURE_PR_SOURCE_BRANCH_ENV in os.environ
 
-def get_source_branch():
-    pr_branch = os.environ.get(AZURE_PR_SOURCE_BRANCH_ENV)
-    if pr_branch:
-        return pr_branch
+def get_branch():
+    branch = os.environ.get('BUILD_SOURCEBRANCH')
+    if branch:
+        return branch
     raise NotImplementedError('Source branch info not found')
+
+def should_skip(settings):
+    if is_pull_request():
+        return False
+    if get_branch() == settings['main_branch']:
+        return False
+    return True
 
 def get_commit():
     commit = os.environ.get('BUILD_SOURCEVERSION')
@@ -51,8 +58,8 @@ class Metrics(object):
         }
 
     def publish(self):
-        if not is_pull_request():
-            print('Not a pull request, not submitting metrics')
+        if should_skip(self.settings):
+            print('Not a pull request or main_branch, not submitting metrics')
             return
         client = pymongo.MongoClient(get_mongo_connection_string())
         db = client[self.settings['db']]
@@ -60,7 +67,7 @@ class Metrics(object):
         coll.insert_one({
             "created": datetime.datetime.now(),
             "build_id": get_build_id(),
-            "branch": get_source_branch(),
+            "branch": get_branch(),
             "commit": get_commit(),
             "metrics": self.metrics
         })
