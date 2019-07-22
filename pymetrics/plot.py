@@ -5,19 +5,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 plt.style.use('ggplot')
 
-def get_settings():
-  with open('metrics.yml') as cfgf:
-    cfg = yaml.safe_load(cfgf)
-    return cfg['db'], cfg['collection'], cfg['main_branch']
+def get_mongo_connection_string():
+  return os.environ['METRICS_MONGO_CONNECTION']
 
-DB, COLLECTION, MAIN_BRANCH = get_settings()
+def get_settings():
+  root = os.getenv('BUILD_SOURCEDIRECTORY')
+  if not root:
+    raise NotImplementedError('Repository root folder not found')
+  with open(os.path.join(root, 'metrics.yml')) as fp:
+    cfg = yaml.safe_load(fp)
+    return cfg
+
+CFG = get_settings()
 
 class Metrics:
   def __init__(self):
-    uri = os.getenv("COSMOS_CONNECTION")
+    uri = get_mongo_connection_string()
     self.client = pymongo.MongoClient(uri)
-    db = self.client[DB]
-    self.col = db[COLLECTION]
+    db = self.client[CFG['db']]
+    self.col = db[CFG['collection']]
 
   def all(self):
     return self.col.find()
@@ -42,7 +48,7 @@ class Metrics:
 if __name__ == '__main__':
   m = Metrics()
   BRANCH = 'foo'
-  branch, main, ticks = m.bars(BRANCH, MAIN_BRANCH)
+  branch, main, ticks = m.bars(BRANCH, CFG['main_branch'])
   fig, ax = plt.subplots()
   index = np.arange(len(ticks))
   bar_width = 0.35
@@ -50,10 +56,10 @@ if __name__ == '__main__':
   ax.bar(index, branch, bar_width, alpha=opacity, color='r',
          label=BRANCH)
   ax.bar(index+bar_width, main, bar_width, alpha=opacity, color='b',
-         label=MAIN_BRANCH)
+         label=CFG['main_branch'])
   ax.set_xlabel('Metrics')
   ax.set_ylabel('Value')
-  ax.set_title(f'{BRANCH} vs {MAIN_BRANCH}')
+  ax.set_title(f"{BRANCH} vs {CFG['main_branch']}")
   ax.set_xticks(index + bar_width / 2)
   ax.set_xticklabels(ticks)
   ax.legend()
