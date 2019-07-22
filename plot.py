@@ -30,10 +30,12 @@ class Metrics:
     r = []
     ticks = []
     for field in branch_metrics.keys() | reference_metrics.keys():
-      b = branch_metrics.get
+      b.append(branch_metrics.get(field, {}).get('value', 0))
+      r.append(reference_metrics.get(field, {}).get('value', 0))
+      ticks.append(field)
+
+    return b, r, ticks
  
 if __name__ == '__main__':
   m = Metrics()
-  #for p in m.all():
-  #  print(p)
-  print(next(m.last_for_branch(MAIN_BRANCH)))
+  print(m.bars('foo', MAIN_BRANCH))
