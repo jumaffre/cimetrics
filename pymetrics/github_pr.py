@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     # If the build is not because of a pull request, return immediately
     if not is_pull_request():
-        return 
+        sys.exit()
 
     create_branch()
 
