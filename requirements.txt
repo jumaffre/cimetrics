@@ -2,3 +2,4 @@ pymongo
 matplotlib
 pyyaml
 numpy
+requests
