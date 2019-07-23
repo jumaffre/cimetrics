@@ -16,7 +16,10 @@ def get_github_token():
     return os.environ['GITHUB_TOKEN']
 
 def get_pull_request_id():
-    return os.environ['SYSTEM_PULLREQUEST_PULLREQUESTID']
+    return os.environ['SYSTEM_PULLREQUEST_PULLREQUESTNUMBER']
+
+def is_pull_request():
+    return os.environ['BUILD_REASON'] == 'PullRequest'
 
 # REST specific
 REQUEST_HEADERS = {'content-type': 'application/json', 'Authorization': f"token {get_github_token()}"}
@@ -58,9 +61,13 @@ def publish_comment(pull_request_id, image_report_url):
     print(f"Publishing comment to pull request {pull_request_id}")
     rep = requests.post(f"{GITHUB_URL}/issues/{str(pull_request_id)}/comments", data=json.dumps(params), headers=REQUEST_HEADERS)
 
-
 if __name__ == '__main__':
     # Try to create the branch to upload images to
+
+    # If the build is not because of a pull request, return immediately
+    if not is_pull_request():
+        return 
+
     create_branch()
 
     encoded_image = None
