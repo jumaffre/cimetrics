@@ -8,6 +8,9 @@ steps:
   inputs:
     versionSpec: '3.7'
 
+- script: env
+  displayName: env
+
 - script: pip install -r requirements.txt
   displayName: 'Install Python dependencies'
 
