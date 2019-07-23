@@ -1,3 +1,4 @@
+from typing import Optional
 import os
 import yaml
 from git import Repo
@@ -49,8 +50,13 @@ class GitEnv(Env):
         return self.repo.working_tree_dir
 
     @property
-    def branch(self) -> str:
-        return self.repo.active_branch.name
+    def branch(self) -> Optional[str]:
+        if not self.repo.head.is_detached:
+            return self.repo.active_branch.name
+        tag_or_none = next((tag.name for tag in self.repo.tags 
+                            if tag.commit == self.repo.head.commit),
+                           None)
+        return tag_or_none
 
     @property
     def commit(self) -> str:
@@ -68,12 +74,18 @@ class AzurePipelinesEnv(GitEnv):
     @property
     def target_branch(self) -> str:
         assert self.is_pr
-        return os.environ['SYSTEM_PULLREQUEST_SOURCEBRANCH']
+        return os.environ['SYSTEM_PULLREQUEST_TARGETBRANCH']
     
     @property
-    def branch(self) -> str:
-        # CI checks out detached commit, must rely on env var.
-        ref = os.environ['BUILD_SOURCEBRANCH']
-        prefix = 'refs/heads/'
-        assert ref.startswith(prefix), f'Unsupported ref type: {ref}'
-        return ref[len(prefix):]
+    def branch(self) -> Optional[str]:
+        if self.is_pr:
+            ref = os.environ['SYSTEM_PULLREQUEST_SOURCEBRANCH']
+        else:
+            ref = os.environ['BUILD_SOURCEBRANCH']
+        short = None
+        for prefix in ['refs/heads/', 'refs/tags/']:
+            if ref.startswith(prefix):
+                short = ref[len(prefix):]
+                break
+        assert short, f'Unsupported ref type: {ref}'
+        return short
