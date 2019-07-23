@@ -29,6 +29,9 @@ def is_pull_request():
     return AZURE_PR_SOURCE_BRANCH_ENV in os.environ
 
 def get_branch():
+    branch = os.getenv(AZURE_PR_SOURCE_BRANCH_ENV)
+    if branch:
+        return branch
     branch = os.getenv('BUILD_SOURCEBRANCH')
     if branch:
         return branch

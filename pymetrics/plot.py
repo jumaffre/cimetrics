@@ -16,11 +16,16 @@ def get_settings():
     cfg = yaml.safe_load(fp)
     return cfg
 
+AZURE_PR_SOURCE_BRANCH_ENV = 'SYSTEM_PULLREQUEST_SOURCEBRANCH'
+
 def get_branch():
-  branch = os.environ.get('BUILD_SOURCEBRANCH')
-  if branch:
-    return branch
-  raise NotImplementedError('Source branch info not found')
+    branch = os.getenv(AZURE_PR_SOURCE_BRANCH_ENV)
+    if branch:
+        return branch
+    branch = os.getenv('BUILD_SOURCEBRANCH')
+    if branch:
+        return branch
+    raise NotImplementedError('Source branch info not found')
 
 CFG = get_settings()
 
