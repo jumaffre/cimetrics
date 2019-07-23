@@ -13,6 +13,7 @@ REPO = "jumaffre/metrics-devops"
 IMAGE_BRANCH_NAME = "metrics-devops"
 
 def get_github_token():
+  print(len(os.environ['GITHUB_TOKEN']))
   return os.environ['GITHUB_TOKEN']
 
 # REST specific
