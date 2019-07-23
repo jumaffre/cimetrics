@@ -5,6 +5,10 @@ import base64
 import datetime
 import os
 
+#
+# This script should only run on the CI against Pull Request builds
+#
+
 # To get from the CI environment variables
 USERNAME = "jumaffre"
 REPO = "jumaffre/metrics-devops"
@@ -17,9 +21,6 @@ def get_github_token():
 
 def get_pull_request_id():
     return os.environ['SYSTEM_PULLREQUEST_PULLREQUESTNUMBER']
-
-def is_pull_request():
-    return os.environ['BUILD_REASON'] == 'PullRequest'
 
 # REST specific
 REQUEST_HEADERS = {'content-type': 'application/json', 'Authorization': f"token {get_github_token()}"}
@@ -63,10 +64,6 @@ def publish_comment(pull_request_id, image_report_url):
 
 if __name__ == '__main__':
     # Try to create the branch to upload images to
-
-    # If the build is not because of a pull request, return immediately
-    if not is_pull_request():
-        sys.exit()
 
     create_branch()
 

@@ -27,10 +27,12 @@ steps:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Plot metrics'
 
+# This step is only run on Pull Request
 - script: python pymetrics/github_pr.py
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
   displayName: 'Post metrics graphs as PR comment'
+  condition: eq(variables['Build.Reason'], 'PullRequest')
 
 - task: PublishBuildArtifacts@1
   inputs:
