@@ -4,9 +4,9 @@ import random
 
 ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
 sys.path.append(ROOT_DIR)
-import pymetrics
+import pymetrics.upload
 
-metrics = pymetrics.Metrics()
+metrics = pymetrics.upload.Metrics()
 
 metrics.put('Signed throughput', random.randint(50_000, 100_0000))
 metrics.put('Unsigned throughput', random.randint(50_000, 100_000))
