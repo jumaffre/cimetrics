@@ -43,7 +43,10 @@ def upload_image(encoded_image):
     print(f"Uploading image to branch {IMAGE_BRANCH_NAME}")
     rep = requests.put(IMAGE_UPLOADING_URL, data=json.dumps(params), headers=REQUEST_HEADERS)
     json_rep = json.loads(rep.text)
-    return json_rep["content"]["download_url"]
+    if "content" in json_rep:
+        return json_rep["content"]["download_url"]
+    else:
+        raise Exception("Failed to upload image")
 
 def publish_comment(pull_request_id, image_report_url):
     params = {}
