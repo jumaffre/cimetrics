@@ -30,5 +30,7 @@ steps:
     artifactName: metrics
   displayName: 'Publish metrics graphs as build artifact'
 
-#- script: python pymetrics/post_to_github.py _pymetrics
-#  displayName: 'Post metrics graphs as PR comment'
+- script: python pymetrics/github_pr.py
+  env:
+    GITHUB_TOKEN: ${GITHUB_TOKEN}
+  displayName: 'Post metrics graphs as PR comment'
