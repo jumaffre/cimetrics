@@ -13,11 +13,13 @@ REPO = "jumaffre/metrics-devops"
 IMAGE_BRANCH_NAME = "metrics-devops"
 
 def get_github_token():
-  print(len(os.environ['GITHUB_TOKEN']))
-  return os.environ['GITHUB_TOKEN']
+    return os.environ['GITHUB_TOKEN']
+
+def get_pull_request_id():
+    return os.environ['SYSTEM_PULLREQUEST_PULLREQUESTID']
 
 # REST specific
-REQUEST_HEADERS = {'content-type': 'application/json', 'Authorization': 'token {}'.format(get_github_token())}
+REQUEST_HEADERS = {'content-type': 'application/json', 'Authorization': f"token {get_github_token()}"}
 GITHUB_URL = f"https://api.github.com/repos/{REPO}"
 BRANCH_CREATION_URL = f"{GITHUB_URL}/git/refs"
 IMAGE_UPLOADING_URL = f"{GITHUB_URL}/contents/{IMAGE_BRANCH_NAME}/image{datetime.datetime.now()}.png"
@@ -70,5 +72,5 @@ if __name__ == '__main__':
     image_url = upload_image(str(encoded_image.decode()))
 
     # Comment on the pull request
-    pull_request_id = 1
+    pull_request_id = get_pull_request_id()
     publish_comment(pull_request_id, image_url)
