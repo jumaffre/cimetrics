@@ -16,10 +16,6 @@ class Env(object):
             self.cfg = yaml.safe_load(fp)
 
     @property
-    def plot_cfg(self) -> list:
-        return self.cfg['plots']
-
-    @property
     def repo_root(self) -> str:
         # implemented by subclass
         raise NotImplementedError
