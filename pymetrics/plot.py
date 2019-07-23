@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(ROOT_DIR)
-
 from pymetrics.env import get_env
 
 plt.style.use('ggplot')
