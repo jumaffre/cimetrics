@@ -75,6 +75,5 @@ class AzurePipelinesEnv(GitEnv):
         # CI checks out detached commit, must rely on env var.
         ref = os.environ['BUILD_SOURCEBRANCH']
         prefix = 'refs/heads/'
-        assert prefix in ref, 'Unsupported ref type: ' + ref
-        short = ref.replace(prefix, '')
-        return short
+        assert ref.startswith(prefix), f'Unsupported ref type: {ref}'
+        return ref[len(prefix):]
