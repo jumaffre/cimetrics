@@ -1,3 +1,13 @@
 db: 'metrics'
 collection: 'metrics_my_app'
-main_branch: 'refs/heads/master'
+plots:
+- title: 'Throughput in tx/s'
+  metrics:
+    signed_throughput: 'Signed Throughput'
+    unsigned_throughput: 'Unsigned Throughput'
+  
+- title: 'Latency in ms'
+  metrics:
+    local_latency: 'Local Latency'
+    global_latency: 'Global latency'
+    geo_replicated_latency: 'Geo-replicated latency'
