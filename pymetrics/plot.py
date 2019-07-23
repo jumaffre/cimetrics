@@ -3,6 +3,7 @@ import pymongo
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
 sys.path.append(ROOT_DIR)
@@ -39,8 +40,9 @@ class Metrics(object):
     return b, r, ticks
 
 if __name__ == '__main__':
-  os.makedirs('_pymetrics', exist_ok=True)
   env = get_env()
+  metrics_path = os.path.join(env.repo_root, '_pymetrics')
+  os.makedirs(metrics_path, exist_ok=True)
   m = Metrics(env)
   BRANCH = env.branch
   if env.is_pr:
@@ -61,4 +63,4 @@ if __name__ == '__main__':
     ax.set_xticks(index + bar_width / 2)
     ax.set_xticklabels(ticks)
     ax.legend()
-    plt.savefig('_pymetrics/diff.png')
+    plt.savefig(os.path.join(metrics_path, 'diff.png'))
