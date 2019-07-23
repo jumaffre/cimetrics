@@ -3,38 +3,17 @@ import pymongo
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+
+from .env import get_env
+
 plt.style.use('ggplot')
 
-def get_mongo_connection_string():
-  return os.environ['METRICS_MONGO_CONNECTION']
 
-def get_settings():
-  root = os.getenv('BUILD_SOURCESDIRECTORY')
-  if not root:
-    raise NotImplementedError('Repository root folder not found')
-  with open(os.path.join(root, 'metrics.yml')) as fp:
-    cfg = yaml.safe_load(fp)
-    return cfg
-
-AZURE_PR_SOURCE_BRANCH_ENV = 'SYSTEM_PULLREQUEST_SOURCEBRANCH'
-
-def get_branch():
-    branch = os.getenv(AZURE_PR_SOURCE_BRANCH_ENV)
-    if branch:
-        return branch
-    branch = os.getenv('BUILD_SOURCEBRANCH')
-    if branch:
-        return branch
-    raise NotImplementedError('Source branch info not found')
-
-CFG = get_settings()
-
-class Metrics:
-  def __init__(self):
-    uri = get_mongo_connection_string()
-    self.client = pymongo.MongoClient(uri)
-    db = self.client[CFG['db']]
-    self.col = db[CFG['collection']]
+class Metrics(object):
+  def __init__(self, env):
+    self.client = pymongo.MongoClient(env.mongo_connection)
+    db = self.client[env.mongo_db]
+    self.col = db[env.mongo_collection]
 
   def all(self):
     return self.col.find()
@@ -57,22 +36,26 @@ class Metrics:
     return b, r, ticks
 
 if __name__ == '__main__':
-  m = Metrics()
-  BRANCH = get_branch()
-  print(f"Comparing {BRANCH} and {CFG['main_branch']}")
-  branch, main, ticks = m.bars(BRANCH, CFG['main_branch'])
-  fig, ax = plt.subplots()
-  index = np.arange(len(ticks))
-  bar_width = 0.35
-  opacity = 0.9
-  ax.bar(index, branch, bar_width, alpha=opacity, color='r',
-         label=BRANCH)
-  ax.bar(index+bar_width, main, bar_width, alpha=opacity, color='b',
-         label=CFG['main_branch'])
-  ax.set_xlabel('Metrics')
-  ax.set_ylabel('Value')
-  ax.set_title(f"{BRANCH} vs {CFG['main_branch']}")
-  ax.set_xticks(index + bar_width / 2)
-  ax.set_xticklabels(ticks)
-  ax.legend()
-  plt.savefig('_pymetrics/diff.png')
+  os.makedirs('_pymetrics', exist_ok=True)
+  env = get_env()
+  m = Metrics(env)
+  BRANCH = env.branch
+  if env.is_pr:
+    target_branch = env.target_branch
+    print(f"Comparing {BRANCH} and {target_branch}")
+    branch, main, ticks = m.bars(BRANCH, target_branch)
+    fig, ax = plt.subplots()
+    index = np.arange(len(ticks))
+    bar_width = 0.35
+    opacity = 0.9
+    ax.bar(index, branch, bar_width, alpha=opacity, color='r',
+          label=BRANCH)
+    ax.bar(index+bar_width, main, bar_width, alpha=opacity, color='b',
+          label=target_branch)
+    ax.set_xlabel('Metrics')
+    ax.set_ylabel('Value')
+    ax.set_title(f"{BRANCH} vs {target_branch}")
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(ticks)
+    ax.legend()
+    plt.savefig('_pymetrics/diff.png')

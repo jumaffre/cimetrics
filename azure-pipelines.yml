@@ -19,9 +19,6 @@ steps:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Run app and collect metrics'
 
-- script: mkdir _pymetrics
-  displayName: 'Make output directory'
-
 - script: python pymetrics/plot.py
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
