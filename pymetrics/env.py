@@ -79,13 +79,13 @@ class AzurePipelinesEnv(GitEnv):
     @property
     def branch(self) -> Optional[str]:
         if self.is_pr:
-            ref = os.environ['SYSTEM_PULLREQUEST_SOURCEBRANCH']
+            short = os.environ['SYSTEM_PULLREQUEST_SOURCEBRANCH']
         else:
             ref = os.environ['BUILD_SOURCEBRANCH']
-        short = None
-        for prefix in ['refs/heads/', 'refs/tags/']:
-            if ref.startswith(prefix):
-                short = ref[len(prefix):]
-                break
-        assert short, f'Unsupported ref type: {ref}'
+            short = None
+            for prefix in ['refs/heads/', 'refs/tags/']:
+                if ref.startswith(prefix):
+                    short = ref[len(prefix):]
+                    break
+            assert short, f'Unsupported ref type: {ref}'
         return short
