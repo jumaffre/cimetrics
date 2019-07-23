@@ -4,7 +4,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .env import get_env
+ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
+sys.path.append(ROOT_DIR)
+
+from pymetrics.env import get_env
 
 plt.style.use('ggplot')
 

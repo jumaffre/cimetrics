@@ -4,7 +4,10 @@ import datetime
 import yaml
 import pymongo
 
-from .env import get_env
+ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
+sys.path.append(ROOT_DIR)
+
+from pymetrics.env import get_env
 
 class Metrics(object):
     def __init__(self) -> None:
