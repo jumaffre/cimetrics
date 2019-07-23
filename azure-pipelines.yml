@@ -26,7 +26,7 @@ steps:
 
 - script: python pymetrics/github_pr.py
   env:
-    GITHUB_TOKEN: ${GITHUB_TOKEN}
+    GITHUB_TOKEN: $(GITHUB_TOKEN)
   displayName: 'Post metrics graphs as PR comment'
 
 - task: PublishBuildArtifacts@1
