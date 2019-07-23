@@ -17,17 +17,20 @@ steps:
 - script: python app/main.py
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
+    PYTHONPATH: $(Build.SourcesDirectory)
   displayName: 'Run app and collect metrics'
 
 - script: python pymetrics/plot.py
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
+    PYTHONPATH: $(Build.SourcesDirectory)
   displayName: 'Plot metrics'
 
 # This step is only run on Pull Request
 - script: python pymetrics/github_pr.py
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
+    PYTHONPATH: $(Build.SourcesDirectory)
   displayName: 'Post metrics graphs as PR comment'
   condition: eq(variables['Build.Reason'], 'PullRequest')
 

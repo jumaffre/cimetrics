@@ -2,8 +2,6 @@ import os
 import sys
 import random
 
-ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
-sys.path.append(ROOT_DIR)
 import pymetrics.upload
 
 metrics = pymetrics.upload.Metrics()
