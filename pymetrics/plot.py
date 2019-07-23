@@ -59,6 +59,7 @@ class Metrics:
 if __name__ == '__main__':
   m = Metrics()
   BRANCH = get_branch()
+  print(f"Comparing {BRANCH} and {CFG['main_branch']}")
   branch, main, ticks = m.bars(BRANCH, CFG['main_branch'])
   fig, ax = plt.subplots()
   index = np.arange(len(ticks))
