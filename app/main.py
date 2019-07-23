@@ -8,7 +8,10 @@ import pymetrics
 
 metrics = pymetrics.Metrics()
 
-metrics.put('throughput', random.random())
-metrics.put('latency', random.randint(10, 100))
+metrics.put('Signed throughput', random.random(100_0000))
+metrics.put('Unsigned throughput', random.random(100_000))
+metrics.put('Local latency', random.randint(10, 100))
+metrics.put('Global latency', random.randint(10, 100))
+metrics.put('Geo-replicated latency', random.randint(10, 100))
 
 metrics.publish()
