@@ -72,8 +72,7 @@ if __name__ == '__main__':
     opacity = 0.9
     ax.barh(index, pos, 0.3, alpha=opacity, color='blue', left=0)
     ax.barh(index, neg, 0.3, alpha=opacity, color='orange', left=0)
-    ax.set_ylabel('Metrics')
-    ax.set_xlabel('Value')
+    ax.set_xlabel('Change')
     ax.set_title(f"{BRANCH} vs {target_branch}")
     ax.set_yticks(index)
     ax.set_yticklabels(ticks)
