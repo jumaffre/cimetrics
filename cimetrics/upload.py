@@ -9,15 +9,14 @@ import pymongo
 
 from cimetrics.env import get_env
 
+
 class Metrics(object):
     def __init__(self) -> None:
         self.env = get_env()
         self.metrics = {}
-    
+
     def put(self, name: str, value: float) -> None:
-        self.metrics[name] = {
-            "value": value
-        }
+        self.metrics[name] = {"value": value}
 
     def publish(self):
         client = pymongo.MongoClient(self.env.mongo_connection)
@@ -29,8 +28,8 @@ class Metrics(object):
             "branch": self.env.branch,
             "is_pr": self.env.is_pr,
             "commit": self.env.commit,
-            "metrics": self.metrics
+            "metrics": self.metrics,
         }
         if self.env.is_pr:
-            doc['target_branch'] = self.env.target_branch
+            doc["target_branch"] = self.env.target_branch
         coll.insert_one(doc)

@@ -35,5 +35,6 @@ setup(
         'requests',
         'matplotlib',
         'numpy',
+        'black',
     ]
 )
