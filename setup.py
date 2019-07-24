@@ -10,7 +10,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='pymetrics',
+    name='cimetrics',
     version='0.1.0',
     description='TBD',
     long_description=long_description,
@@ -26,7 +26,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
     ],
-    packages=['pymetrics'],
+    packages=['cimetrics'],
     python_requires='>=3.3',
     install_requires=[
         'pymongo',

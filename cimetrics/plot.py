@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-from pymetrics.env import get_env
+from cimetrics.env import get_env
 
 plt.style.use('ggplot')
 
@@ -42,7 +42,7 @@ class Metrics(object):
 
 if __name__ == '__main__':
   env = get_env()
-  metrics_path = os.path.join(env.repo_root, '_pymetrics')
+  metrics_path = os.path.join(env.repo_root, '_cimetrics')
   os.makedirs(metrics_path, exist_ok=True)
   m = Metrics(env)
   BRANCH = env.branch

@@ -5,9 +5,9 @@ import os
 import sys
 import random
 
-import pymetrics.upload
+import cimetrics.upload
 
-metrics = pymetrics.upload.Metrics()
+metrics = cimetrics.upload.Metrics()
 
 metrics.put('Signed throughput', random.randint(50_000, 100_0000))
 metrics.put('Unsigned throughput', random.randint(50_000, 100_000))

@@ -7,7 +7,7 @@ import datetime
 import yaml
 import pymongo
 
-from pymetrics.env import get_env
+from cimetrics.env import get_env
 
 class Metrics(object):
     def __init__(self) -> None:

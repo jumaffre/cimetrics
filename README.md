@@ -13,6 +13,6 @@ Submit sample metrics and create plots:
 ```sh
 export METRICS_MONGO_CONNECTION=...
 python app/main.py
-python -m pymetrics.plot
-ls _pymetrics
+python -m cimetrics.plot
+ls _cimetrics
 ```

@@ -8,11 +8,11 @@ import base64
 import datetime
 import os
 
-from pymetrics.env import get_env
+from cimetrics.env import get_env
 
 # Always the same for metrics-devops
 IMAGE_BRANCH_NAME = "metrics-devops"
-IMAGE_PATH = "_pymetrics/diff.png"
+IMAGE_PATH = "_cimetrics/diff.png"
 
 class GithubPRPublisher(object):
 

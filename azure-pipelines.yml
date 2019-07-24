@@ -20,13 +20,13 @@ steps:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Run app and collect metrics'
 
-- script: python -m pymetrics.plot
+- script: python -m cimetrics.plot
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Plot metrics'
 
 # This step is only run on Pull Request
-- script: python -m pymetrics.github_pr
+- script: python -m cimetrics.github_pr
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
   displayName: 'Post metrics graphs as PR comment'
@@ -34,7 +34,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathtoPublish: _pymetrics
+    pathtoPublish: _cimetrics
     artifactName: metrics
   displayName: 'Publish metrics graphs as build artifact'
 
