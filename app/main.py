@@ -5,9 +5,9 @@ import cimetrics.upload
 
 def run_benchmark():
     return {
-        'throughput': 50000,
-        'latency': 10,
-        'peak_wss': 50
+        'throughput': 40000,
+        'latency': 25,
+        'peak_wss': 60
     }
 
 results = run_benchmark()
