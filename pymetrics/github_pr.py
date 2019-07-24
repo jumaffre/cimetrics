@@ -48,7 +48,7 @@ class GithubPRPublisher(object):
         params = {}
         params["body"] = f"Performance report: \n ![images]({image_report_url}) \n **Have a look before merging** :bar_chart: :eyes: :thumbsup:"
 
-        print(f"Publishing comment to pull request {pull_request_id}")
+        print(f"Publishing comment to pull request {self.pull_request_id}")
         rep = requests.post(f"{self.github_url}/issues/{self.pull_request_id}/comments", data=json.dumps(params), headers=self.request_header)
 
 
