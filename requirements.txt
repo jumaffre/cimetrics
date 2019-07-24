@@ -1,6 +1,0 @@
-pymongo
-matplotlib
-pyyaml
-numpy
-requests
-gitpython

@@ -9,26 +9,23 @@ steps:
 - script: env
   displayName: env
 
-- script: pip install -r requirements.txt
-  displayName: 'Install Python dependencies'
+- script: pip install .
+  displayName: 'Install library'
 
 - script: python app/main.py
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
-    PYTHONPATH: $(Build.SourcesDirectory)
   displayName: 'Run app and collect metrics'
 
-- script: python pymetrics/plot.py
+- script: python -m pymetrics.plot
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
-    PYTHONPATH: $(Build.SourcesDirectory)
   displayName: 'Plot metrics'
 
 # This step is only run on Pull Request
-- script: python pymetrics/github_pr.py
+- script: python -m pymetrics.github_pr
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
-    PYTHONPATH: $(Build.SourcesDirectory)
   displayName: 'Post metrics graphs as PR comment'
   condition: eq(variables['Build.Reason'], 'PullRequest')
 
