@@ -42,29 +42,33 @@ class Metrics(object):
   def normalise(self, new, ref):
     return [n / r for n, r in zip(new, ref)]
 
+
 if __name__ == '__main__':
   env = get_env()
   metrics_path = os.path.join(env.repo_root, '_cimetrics')
   os.makedirs(metrics_path, exist_ok=True)
   m = Metrics(env)
   BRANCH = env.branch
-  if env.is_pr:
-    target_branch = env.target_branch
+  #if env.is_pr:
+  if True:
+    #target_branch = env.target_branch
+    target_branch = "TARGET"
     print(f"Comparing {BRANCH} and {target_branch}")
-    branch, main, ticks = m.bars(BRANCH, target_branch)
+    #branch, main, ticks = m.bars(BRANCH, target_branch)
+    branch, main, ticks = [1, 2], [0.8, 0.7], ['foo', 'bar']
     values = m.normalise(branch, main)
     fig, ax = plt.subplots()
     index = np.arange(len(ticks))
     bar_width = 0.35
     opacity = 0.9
-    ax.bar(index, values, bar_width, alpha=opacity, color='r',
+    ax.barh(index, values, bar_width, alpha=opacity, color='r',
           label=BRANCH)
-    ax.bar(index+bar_width, [1] * len(ticks), bar_width, alpha=opacity, color='b',
+    ax.barh(index+bar_width, [1] * len(ticks), bar_width, alpha=opacity, color='b',
            label=target_branch)
-    ax.set_xlabel('Metrics')
-    ax.set_ylabel('Value')
+    ax.set_ylabel('Metrics')
+    ax.set_xlabel('Value')
     ax.set_title(f"{BRANCH} vs {target_branch}")
-    ax.set_xticks(index + bar_width / 2)
-    ax.set_xticklabels(ticks)
+    ax.set_yticks(index + bar_width / 2)
+    ax.set_yticklabels(ticks)
     ax.legend()
     plt.savefig(os.path.join(metrics_path, 'diff.png'))
