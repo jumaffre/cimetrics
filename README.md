@@ -16,3 +16,6 @@ python app/main.py
 python -m cimetrics.plot
 ls _cimetrics
 ```
+
+
+
