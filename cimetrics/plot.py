@@ -82,4 +82,5 @@ if __name__ == '__main__':
     fmt = '%.0f%%'
     xticks = mtick.FormatStrFormatter(fmt)
     ax.xaxis.set_major_formatter(xticks)
+    plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, 'diff.png'))
