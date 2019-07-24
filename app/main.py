@@ -7,12 +7,17 @@ import random
 
 import cimetrics.upload
 
+def run_benchmark():
+    return {
+        'throughput': 50000,
+        'latency': 10,
+        'peak_wss': 50
+    }
+
+results = run_benchmark()
+
 metrics = cimetrics.upload.Metrics()
-
-metrics.put('Signed throughput', random.randint(50_000, 100_0000))
-metrics.put('Unsigned throughput', random.randint(50_000, 100_000))
-metrics.put('Local latency', random.randint(10, 100))
-metrics.put('Global latency', random.randint(10, 100))
-metrics.put('Geo-replicated latency', random.randint(10, 100))
-
+metrics.put('Throughput', results['throughput'])
+metrics.put('Latency', results['latency'])
+metrics.put('Peak working set size', results['peak_wss'])
 metrics.publish()
