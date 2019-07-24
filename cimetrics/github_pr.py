@@ -26,9 +26,9 @@ class GithubPRPublisher(object):
         # Does not do anything if the branch already exists
         params = {}
         params["ref"] = f"refs/heads/{IMAGE_BRANCH_NAME}"
-
-        # TODO: Should get the hash of master instead?
-        params["sha"] = "ab6b38a54d04097a2924330c7730be8f339ab9a1"
+        rep = requests.get(f"{self.github_url}/git/refs/heads/master", data="", headers=self.request_header)
+        json_rep = json.loads(rep.text)
+        params["sha"] = json_rep["object"]["sha"]
 
         print(f"Creating branch {json.dumps(params)}")
         rep = requests.post(f"{self.github_url}/git/refs", data=json.dumps(params), headers=self.request_header)
