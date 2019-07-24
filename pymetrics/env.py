@@ -40,6 +40,10 @@ class Env(object):
     def is_pr(self):
         return False
 
+    @property
+    def github_token(self) -> str:
+        return os.environ['GITHUB_TOKEN']
+
 class GitEnv(Env):
     def __init__(self) -> None:
         self.repo = Repo(os.getcwd(), search_parent_directories=True)
@@ -75,7 +79,7 @@ class AzurePipelinesEnv(GitEnv):
     def target_branch(self) -> str:
         assert self.is_pr
         return os.environ['SYSTEM_PULLREQUEST_TARGETBRANCH']
-    
+
     @property
     def branch(self) -> Optional[str]:
         if self.is_pr:
@@ -89,3 +93,12 @@ class AzurePipelinesEnv(GitEnv):
                     break
             assert short, f'Unsupported ref type: {ref}'
         return short
+
+    @property
+    def pull_request_id(self) -> str:
+        assert self.is_pr
+        return os.environ['SYSTEM_PULLREQUEST_PULLREQUESTNUMBER']
+
+    @property
+    def repo_id(self) -> str:
+        return os.environ['BUILD_REPOSITORY_ID']
