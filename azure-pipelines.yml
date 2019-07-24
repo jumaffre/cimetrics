@@ -25,6 +25,9 @@ steps:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Plot metrics'
 
+- script: black --check cimetrics
+  displayName: 'Check code format'
+
 # This step is only run on Pull Request
 - script: python -m cimetrics.github_pr
   env:
@@ -37,5 +40,3 @@ steps:
     pathtoPublish: _cimetrics
     artifactName: metrics
   displayName: 'Publish metrics graphs as build artifact'
-
-
