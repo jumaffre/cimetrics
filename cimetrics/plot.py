@@ -8,6 +8,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import matplotlib.ticker as mtick
 
 from cimetrics.env import get_env
 
@@ -40,8 +41,18 @@ class Metrics(object):
     return b, r, ticks
 
   def normalise(self, new, ref):
-    return [n / r for n, r in zip(new, ref)]
+    return [ 100 * (n - r) / r for n, r in zip(new, ref)]
 
+  def split(self, series):
+    pos, neg = [], []
+    for v in series:
+      if v > 0:
+        pos.append(v)
+        neg.append(0)
+      else:
+        pos.append(0)
+        neg.append(v)
+    return pos, neg
 
 if __name__ == '__main__':
   env = get_env()
@@ -55,20 +66,23 @@ if __name__ == '__main__':
     target_branch = "TARGET"
     print(f"Comparing {BRANCH} and {target_branch}")
     #branch, main, ticks = m.bars(BRANCH, target_branch)
-    branch, main, ticks = [1, 2], [0.8, 0.7], ['foo', 'bar']
+    branch, main, ticks = [1.2, 0.5, 1.1, 1.3], [1, 1, 1, 1], ['foo', 'bar', 'aardvark', 'platypus']
     values = m.normalise(branch, main)
+    pos, neg = m.split(values) 
     fig, ax = plt.subplots()
     index = np.arange(len(ticks))
     bar_width = 0.35
     opacity = 0.9
-    ax.barh(index, values, bar_width, alpha=opacity, color='r',
-          label=BRANCH)
-    ax.barh(index+bar_width, [1] * len(ticks), bar_width, alpha=opacity, color='b',
-           label=target_branch)
+    ax.barh(index, pos, 0.3, alpha=opacity, color='blue', left=0)
+    ax.barh(index, neg, 0.3, alpha=opacity, color='orange', left=0)
     ax.set_ylabel('Metrics')
     ax.set_xlabel('Value')
     ax.set_title(f"{BRANCH} vs {target_branch}")
-    ax.set_yticks(index + bar_width / 2)
+    ax.set_yticks(index)
     ax.set_yticklabels(ticks)
-    ax.legend()
+    ax.axvline(0, color='grey')
+    plt.xlim([min(values + [0]) - 1, max(values) + 1])
+    fmt = '%.0f%%' # Format you want the ticks, e.g. '40%'
+    xticks = mtick.FormatStrFormatter(fmt)
+    ax.xaxis.set_major_formatter(xticks)
     plt.savefig(os.path.join(metrics_path, 'diff.png'))
