@@ -60,13 +60,10 @@ if __name__ == '__main__':
   os.makedirs(metrics_path, exist_ok=True)
   m = Metrics(env)
   BRANCH = env.branch
-  #if env.is_pr:
-  if True:
-    #target_branch = env.target_branch
-    target_branch = "TARGET"
+  if env.is_pr:
+    target_branch = env.target_branch
     print(f"Comparing {BRANCH} and {target_branch}")
-    #branch, main, ticks = m.bars(BRANCH, target_branch)
-    branch, main, ticks = [1.2, 0.5, 1.1, 1.3], [1, 1, 1, 1], ['foo', 'bar', 'aardvark', 'platypus']
+    branch, main, ticks = m.bars(BRANCH, target_branch)
     values = m.normalise(branch, main)
     pos, neg = m.split(values) 
     fig, ax = plt.subplots()
@@ -82,7 +79,7 @@ if __name__ == '__main__':
     ax.set_yticklabels(ticks)
     ax.axvline(0, color='grey')
     plt.xlim([min(values + [0]) - 1, max(values) + 1])
-    fmt = '%.0f%%' # Format you want the ticks, e.g. '40%'
+    fmt = '%.0f%%'
     xticks = mtick.FormatStrFormatter(fmt)
     ax.xaxis.set_major_formatter(xticks)
     plt.savefig(os.path.join(metrics_path, 'diff.png'))
