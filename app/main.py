@@ -6,10 +6,10 @@ import cimetrics.upload
 
 def run_benchmark():
     return {
-        "throughput": 50000,
-        "latency": 10,
+        "throughput": 50200,
+        "latency": 11,
         "peak_wss": 50,
-        "accuracy": 0.7,
+        "accuracy": 0.65,
         "error_rate": 0.05,
         "memory_fragmentation": 0.02,
         "cpu_usage": 0.30,
