@@ -11,7 +11,7 @@ import os
 from cimetrics.env import get_env
 
 # Always the same for metrics-devops
-IMAGE_BRANCH_NAME = "metrics-devops"
+IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
 
 
@@ -52,7 +52,7 @@ class GithubPRPublisher(object):
 
         print(f"Uploading image to branch {IMAGE_BRANCH_NAME}")
         rep = requests.put(
-            f"{self.github_url}/contents/IMAGE_BRANCH_NAME/image{datetime.datetime.now()}.png",
+            f"{self.github_url}/contents/{IMAGE_BRANCH_NAME}/image{datetime.datetime.now()}.png",
             data=json.dumps(params),
             headers=self.request_header,
         )
