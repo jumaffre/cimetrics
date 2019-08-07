@@ -24,16 +24,34 @@ class Metrics(object):
     def all(self):
         return self.col.find()
 
-    def last_for_branch(self, branch):
-        return next(
-            self.col.find({"branch": branch})
-            .sort([("created", pymongo.DESCENDING)])
-            .limit(1)
-        )
+    def all_for_branch_and_build(self, branch, build_id=None):
+        """ Search for all results for the given branch and build number.
+        If no build number is given, only the latest result is returned"""
+        query = {}
+        query["branch"] = branch
+        if build_id:
+            query["build_id"] = build_id
 
-    def bars(self, branch, reference):
-        branch_metrics = self.last_for_branch(branch)["metrics"]
-        reference_metrics = self.last_for_branch(reference)["metrics"]
+        res = self.col.find(query)
+        if not build_id:
+            res = res.sort([("created", pymongo.DESCENDING)]).limit(1)
+
+        metrics = {}
+        for data in res:
+            metrics.update(data["metrics"])
+
+        return metrics
+
+    def bars(self, branch, build_id, reference):
+        branch_metrics = self.all_for_branch_and_build(branch, build_id)
+        reference_metrics = self.all_for_branch_and_build(reference)
+
+        diff_against_self = False
+        if reference_metrics == {}:
+            print(f"** Reference branch {reference} does not have any metrics")
+            print(f"** Comparing branch {branch} to self instead")
+            reference_metrics = branch_metrics
+            diff_against_self = True
 
         b, r = [], []
         ticks = []
@@ -42,7 +60,7 @@ class Metrics(object):
             r.append(reference_metrics.get(field, {}).get("value", 0))
             ticks.append(field)
 
-        return b, r, ticks
+        return b, r, ticks, diff_against_self
 
     def normalise(self, new, ref):
         return [100 * (n - r) / r for n, r in zip(new, ref)]
@@ -65,10 +83,11 @@ if __name__ == "__main__":
     os.makedirs(metrics_path, exist_ok=True)
     m = Metrics(env)
     BRANCH = env.branch
+    BUILD_ID = env.build_id
     if env.is_pr:
         target_branch = env.target_branch
-        print(f"Comparing {BRANCH} and {target_branch}")
-        branch, main, ticks = m.bars(BRANCH, target_branch)
+        branch, main, ticks, diff_against_self = m.bars(BRANCH, BUILD_ID, target_branch)
+
         values = m.normalise(branch, main)
         pos, neg = m.split(values)
         fig, ax = plt.subplots()
@@ -78,7 +97,13 @@ if __name__ == "__main__":
         ax.barh(index, pos, 0.3, alpha=opacity, color="blue", left=0)
         ax.barh(index, neg, 0.3, alpha=opacity, color="orange", left=0)
         ax.set_xlabel("Change")
-        ax.set_title(f"{BRANCH} vs {target_branch}")
+
+        if not diff_against_self:
+            print(f"Comparing {BRANCH} and {target_branch}")
+            ax.set_title(f"{BRANCH} vs {target_branch}")
+        else:
+            ax.set_title(f"WARNING: {target_branch} does not have any data")
+
         ax.set_yticks(index)
         ax.set_yticklabels(ticks)
         ax.axvline(0, color="grey")
@@ -88,3 +113,6 @@ if __name__ == "__main__":
         ax.xaxis.set_major_formatter(xticks)
         plt.tight_layout()
         plt.savefig(os.path.join(metrics_path, "diff.png"))
+
+    else:
+        print("Skipping since job is not a Pull Request")
