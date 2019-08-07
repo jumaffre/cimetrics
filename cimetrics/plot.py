@@ -29,7 +29,7 @@ class Metrics(object):
         If no build number is given, only the latest result is returned"""
         query = {}
         query["branch"] = branch
-        if build:
+        if build_id:
             query["build_id"] = build_id
 
         res = self.col.find(query)
