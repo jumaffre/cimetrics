@@ -78,12 +78,14 @@ class GithubPRPublisher(object):
 
 if __name__ == "__main__":
 
+    env = get_env()
+
     publisher = GithubPRPublisher()
 
     publisher.create_image_branch()
 
     encoded_image = None
-    with open(IMAGE_PATH, "rb") as image_file:
+    with open(os.path.join(env.repo_root, IMAGE_PATH), "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read())
 
     image_url = publisher.upload_image(str(encoded_image.decode()))
