@@ -25,6 +25,7 @@ class Metrics(object):
             print(
                 "Results were not uploaded since METRICS_MONGO_CONNECTION env is not set"
             )
+            return
 
         client = pymongo.MongoClient(self.env.mongo_connection)
         db = client[self.env.mongo_db]
