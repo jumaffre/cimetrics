@@ -98,6 +98,7 @@ That's it! The next time you create a Pull Request, your CI will automatically s
 - [x] Publish to PyPi (https://pypi.org/project/cimetrics/)
 - [ ] Use a GitHub bot instead of tokens
 - [ ] Improve plotting (standard deviation, etc.)
+- [ ] Add personalised PR message
 
 ## Supported CI pipelines
 
