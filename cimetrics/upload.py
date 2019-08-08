@@ -19,6 +19,13 @@ class Metrics(object):
         self.metrics[name] = {"value": value}
 
     def publish(self):
+        try:
+            self.env.mongo_connection
+        except KeyError:
+            print(
+                "Results were not uploaded since METRICS_MONGO_CONNECTION env is not set"
+            )
+
         client = pymongo.MongoClient(self.env.mongo_connection)
         db = client[self.env.mongo_db]
         coll = db[self.env.mongo_collection]
