@@ -3,16 +3,18 @@
 
 import cimetrics.upload
 
+import random
+
 
 def run_benchmark():
     return {
-        "throughput": 50000,
-        "latency": 10,
-        "peak_wss": 50,
-        "accuracy": 0.7,
-        "error_rate": 0.05,
-        "memory_fragmentation": 0.02,
-        "cpu_usage": 0.30,
+        "throughput": random.randint(46000, 52000),
+        "latency": random.randint(9, 11),
+        "peak_wss": random.randint(45, 55),
+        "accuracy": random.randint(68, 73) / 100,
+        "error_rate": random.randint(4, 6) / 100,
+        "memory_fragmentation": random.randint(18, 22) / 1000,
+        "cpu_usage": random.randint(28, 32) / 100,
     }
 
 
