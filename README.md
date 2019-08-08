@@ -77,12 +77,27 @@ Then, you should add the following steps to your CI configuration file, e.g. for
 
 See [azure-pipelines.yml](https://github.com/jumaffre/cimetrics/blob/master/azure-pipelines.yml) for a full working example.
 
+### Create the `metrics.yml` file
+
+The last step is to create a new `metrics.yml` configuration file at the root of your repository. The file should specify the name of the database and collection used for MongoDB. For example:
+
+```yaml
+db: 'metrics'
+collection: 'metrics_performance'
+```
+
 That's it! The next time you create a Pull Request, your CI will automatically store your metrics and publish a graph comparing your metrics against the same metrics on the branch you are merging to.
 
 ## Caveats
 
 - If the CI has never run on the target branch (e.g. `master` - likely to happen when you first set up `cimetrics`), the report will show the metrics results of the branch to merge against itself. It will be displayed fine once the CI has run on the target branch.
 - The rendered images are currently hosted in the target GitHub repository itself, under the `cimetrics` branch, in the `cimetrics` directory.
+
+## to-do
+
+- [x] Publish to PyPi (https://pypi.org/project/cimetrics/)
+- [ ] Use a GitHub bot instead of tokens
+- [ ] Improve plotting (standard deviation, etc.)
 
 ## Supported CI pipelines
 
