@@ -2,7 +2,10 @@
 
 [![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.metrics-devops?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=1&branchName=master)
 
-`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests.
+`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/28#issuecomment-519552043). 
+
+<p align="center"> <img src="https://raw.githubusercontent.com/jumaffre/cimetrics/master/cimetrics_demo.PNG" width="600"></p>
+
 
 ## Development
 
