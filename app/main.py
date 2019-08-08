@@ -12,7 +12,7 @@ def run_benchmark():
         "latency": random.randint(9, 11),
         "peak_wss": random.randint(45, 55),
         "accuracy": random.randint(68, 73) / 100,
-        "error_rate": random.randint(4, 6) / 1000,
+        "error_rate": random.randint(4, 6) / 100,
         "memory_fragmentation": random.randint(18, 22) / 1000,
         "cpu_usage": random.randint(28, 32) / 100,
     }
