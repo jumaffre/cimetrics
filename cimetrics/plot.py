@@ -52,7 +52,9 @@ class Metrics(object):
         reference_metrics = self.all_for_branch_and_build(reference)
 
         if branch_metrics == {}:
-            raise ValueError(f"Branch {branch} does not have any metrics for build {build_id}")
+            raise ValueError(
+                f"Branch {branch} does not have any metrics for build {build_id}"
+            )
 
         diff_against_self = False
         if reference_metrics == {}:
