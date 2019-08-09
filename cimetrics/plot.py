@@ -34,7 +34,12 @@ class Metrics(object):
 
         res = self.col.find(query)
         if not build_id:
+            # If there is no build_id, retrieve all the latest results
             res = res.sort([("created", pymongo.DESCENDING)]).limit(1)
+            for data in res:
+                build_id = data["build_id"]
+            query["build_id"] = build_id
+            res = self.col.find(query)
 
         metrics = {}
         for data in res:
@@ -46,12 +51,19 @@ class Metrics(object):
         branch_metrics = self.all_for_branch_and_build(branch, build_id)
         reference_metrics = self.all_for_branch_and_build(reference)
 
+        if branch_metrics == {}:
+            raise ValueError(f"Branch {branch} does not have any metrics for build {build_id}")
+
         diff_against_self = False
         if reference_metrics == {}:
             print(f"** Reference branch {reference} does not have any metrics")
             print(f"** Comparing branch {branch} to self instead")
             reference_metrics = branch_metrics
             diff_against_self = True
+
+        assert len(branch_metrics) == len(
+            reference_metrics
+        ), f"The metrics on {branch} and {reference} are inconsistent"
 
         b, r = [], []
         ticks = []
