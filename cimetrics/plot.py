@@ -110,7 +110,7 @@ if __name__ == "__main__":
         index = np.arange(len(ticks))
         bar_width = 0.35
         opacity = 0.9
-        bars = ax.barh(index, pos, 0.3, alpha=opacity, color="blue", left=0)
+        bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
 
         for i, bar in enumerate(bars):
             x = bar.get_width()
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                     ha="left",
                 )
 
-        bars = ax.barh(index, neg, 0.3, alpha=opacity, color="orange", left=0)
+        bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
         for i, bar in enumerate(bars):
             x = bar.get_width()
