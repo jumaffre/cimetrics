@@ -113,7 +113,7 @@ if __name__ == "__main__":
         for bar in bars:
             x = bar.get_width()
             y = bar.get_y() + bar.get_height() / 2
-            plt.annotate('test', (x, y), xytext=(5, 0), textcoords="offset point", va="center", ha="left")
+            plt.annotate('test', (x, y), xytext=(5, 0), textcoords="offset points", va="center", ha="left")
 
         ax.barh(index, neg, 0.3, alpha=opacity, color="orange", left=0)
         ax.set_xlabel("Change")
