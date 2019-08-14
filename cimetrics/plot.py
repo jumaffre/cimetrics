@@ -105,6 +105,8 @@ if __name__ == "__main__":
         values = m.normalise(branch, main)
         pos, neg = m.split(values)
         fig, ax = plt.subplots(constrained_layout=True)
+        ax.set_facecolor("white")
+        ax.grid("grey")
         index = np.arange(len(ticks))
         bar_width = 0.35
         opacity = 0.9
@@ -149,7 +151,7 @@ if __name__ == "__main__":
         ax.set_yticks(index)
         ax.set_yticklabels(ticks)
         ax.axvline(0, color="grey")
-        plt.xlim([min(values + [0]) - 1, max(values) + 1])
+        plt.xlim([min(values + [0]) - 3, max(values) + 3])
         fmt = "%.0f%%"
         xticks = mtick.FormatStrFormatter(fmt)
         ax.xaxis.set_major_formatter(xticks)
