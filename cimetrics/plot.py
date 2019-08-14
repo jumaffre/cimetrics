@@ -110,10 +110,11 @@ if __name__ == "__main__":
         opacity = 0.9
         bars = ax.barh(index, pos, 0.3, alpha=opacity, color="blue", left=0)
 
-        for bar in bars:
+        for i, bar in enumerate(bars):
             x = bar.get_width()
             y = bar.get_y() + bar.get_height() / 2
-            plt.annotate('test', (x, y), xytext=(5, 0), textcoords="offset points", va="center", ha="left")
+            if x:
+                plt.annotate(str(main[i], (x, y), xytext=(5, 0), textcoords="offset points", va="center", ha="left")
 
         ax.barh(index, neg, 0.3, alpha=opacity, color="orange", left=0)
         ax.set_xlabel("Change")
