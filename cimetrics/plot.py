@@ -140,8 +140,6 @@ if __name__ == "__main__":
                     ha="right",
                 )
 
-        ax.set_xlabel("Change")
-
         if not diff_against_self:
             print(f"Comparing {BRANCH} and {target_branch}")
             ax.set_title(f"{BRANCH} vs {target_branch}")
