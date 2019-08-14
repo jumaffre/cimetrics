@@ -128,7 +128,7 @@ if __name__ == "__main__":
                 plt.annotate(
                     str(main[i]),
                     (x, y),
-                    xytext=(-3, 0),
+                    xytext=(3, 0),
                     textcoords="offset points",
                     va="center",
                     ha="right",
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                 plt.annotate(
                     str(main[i]),
                     (x, y),
-                    xytext=(3, 0),
+                    xytext=(-3, 0),
                     textcoords="offset points",
                     va="center",
                     ha="left",
