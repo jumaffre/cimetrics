@@ -106,7 +106,7 @@ if __name__ == "__main__":
         pos, neg = m.split(values)
         fig, ax = plt.subplots(constrained_layout=True)
         ax.set_facecolor("white")
-        ax.grid(color="grey")
+        ax.grid(color="whitesmoke", axis="y")
         index = np.arange(len(ticks))
         bar_width = 0.35
         opacity = 0.9
