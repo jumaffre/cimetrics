@@ -64,9 +64,7 @@ class GithubPRPublisher(object):
 
     def publish_comment(self, image_report_url):
         params = {}
-        params[
-            "body"
-        ] = f"![images]({image_report_url})"
+        params["body"] = f"![images]({image_report_url})"
 
         print(f"Publishing comment to pull request {self.pull_request_id}")
         rep = requests.post(
