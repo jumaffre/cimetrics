@@ -149,6 +149,7 @@ if __name__ == "__main__":
             ax.set_title(f"WARNING: {target_branch} does not have any data")
 
         ax.set_yticks(index)
+        ax.yaxis.set_ticks_position("none")
         ax.set_yticklabels(ticks)
         ax.axvline(0, color="grey")
         plt.xlim([min(values + [0]) - 3, max(values) + 3])
