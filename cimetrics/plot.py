@@ -124,17 +124,6 @@ if __name__ == "__main__":
                     va="center",
                     ha="left",
                 )
-            else:
-                plt.annotate(
-                    str(main[i]),
-                    (x, y),
-                    xytext=(3, 0),
-                    textcoords="offset points",
-                    va="center",
-                    ha="right",
-                )
-
-
 
         bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
@@ -149,15 +138,6 @@ if __name__ == "__main__":
                     textcoords="offset points",
                     va="center",
                     ha="right",
-                )
-            else:
-                plt.annotate(
-                    str(main[i]),
-                    (x, y),
-                    xytext=(-3, 0),
-                    textcoords="offset points",
-                    va="center",
-                    ha="left",
                 )
 
         if not diff_against_self:
