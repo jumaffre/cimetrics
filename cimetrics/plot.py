@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
         values = m.normalise(branch, main)
         pos, neg = m.split(values)
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(constrained_layout=True)
         index = np.arange(len(ticks))
         bar_width = 0.35
         opacity = 0.9
@@ -153,7 +153,6 @@ if __name__ == "__main__":
         fmt = "%.0f%%"
         xticks = mtick.FormatStrFormatter(fmt)
         ax.xaxis.set_major_formatter(xticks)
-        plt.tight_layout()
         plt.savefig(os.path.join(metrics_path, "diff.png"))
 
     else:
