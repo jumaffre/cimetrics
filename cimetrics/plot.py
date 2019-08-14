@@ -108,7 +108,13 @@ if __name__ == "__main__":
         index = np.arange(len(ticks))
         bar_width = 0.35
         opacity = 0.9
-        ax.barh(index, pos, 0.3, alpha=opacity, color="blue", left=0)
+        bars = ax.barh(index, pos, 0.3, alpha=opacity, color="blue", left=0)
+
+        for bar in bars:
+            x = bar.get_width()
+            y = bar.get_y() + bar.get_height() / 2
+            plt.annotate('test', (x, y), xytext=(5, 0), textcoords="offset point", va="center", ha="left")
+
         ax.barh(index, neg, 0.3, alpha=opacity, color="orange", left=0)
         ax.set_xlabel("Change")
 
