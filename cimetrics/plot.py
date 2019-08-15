@@ -104,13 +104,41 @@ if __name__ == "__main__":
 
         values = m.normalise(branch, main)
         pos, neg = m.split(values)
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(constrained_layout=True)
+        ax.set_facecolor("white")
+        ax.grid(color="whitesmoke", axis="x")
         index = np.arange(len(ticks))
         bar_width = 0.35
         opacity = 0.9
-        ax.barh(index, pos, 0.3, alpha=opacity, color="blue", left=0)
-        ax.barh(index, neg, 0.3, alpha=opacity, color="orange", left=0)
-        ax.set_xlabel("Change")
+        bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+
+        for i, bar in enumerate(bars):
+            x = bar.get_width()
+            y = bar.get_y() + bar.get_height() / 2
+            if x:
+                plt.annotate(
+                    str(branch[i]),
+                    (x, y),
+                    xytext=(3, 0),
+                    textcoords="offset points",
+                    va="center",
+                    ha="left",
+                )
+
+        bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
+
+        for i, bar in enumerate(bars):
+            x = bar.get_width()
+            y = bar.get_y() + bar.get_height() / 2
+            if x:
+                plt.annotate(
+                    str(branch[i]),
+                    (x, y),
+                    xytext=(-3, 0),
+                    textcoords="offset points",
+                    va="center",
+                    ha="right",
+                )
 
         if not diff_against_self:
             print(f"Comparing {BRANCH} and {target_branch}")
@@ -119,13 +147,13 @@ if __name__ == "__main__":
             ax.set_title(f"WARNING: {target_branch} does not have any data")
 
         ax.set_yticks(index)
+        ax.yaxis.set_ticks_position("none")
         ax.set_yticklabels(ticks)
         ax.axvline(0, color="grey")
-        plt.xlim([min(values + [0]) - 1, max(values) + 1])
+        plt.xlim([min(values + [0]) - 3, max(values) + 3])
         fmt = "%.0f%%"
         xticks = mtick.FormatStrFormatter(fmt)
         ax.xaxis.set_major_formatter(xticks)
-        plt.tight_layout()
         plt.savefig(os.path.join(metrics_path, "diff.png"))
 
     else:
