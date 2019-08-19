@@ -72,7 +72,9 @@ class Metrics(object):
         b, r = [], []
         ticks = []
 
-        for field in sorted(branch_metrics.keys() | reference_metrics.keys(), reverse=True):
+        for field in sorted(
+            branch_metrics.keys() | reference_metrics.keys(), reverse=True
+        ):
             b.append(branch_metrics.get(field, {}).get("value", 0))
             r.append(reference_metrics.get(field, {}).get("value", 0))
             ticks.append(field)
