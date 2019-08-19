@@ -1,6 +1,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+trigger:
+  exclude:
+    - cimetrics
+
 pool:
   vmImage: 'ubuntu-latest'
 
