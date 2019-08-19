@@ -17,8 +17,21 @@ def get_env():
 class Env(object):
     def __init__(self) -> None:
         root = self.repo_root
-        with open(os.path.join(root, "metrics.yml")) as fp:
-            self.cfg = yaml.safe_load(fp)
+        self.CONFIG_FILE = "metrics.yml"
+        config_file_path = os.path.join(root, self.CONFIG_FILE)
+        if os.path.exists(config_file_path):
+            with open(config_file_path) as fp:
+                self.cfg = yaml.safe_load(fp)
+        else:
+            print(
+                f"{self.CONFIG_FILE} does not exist at the root of your repo."
+                " Your metrics will not be recorded."
+            )
+            self.cfg = None
+
+    @property
+    def config_file(self) -> str:
+        return self.CONFIG_FILE
 
     @property
     def repo_root(self) -> str:

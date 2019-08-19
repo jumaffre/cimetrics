@@ -23,13 +23,24 @@ class Metrics(object):
             self.env.mongo_connection
         except KeyError:
             print(
-                "Results were not uploaded since METRICS_MONGO_CONNECTION env is not set"
+                "Results were not uploaded since METRICS_MONGO_CONNECTION env is not set."
             )
             return
 
         client = pymongo.MongoClient(self.env.mongo_connection)
-        db = client[self.env.mongo_db]
-        coll = db[self.env.mongo_collection]
+
+        db = None
+        coll = None
+        try:
+            db = client[self.env.mongo_db]
+            coll = db[self.env.mongo_collection]
+        except:
+            print(
+                'Results were not uploaded since "db" or "collection" have not been set.'
+                f" Make sure you create the {self.env.config_file} file at the root of your repo."
+            )
+            return
+
         doc = {
             "created": datetime.datetime.now(),
             "build_id": self.env.build_id,
