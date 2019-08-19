@@ -58,18 +58,21 @@ class Metrics(object):
 
         diff_against_self = False
         if reference_metrics == {}:
-            print(f"** Reference branch {reference} does not have any metrics")
-            print(f"** Comparing branch {branch} to self instead")
+            print(
+                f"Reference branch {reference} does not have any metrics."
+                f" Comparing branch {branch} to self instead."
+            )
             reference_metrics = branch_metrics
             diff_against_self = True
 
         assert len(branch_metrics) == len(
             reference_metrics
-        ), f"The metrics on {branch} and {reference} are inconsistent"
+        ), f"The metrics on {branch} and {reference} are inconsistent."
 
         b, r = [], []
         ticks = []
-        for field in branch_metrics.keys() | reference_metrics.keys():
+
+        for field in sorted(branch_metrics.keys() | reference_metrics.keys(), reverse=True):
             b.append(branch_metrics.get(field, {}).get("value", 0))
             r.append(reference_metrics.get(field, {}).get("value", 0))
             ticks.append(field)
