@@ -98,63 +98,59 @@ if __name__ == "__main__":
     m = Metrics(env)
     BRANCH = env.branch
     BUILD_ID = env.build_id
-    if env.is_pr:
-        target_branch = env.target_branch
-        branch, main, ticks, diff_against_self = m.bars(BRANCH, BUILD_ID, target_branch)
+    target_branch = env.target_branch
+    branch, main, ticks, diff_against_self = m.bars(BRANCH, BUILD_ID, target_branch)
 
-        values = m.normalise(branch, main)
-        pos, neg = m.split(values)
-        fig, ax = plt.subplots(constrained_layout=True)
-        ax.set_facecolor("white")
-        ax.grid(color="whitesmoke", axis="x")
-        index = np.arange(len(ticks))
-        bar_width = 0.35
-        opacity = 0.9
-        bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+    values = m.normalise(branch, main)
+    pos, neg = m.split(values)
+    fig, ax = plt.subplots(constrained_layout=True)
+    ax.set_facecolor("white")
+    ax.grid(color="whitesmoke", axis="x")
+    index = np.arange(len(ticks))
+    bar_width = 0.35
+    opacity = 0.9
+    bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
 
-        for i, bar in enumerate(bars):
-            x = bar.get_width()
-            y = bar.get_y() + bar.get_height() / 2
-            if x:
-                plt.annotate(
-                    str(branch[i]),
-                    (x, y),
-                    xytext=(3, 0),
-                    textcoords="offset points",
-                    va="center",
-                    ha="left",
-                )
+    for i, bar in enumerate(bars):
+        x = bar.get_width()
+        y = bar.get_y() + bar.get_height() / 2
+        if x:
+            plt.annotate(
+                str(branch[i]),
+                (x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                va="center",
+                ha="left",
+            )
 
-        bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
+    bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
-        for i, bar in enumerate(bars):
-            x = bar.get_width()
-            y = bar.get_y() + bar.get_height() / 2
-            if x:
-                plt.annotate(
-                    str(branch[i]),
-                    (x, y),
-                    xytext=(-3, 0),
-                    textcoords="offset points",
-                    va="center",
-                    ha="right",
-                )
+    for i, bar in enumerate(bars):
+        x = bar.get_width()
+        y = bar.get_y() + bar.get_height() / 2
+        if x:
+            plt.annotate(
+                str(branch[i]),
+                (x, y),
+                xytext=(-3, 0),
+                textcoords="offset points",
+                va="center",
+                ha="right",
+            )
 
-        if not diff_against_self:
-            print(f"Comparing {BRANCH} and {target_branch}")
-            ax.set_title(f"{BRANCH} vs {target_branch}")
-        else:
-            ax.set_title(f"WARNING: {target_branch} does not have any data")
-
-        ax.set_yticks(index)
-        ax.yaxis.set_ticks_position("none")
-        ax.set_yticklabels(ticks)
-        ax.axvline(0, color="grey")
-        plt.xlim([min(values + [0]) - 3, max(values) + 3])
-        fmt = "%.0f%%"
-        xticks = mtick.FormatStrFormatter(fmt)
-        ax.xaxis.set_major_formatter(xticks)
-        plt.savefig(os.path.join(metrics_path, "diff.png"))
-
+    if not diff_against_self:
+        print(f"Comparing {BRANCH} and {target_branch}")
+        ax.set_title(f"{BRANCH} vs {target_branch}")
     else:
-        print("Skipping since job is not a Pull Request")
+        ax.set_title(f"WARNING: {target_branch} does not have any data")
+
+    ax.set_yticks(index)
+    ax.yaxis.set_ticks_position("none")
+    ax.set_yticklabels(ticks)
+    ax.axvline(0, color="grey")
+    plt.xlim([min(values + [0]) - 3, max(values) + 3])
+    fmt = "%.0f%%"
+    xticks = mtick.FormatStrFormatter(fmt)
+    ax.xaxis.set_major_formatter(xticks)
+    plt.savefig(os.path.join(metrics_path, "diff.png"))

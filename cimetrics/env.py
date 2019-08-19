@@ -53,6 +53,7 @@ class Env(object):
 class GitEnv(Env):
     def __init__(self) -> None:
         self.repo = Repo(os.getcwd(), search_parent_directories=True)
+        self.DEFAULT_TARGET_BRANCH = "master"
         super().__init__()
 
     @property
@@ -72,6 +73,16 @@ class GitEnv(Env):
     @property
     def commit(self) -> str:
         return self.repo.commit().hexsha
+
+    @property
+    def target_branch(self) -> str:
+        target_branch_ = os.environ.get("CIMETRICS_TARGET_BRANCH")
+        if target_branch_ is not None:
+            return target_branch_
+        print(
+            f"Target branch defaulting to {self.DEFAULT_TARGET_BRANCH}. Set CIMETRICS_TARGET_BRANCH env var to change it."
+        )
+        return self.DEFAULT_TARGET_BRANCH
 
 
 class AzurePipelinesEnv(GitEnv):
