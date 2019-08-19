@@ -18,6 +18,8 @@ class Env(object):
     def __init__(self) -> None:
         root = self.repo_root
         self.CONFIG_FILE = "metrics.yml"
+        self.DEFAULT_TARGET_BRANCH = "master"
+
         config_file_path = os.path.join(root, self.CONFIG_FILE)
         if os.path.exists(config_file_path):
             with open(config_file_path) as fp:
@@ -66,7 +68,6 @@ class Env(object):
 class GitEnv(Env):
     def __init__(self) -> None:
         self.repo = Repo(os.getcwd(), search_parent_directories=True)
-        self.DEFAULT_TARGET_BRANCH = "master"
         super().__init__()
 
     @property
@@ -109,8 +110,10 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def target_branch(self) -> str:
-        assert self.is_pr
-        return os.environ["SYSTEM_PULLREQUEST_TARGETBRANCH"]
+        target_branch_ = os.environ.get("SYSTEM_PULLREQUEST_TARGETBRANCH")
+        if target_branch_ is not None:
+            return target_branch_
+        return self.DEFAULT_TARGET_BRANCH
 
     @property
     def branch(self) -> Optional[str]:
