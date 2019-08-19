@@ -11,7 +11,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="cimetrics",
-    version="0.1.6",
+    version="0.1.7",
     description="Lightweight python module to track crucial metrics",
     url="https://github.com/jumaffre/cimetrics",
     author="Julien Maffre",
