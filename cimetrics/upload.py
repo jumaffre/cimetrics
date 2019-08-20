@@ -34,7 +34,7 @@ class Metrics(object):
         try:
             db = client[self.env.mongo_db]
             coll = db[self.env.mongo_collection]
-        except:
+        except KeyError:
             print(
                 'Results were not uploaded since "db" or "collection" have not been set.'
                 f" Make sure you create the {self.env.config_file} file at the root of your repo."

@@ -24,12 +24,14 @@ class Env(object):
         if os.path.exists(config_file_path):
             with open(config_file_path) as fp:
                 self.cfg = yaml.safe_load(fp)
+                if self.cfg is None:
+                    self.cfg = {}
         else:
             print(
                 f"{self.CONFIG_FILE} does not exist at the root of your repo."
                 " Your metrics will not be recorded."
             )
-            self.cfg = None
+            self.cfg = {}
 
     @property
     def config_file(self) -> str:
@@ -110,10 +112,9 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def target_branch(self) -> str:
-        target_branch_ = os.environ.get("SYSTEM_PULLREQUEST_TARGETBRANCH")
-        if target_branch_ is not None:
-            return target_branch_
-        return self.DEFAULT_TARGET_BRANCH
+        return os.environ.get(
+            "SYSTEM_PULLREQUEST_TARGETBRANCH", self.DEFAULT_TARGET_BRANCH
+        )
 
     @property
     def branch(self) -> Optional[str]:

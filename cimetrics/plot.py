@@ -17,12 +17,26 @@ plt.style.use("ggplot")
 
 class Metrics(object):
     def __init__(self, env):
-        self.client = pymongo.MongoClient(env.mongo_connection)
-        db = self.client[env.mongo_db]
-        self.col = db[env.mongo_collection]
+        try:
+            env.mongo_connection
+        except KeyError:
+            raise ValueError(
+                "Results were not uploaded since METRICS_MONGO_CONNECTION env is not set."
+            )
+            return
 
-    def all(self):
-        return self.col.find()
+        self.client = pymongo.MongoClient(env.mongo_connection)
+
+        db = None
+        self.col = None
+        try:
+            db = self.client[env.mongo_db]
+            self.col = db[env.mongo_collection]
+        except KeyError:
+            raise ValueError(
+                'Results were not uploaded since "db" or "collection" have not been set.'
+                f" Make sure you create the {env.config_file} file at the root of your repo."
+            )
 
     def all_for_branch_and_build(self, branch, build_id=None):
         """ Search for all results for the given branch and build number.
@@ -100,7 +114,11 @@ if __name__ == "__main__":
     env = get_env()
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
-    m = Metrics(env)
+    try:
+        m = Metrics(env)
+    except ValueError as e:
+        sys.exit(str(e))
+
     BRANCH = env.branch
     BUILD_ID = env.build_id
     target_branch = env.target_branch
