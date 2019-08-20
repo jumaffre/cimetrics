@@ -64,9 +64,7 @@ class GithubPRPublisher(object):
 
     def publish_comment(self, image_report_url):
         params = {}
-        params[
-            "body"
-        ] = f"Performance report: \n ![images]({image_report_url}) \n **Have a look before merging** :bar_chart: :eyes: :thumbsup:"
+        params["body"] = f"![images]({image_report_url})"
 
         print(f"Publishing comment to pull request {self.pull_request_id}")
         rep = requests.post(

@@ -2,7 +2,10 @@
 
 [![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.metrics-devops?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=1&branchName=master)
 
-`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests.
+`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/28#issuecomment-519552043). 
+
+<p align="center"> <img src="https://raw.githubusercontent.com/jumaffre/cimetrics/master/cimetrics_demo.PNG" width="600"></p>
+
 
 ## Development
 
@@ -53,26 +56,30 @@ Your CI is responsible for rendering the metrics report and posting them to your
 Then, you should add the following steps to your CI configuration file, e.g. for Azure Pipelines:
 
 ```yaml
-# Plot the metrics on the branch against the target branch (e.g. master)
+# Your application. This step collects and uploads your metrics
+# to your MongoDB instance.
+- script: python app/main.py
+  env:
+    METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
+  displayName: 'Run app and collect metrics'
+
+# This step generates a graph reporting the differences between 
+# your branch and the target branch.
+# Only run on Pull Requests build.
 - script: python -m cimetrics.plot
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
-  displayName: 'Plot cimetrics'
+  displayName: 'Plot metrics'
+  condition: eq(variables['Build.Reason'], 'PullRequest')
 
-# Publish the rendered plot on the Github PR
-# (only run for builds triggered by Pull Requests)
+# This step publishes a report comment on the GitHub Pull Request 
+# using GITHUB_TOKEN as authentication (use secret variables!)
+# Only run on Pull Requests build.
 - script: python -m cimetrics.github_pr
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
-  displayName: 'Post cimetrics graphs as PR comment'
+  displayName: 'Post metrics graphs as PR comment'
   condition: eq(variables['Build.Reason'], 'PullRequest')
-
-# Publish plot as a build artifact (optional)
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: _cimetrics
-    artifactName: cimetrics
-  displayName: 'Publish cimetrics graphs as build artifact'
 ```
 
 See [azure-pipelines.yml](https://github.com/jumaffre/cimetrics/blob/master/azure-pipelines.yml) for a full working example.
