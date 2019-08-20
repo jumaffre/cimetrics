@@ -53,3 +53,4 @@ steps:
     pathtoPublish: _cimetrics
     artifactName: metrics
   displayName: 'Publish metrics graphs as build artifact'
+  condition: eq(variables['Build.Reason'], 'PullRequest')
