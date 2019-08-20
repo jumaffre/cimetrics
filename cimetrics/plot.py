@@ -17,12 +17,26 @@ plt.style.use("ggplot")
 
 class Metrics(object):
     def __init__(self, env):
-        self.client = pymongo.MongoClient(env.mongo_connection)
-        db = self.client[env.mongo_db]
-        self.col = db[env.mongo_collection]
+        try:
+            env.mongo_connection
+        except KeyError:
+            raise ValueError(
+                "Results were not uploaded since METRICS_MONGO_CONNECTION env is not set."
+            )
+            return
 
-    def all(self):
-        return self.col.find()
+        self.client = pymongo.MongoClient(env.mongo_connection)
+
+        db = None
+        self.col = None
+        try:
+            db = self.client[env.mongo_db]
+            self.col = db[env.mongo_collection]
+        except KeyError:
+            raise ValueError(
+                'Results were not uploaded since "db" or "collection" have not been set.'
+                f" Make sure you create the {env.config_file} file at the root of your repo."
+            )
 
     def all_for_branch_and_build(self, branch, build_id=None):
         """ Search for all results for the given branch and build number.
@@ -58,18 +72,23 @@ class Metrics(object):
 
         diff_against_self = False
         if reference_metrics == {}:
-            print(f"** Reference branch {reference} does not have any metrics")
-            print(f"** Comparing branch {branch} to self instead")
+            print(
+                f"Reference branch {reference} does not have any metrics."
+                f" Comparing branch {branch} to self instead."
+            )
             reference_metrics = branch_metrics
             diff_against_self = True
 
         assert len(branch_metrics) == len(
             reference_metrics
-        ), f"The metrics on {branch} and {reference} are inconsistent"
+        ), f"The metrics on {branch} and {reference} are inconsistent."
 
         b, r = [], []
         ticks = []
-        for field in branch_metrics.keys() | reference_metrics.keys():
+
+        for field in sorted(
+            branch_metrics.keys() | reference_metrics.keys(), reverse=True
+        ):
             b.append(branch_metrics.get(field, {}).get("value", 0))
             r.append(reference_metrics.get(field, {}).get("value", 0))
             ticks.append(field)
@@ -95,66 +114,66 @@ if __name__ == "__main__":
     env = get_env()
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
-    m = Metrics(env)
+    try:
+        m = Metrics(env)
+    except ValueError as e:
+        sys.exit(str(e))
+
     BRANCH = env.branch
     BUILD_ID = env.build_id
-    if env.is_pr:
-        target_branch = env.target_branch
-        branch, main, ticks, diff_against_self = m.bars(BRANCH, BUILD_ID, target_branch)
+    target_branch = env.target_branch
+    branch, main, ticks, diff_against_self = m.bars(BRANCH, BUILD_ID, target_branch)
 
-        values = m.normalise(branch, main)
-        pos, neg = m.split(values)
-        fig, ax = plt.subplots(constrained_layout=True)
-        ax.set_facecolor("white")
-        ax.grid(color="whitesmoke", axis="x")
-        index = np.arange(len(ticks))
-        bar_width = 0.35
-        opacity = 0.9
-        bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+    values = m.normalise(branch, main)
+    pos, neg = m.split(values)
+    fig, ax = plt.subplots(constrained_layout=True)
+    ax.set_facecolor("white")
+    ax.grid(color="whitesmoke", axis="x")
+    index = np.arange(len(ticks))
+    bar_width = 0.35
+    opacity = 0.9
+    bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
 
-        for i, bar in enumerate(bars):
-            x = bar.get_width()
-            y = bar.get_y() + bar.get_height() / 2
-            if x:
-                plt.annotate(
-                    str(branch[i]),
-                    (x, y),
-                    xytext=(3, 0),
-                    textcoords="offset points",
-                    va="center",
-                    ha="left",
-                )
+    for i, bar in enumerate(bars):
+        x = bar.get_width()
+        y = bar.get_y() + bar.get_height() / 2
+        if x:
+            plt.annotate(
+                str(branch[i]),
+                (x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                va="center",
+                ha="left",
+            )
 
-        bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
+    bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
-        for i, bar in enumerate(bars):
-            x = bar.get_width()
-            y = bar.get_y() + bar.get_height() / 2
-            if x:
-                plt.annotate(
-                    str(branch[i]),
-                    (x, y),
-                    xytext=(-3, 0),
-                    textcoords="offset points",
-                    va="center",
-                    ha="right",
-                )
+    for i, bar in enumerate(bars):
+        x = bar.get_width()
+        y = bar.get_y() + bar.get_height() / 2
+        if x:
+            plt.annotate(
+                str(branch[i]),
+                (x, y),
+                xytext=(-3, 0),
+                textcoords="offset points",
+                va="center",
+                ha="right",
+            )
 
-        if not diff_against_self:
-            print(f"Comparing {BRANCH} and {target_branch}")
-            ax.set_title(f"{BRANCH} vs {target_branch}")
-        else:
-            ax.set_title(f"WARNING: {target_branch} does not have any data")
-
-        ax.set_yticks(index)
-        ax.yaxis.set_ticks_position("none")
-        ax.set_yticklabels(ticks)
-        ax.axvline(0, color="grey")
-        plt.xlim([min(values + [0]) - 3, max(values) + 3])
-        fmt = "%.0f%%"
-        xticks = mtick.FormatStrFormatter(fmt)
-        ax.xaxis.set_major_formatter(xticks)
-        plt.savefig(os.path.join(metrics_path, "diff.png"))
-
+    if not diff_against_self:
+        print(f"Comparing {BRANCH} and {target_branch}")
+        ax.set_title(f"{BRANCH} vs {target_branch}")
     else:
-        print("Skipping since job is not a Pull Request")
+        ax.set_title(f"WARNING: {target_branch} does not have any data")
+
+    ax.set_yticks(index)
+    ax.yaxis.set_ticks_position("none")
+    ax.set_yticklabels(ticks)
+    ax.axvline(0, color="grey")
+    plt.xlim([min(values + [0]) - 3, max(values) + 3])
+    fmt = "%.0f%%"
+    xticks = mtick.FormatStrFormatter(fmt)
+    ax.xaxis.set_major_formatter(xticks)
+    plt.savefig(os.path.join(metrics_path, "diff.png"))

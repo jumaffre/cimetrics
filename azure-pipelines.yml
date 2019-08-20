@@ -1,6 +1,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+trigger:
+  branches:
+    exclude:
+      - cimetrics
+
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -15,20 +20,28 @@ steps:
 - script: pip install .
   displayName: 'Install library'
 
+- script: black --check cimetrics
+  displayName: 'Check code format'
+
+# Your application. This step collects and uploads your metrics
+# to your MongoDB instance.
 - script: python app/main.py
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Run app and collect metrics'
 
+# This step generates a graph reporting the differences between 
+# your branch and the target branch.
+# Only run on Pull Requests build.
 - script: python -m cimetrics.plot
   env:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Plot metrics'
+  condition: eq(variables['Build.Reason'], 'PullRequest')
 
-- script: black --check cimetrics
-  displayName: 'Check code format'
-
-# This step is only run on Pull Request
+# This step publishes a report comment on the GitHub Pull Request 
+# using GITHUB_TOKEN as authentication (use secret variables!)
+# Only run on Pull Requests build.
 - script: python -m cimetrics.github_pr
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
@@ -40,3 +53,4 @@ steps:
     pathtoPublish: _cimetrics
     artifactName: metrics
   displayName: 'Publish metrics graphs as build artifact'
+  condition: eq(variables['Build.Reason'], 'PullRequest')

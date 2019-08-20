@@ -17,8 +17,25 @@ def get_env():
 class Env(object):
     def __init__(self) -> None:
         root = self.repo_root
-        with open(os.path.join(root, "metrics.yml")) as fp:
-            self.cfg = yaml.safe_load(fp)
+        self.CONFIG_FILE = "metrics.yml"
+        self.DEFAULT_TARGET_BRANCH = "master"
+
+        config_file_path = os.path.join(root, self.CONFIG_FILE)
+        if os.path.exists(config_file_path):
+            with open(config_file_path) as fp:
+                self.cfg = yaml.safe_load(fp)
+                if self.cfg is None:
+                    self.cfg = {}
+        else:
+            print(
+                f"{self.CONFIG_FILE} does not exist at the root of your repo."
+                " Your metrics will not be recorded."
+            )
+            self.cfg = {}
+
+    @property
+    def config_file(self) -> str:
+        return self.CONFIG_FILE
 
     @property
     def repo_root(self) -> str:
@@ -73,6 +90,16 @@ class GitEnv(Env):
     def commit(self) -> str:
         return self.repo.commit().hexsha
 
+    @property
+    def target_branch(self) -> str:
+        target_branch_ = os.environ.get("CIMETRICS_TARGET_BRANCH")
+        if target_branch_ is not None:
+            return target_branch_
+        print(
+            f"Target branch defaulting to {self.DEFAULT_TARGET_BRANCH}. Set CIMETRICS_TARGET_BRANCH env var to change it."
+        )
+        return self.DEFAULT_TARGET_BRANCH
+
 
 class AzurePipelinesEnv(GitEnv):
     @property
@@ -85,8 +112,9 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def target_branch(self) -> str:
-        assert self.is_pr
-        return os.environ["SYSTEM_PULLREQUEST_TARGETBRANCH"]
+        return os.environ.get(
+            "SYSTEM_PULLREQUEST_TARGETBRANCH", self.DEFAULT_TARGET_BRANCH
+        )
 
     @property
     def branch(self) -> Optional[str]:
