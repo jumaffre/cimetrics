@@ -123,7 +123,7 @@ class AzurePipelinesEnv(GitEnv):
         else:
             ref = os.environ["BUILD_SOURCEBRANCH"]
             short = None
-            for prefix in ["refs/heads/", "refs/tags/"]:
+            for prefix in ["refs/heads/", "refs/tags/", "refs/pull/"]:
                 if ref.startswith(prefix):
                     short = ref[len(prefix) :]
                     break
