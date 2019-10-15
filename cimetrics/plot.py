@@ -48,7 +48,7 @@ class Metrics(object):
 
         res = self.col.find(query)
         if not build_id:
-            # If there is no build_id, retrieve all the latest results
+            # If there is no build_id, retrieve the latest result
             res = res.sort([("created", pymongo.DESCENDING)]).limit(1)
             for data in res:
                 build_id = data["build_id"]
@@ -79,19 +79,24 @@ class Metrics(object):
             reference_metrics = branch_metrics
             diff_against_self = True
 
-        assert len(branch_metrics) == len(
-            reference_metrics
-        ), f"The metrics on {branch} and {reference} are inconsistent."
-
         b, r = [], []
         ticks = []
 
         for field in sorted(
             branch_metrics.keys() | reference_metrics.keys(), reverse=True
         ):
-            b.append(branch_metrics.get(field, {}).get("value", 0))
-            r.append(reference_metrics.get(field, {}).get("value", 0))
-            ticks.append(field)
+            b_v = branch_metrics.get(field, {}).get("value")
+            r_v = reference_metrics.get(field, {}).get("value")
+            if b_v is None:
+                b_v = r_v
+                prefix = "[DELETED]"
+            elif r_v is None:
+                r_v = b_v
+                prefix = "[NEW]"
+
+            b.append(b_v)
+            r.append(r_v)
+            ticks.append(f"{prefix} {field}")
 
         return b, r, ticks, diff_against_self
 
