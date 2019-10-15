@@ -85,6 +85,7 @@ class Metrics(object):
         for field in sorted(
             branch_metrics.keys() | reference_metrics.keys(), reverse=True
         ):
+            prefix = ""
             b_v = branch_metrics.get(field, {}).get("value")
             r_v = reference_metrics.get(field, {}).get("value")
 
