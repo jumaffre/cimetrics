@@ -110,7 +110,7 @@ class Metrics(object):
     def split(self, series):
         pos, neg = [], []
         for v in series:
-            if v > 0:
+            if v >= 0:
                 pos.append(v)
                 neg.append(0)
             else:
@@ -141,12 +141,13 @@ if __name__ == "__main__":
     index = np.arange(len(ticks))
     bar_width = 0.35
     opacity = 0.9
-    bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+    pbars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+    nbars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
-    for i, bar in enumerate(bars):
-        x = bar.get_width()
-        y = bar.get_y() + bar.get_height() / 2
-        if x:
+    for i, (pbar, nbar) in enumerate(zip(pbars, nbars)):
+        if pbar.get_width() >= 0 and nbar.get_width() == 0:
+            x = pbar.get_width()
+            y = pbar.get_y() + pbar.get_height() / 2
             plt.annotate(
                 str(branch[i]),
                 (x, y),
@@ -155,13 +156,9 @@ if __name__ == "__main__":
                 va="center",
                 ha="left",
             )
-
-    bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
-
-    for i, bar in enumerate(bars):
-        x = bar.get_width()
-        y = bar.get_y() + bar.get_height() / 2
-        if x:
+        else:
+            x = nbar.get_width()
+            y = nbar.get_y() + nbar.get_height() / 2
             plt.annotate(
                 str(branch[i]),
                 (x, y),
@@ -181,7 +178,7 @@ if __name__ == "__main__":
     ax.yaxis.set_ticks_position("none")
     ax.set_yticklabels(ticks)
     ax.axvline(0, color="grey")
-    plt.xlim([min(values + [0]) - 3, max(values) + 3])
+    plt.xlim([min(values + [0]) - 5, max(values) + 5])
     fmt = "%.0f%%"
     xticks = mtick.FormatStrFormatter(fmt)
     ax.xaxis.set_major_formatter(xticks)
