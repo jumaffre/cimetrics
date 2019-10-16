@@ -180,7 +180,7 @@ if __name__ == "__main__":
     ax.yaxis.set_ticks_position("none")
     ax.set_yticklabels(ticks)
     ax.axvline(0, color="grey")
-    plt.xlim([min(values + [0]) - 3, max(values) + 3])
+    plt.xlim([min(values + [0]) - 5, max(values) + 5])
     fmt = "%.0f%%"
     xticks = mtick.FormatStrFormatter(fmt)
     ax.xaxis.set_major_formatter(xticks)
