@@ -67,7 +67,7 @@ class Metrics(object):
         res = self.col.find(query)
         res = res.sort([("created", pymongo.ASCENDING)]).limit(30)
         df = pandas.DataFrame.from_records([r["metrics"] for r in res])
-        ewr = df.ewm(span=5).mean().tail(1).to_dict('index')
+        ewr = df.ewm(span=5).mean().tail(1).to_dict("index")
         metrics = {}
         for data in ewr.values():
             metrics.update(data["metrics"])
