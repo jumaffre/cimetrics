@@ -3,6 +3,7 @@
 
 import yaml
 import pymongo
+import pandas
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -61,9 +62,21 @@ class Metrics(object):
 
         return metrics
 
+    def ewma_all_for_branch(self, branch):
+        query = {"branch": branch}
+        res = self.col.find(query)
+        res = res.sort([("created", pymongo.ASCENDING)]).limit(30)
+        df = pandas.DataFrame.from_records([r["metrics"] for r in res])
+        ewr = df.ewm(span=5).mean().tail(1).to_dict('index')
+        metrics = {}
+        for data in ewr.values():
+            metrics.update(data["metrics"])
+
+        return metrics
+
     def bars(self, branch, build_id, reference):
         branch_metrics = self.all_for_branch_and_build(branch, build_id)
-        reference_metrics = self.all_for_branch_and_build(reference)
+        reference_metrics = self.ewma_all_for_branch(reference)
 
         if branch_metrics == {}:
             raise ValueError(
