@@ -141,26 +141,24 @@ if __name__ == "__main__":
     index = np.arange(len(ticks))
     bar_width = 0.35
     opacity = 0.9
-    bars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+    pbars = ax.barh(index, pos, 0.3, alpha=opacity, color="darkkhaki", left=0)
+    nbars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
-    for i, bar in enumerate(bars):
-        x = bar.get_width()
-        y = bar.get_y() + bar.get_height() / 2
-        plt.annotate(
-            str(branch[i]),
-            (x, y),
-            xytext=(3, 0),
-            textcoords="offset points",
-            va="center",
-            ha="left",
-        )
-
-    bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
-
-    for i, bar in enumerate(bars):
-        x = bar.get_width()
-        y = bar.get_y() + bar.get_height() / 2
-        if x:
+    for i, (pbar, nbar) in enumerate(zip(pbars, nbars)):
+        if pbar.get_width() >= 0:
+            x = pbar.get_width()
+            y = pbar.get_y() + bar.get_height() / 2
+            plt.annotate(
+                str(branch[i]),
+                (x, y),
+                xytext=(3, 0),
+                textcoords="offset points",
+                va="center",
+                ha="left",
+            )
+        else:
+            x = nbar.get_width()
+            y = nbar.get_y() + bar.get_height() / 2
             plt.annotate(
                 str(branch[i]),
                 (x, y),
