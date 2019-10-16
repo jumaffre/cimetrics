@@ -16,6 +16,7 @@ def run_benchmark():
         "memory_fragmentation": random.randint(18, 22) / 1000,
         "cpu_usage": random.randint(28, 32) / 100,
         "new_metric": random.randint(100, 200),
+        "another_new_metric": random.randint(100, 200),
     }
 
 
@@ -30,4 +31,5 @@ metrics.put("Error rate (%)", results["error_rate"])
 metrics.put("Memory fragmentation (%)", results["memory_fragmentation"])
 metrics.put("CPU usage (%)", results["cpu_usage"])
 metrics.put("New metric (U)", results["new_metric"])
+metrics.put("Another new metric (m)", results["another_new_metric"])
 metrics.publish()

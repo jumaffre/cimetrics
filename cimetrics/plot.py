@@ -110,7 +110,7 @@ class Metrics(object):
     def split(self, series):
         pos, neg = [], []
         for v in series:
-            if v > 0:
+            if v >= 0:
                 pos.append(v)
                 neg.append(0)
             else:
@@ -146,15 +146,14 @@ if __name__ == "__main__":
     for i, bar in enumerate(bars):
         x = bar.get_width()
         y = bar.get_y() + bar.get_height() / 2
-        if x:
-            plt.annotate(
-                str(branch[i]),
-                (x, y),
-                xytext=(3, 0),
-                textcoords="offset points",
-                va="center",
-                ha="left",
-            )
+        plt.annotate(
+            str(branch[i]),
+            (x, y),
+            xytext=(3, 0),
+            textcoords="offset points",
+            va="center",
+            ha="left",
+        )
 
     bars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
