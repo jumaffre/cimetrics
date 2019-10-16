@@ -147,7 +147,7 @@ if __name__ == "__main__":
     for i, (pbar, nbar) in enumerate(zip(pbars, nbars)):
         if pbar.get_width() >= 0:
             x = pbar.get_width()
-            y = pbar.get_y() + bar.get_height() / 2
+            y = pbar.get_y() + pbar.get_height() / 2
             plt.annotate(
                 str(branch[i]),
                 (x, y),
@@ -158,7 +158,7 @@ if __name__ == "__main__":
             )
         else:
             x = nbar.get_width()
-            y = nbar.get_y() + bar.get_height() / 2
+            y = nbar.get_y() + nbar.get_height() / 2
             plt.annotate(
                 str(branch[i]),
                 (x, y),
