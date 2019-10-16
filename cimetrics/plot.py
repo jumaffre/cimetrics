@@ -145,7 +145,7 @@ if __name__ == "__main__":
     nbars = ax.barh(index, neg, 0.3, alpha=opacity, color="sandybrown", left=0)
 
     for i, (pbar, nbar) in enumerate(zip(pbars, nbars)):
-        if pbar.get_width() >= 0:
+        if pbar.get_width() >= 0 and nbar.get_width() == 0:
             x = pbar.get_width()
             y = pbar.get_y() + pbar.get_height() / 2
             plt.annotate(
