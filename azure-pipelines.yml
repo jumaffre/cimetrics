@@ -60,11 +60,8 @@ steps:
 
 # Automated release
 - script: |
-    # pip install twine
-    # twine upload -u __token__ -p $(pypi_token)  --skip-existing sdist/*
     pip install twine
-    twine upload --help
-    # TODO: Check that the tag is in the semver form
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+    twine upload -u __token__ -p $(pypi_token) --skip-existing sdist/*
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
   displayName: Automated Release
 
