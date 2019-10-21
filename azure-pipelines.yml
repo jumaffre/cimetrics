@@ -60,6 +60,7 @@ steps:
 
 # Automated release
 - script: |
+    python setup.py sdist
     pip install twine
     twine upload -u __token__ -p $(pypi_token) --skip-existing sdist/*
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
