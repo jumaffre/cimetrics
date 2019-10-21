@@ -64,10 +64,10 @@ class Metrics(object):
 
     def ewma_all_for_branch(self, branch):
         def values_from(d):
-            return {k: v.get('value') for k, v in d.items()}
+            return {k: v.get("value") for k, v in d.items()}
 
         def values(d):
-            return {k: {'value': v} for k, v in d.items()}
+            return {k: {"value": v} for k, v in d.items()}
 
         query = {"branch": branch}
         res = self.col.find(query)
