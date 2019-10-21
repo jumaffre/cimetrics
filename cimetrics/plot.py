@@ -63,16 +63,22 @@ class Metrics(object):
         return metrics
 
     def ewma_all_for_branch(self, branch):
+        def values_from(d):
+            return {k: v.get('value') for k, v in d.items()}
+
+        def values(d):
+            return {k: {'value': v} for k, v in d.items()}
+
         query = {"branch": branch}
         res = self.col.find(query)
         res = res.sort([("created", pymongo.ASCENDING)]).limit(30)
-        df = pandas.DataFrame.from_records([r["metrics"] for r in res])
+        df = pandas.DataFrame.from_records([values_from(r["metrics"]) for r in res])
         ewr = df.ewm(span=5).mean().tail(1).to_dict("index")
         metrics = {}
         for data in ewr.values():
-            metrics.update(data["metrics"])
+            metrics.update(data)
 
-        return metrics
+        return values(metrics)
 
     def bars(self, branch, build_id, reference):
         branch_metrics = self.all_for_branch_and_build(branch, build_id)
