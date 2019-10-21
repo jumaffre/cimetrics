@@ -62,7 +62,7 @@ steps:
 - script: |
     python setup.py sdist
     pip install twine
-    twine upload -u __token__ -p $(pypi_token)
+    twine upload -u __token__ -p $(pypi_token) dist/*
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
   displayName: Automated Release
 
