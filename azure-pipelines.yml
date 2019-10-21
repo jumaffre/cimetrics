@@ -5,6 +5,7 @@ trigger:
   branches:
     include:
       - '*'
+      - refs/tags/*
     exclude:
       - cimetrics
 
@@ -63,4 +64,5 @@ steps:
     # twine upload -u __token__ -p $(pypi_token)  --skip-existing sdist/*
     echo "This is a tag!"
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+  displayName: Automated Release
 
