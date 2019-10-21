@@ -71,7 +71,7 @@ class Metrics(object):
 
         query = {"branch": branch}
         res = self.col.find(query)
-        res = res.sort([("created", pymongo.ASCENDING)]).limit(30)
+        res = res.sort([("created", pymongo.ASCENDING)]).limit(100)
         df = pandas.DataFrame.from_records([values_from(r["metrics"]) for r in res])
         ewr = df.ewm(span=5).mean().tail(1).to_dict("index")
         metrics = {}
