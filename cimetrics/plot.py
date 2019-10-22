@@ -3,6 +3,7 @@
 
 import yaml
 import pymongo
+import pandas
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -61,9 +62,62 @@ class Metrics(object):
 
         return metrics
 
+    def ewma_all_for_branch(self, branch, span=5):
+        """
+        Return exponentially moving averages for all current metrics on
+        the specified branch.
+        """
+        # Slightly unhappy wrapping/unwrapping calls, we should probably
+        # simplify the data format to make it more pandable
+        def values_from(d):
+            return {k: v.get("value") for k, v in d.items()}
+
+        def mrow(d):
+            v = values_from(d["metrics"])
+            v["build_id"] = int(d["build_id"] or 0)
+            return v
+
+        def values(d):
+            return {k: {"value": v} for k, v in d.items()}
+
+        # Find the 20 most recent build ids
+        query = {"branch": branch}
+        res = self.col.find(query, {"build_id": 1, "created": 1}).sort(
+            [("created", pymongo.DESCENDING)]
+        )
+        build_ids = set()
+        for r in res:
+            if r.get("build_id"):
+                build_ids.add(r["build_id"])
+                if len(build_ids) >= 20:
+                    break
+
+        # Get metrics for those build ids
+        query = {"branch": branch, "build_id": {"$in": list(build_ids)}}
+        res = self.col.find(query, {"build_id": 1, "metrics": 1}).sort(
+            [("build_id", pymongo.ASCENDING)]
+        )
+        # Index and collapse metrics by build_id
+        df = (
+            pandas.DataFrame.from_records([mrow(r) for r in res])
+            .set_index("build_id")
+            .groupby("build_id")
+            .mean()
+        )
+        # Drop columns for metrics that don't exist in the last build
+        df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
+        # Run EWM over metrics, and select the last row
+        ewr = df.ewm(span=span).mean().tail(1).to_dict("index")
+
+        metrics = {}
+        for data in ewr.values():
+            metrics.update(data)
+
+        return values(metrics)
+
     def bars(self, branch, build_id, reference):
         branch_metrics = self.all_for_branch_and_build(branch, build_id)
-        reference_metrics = self.all_for_branch_and_build(reference)
+        reference_metrics = self.ewma_all_for_branch(reference)
 
         if branch_metrics == {}:
             raise ValueError(

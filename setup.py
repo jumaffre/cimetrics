@@ -34,5 +34,6 @@ setup(
         "matplotlib",
         "numpy",
         "black",
+        "pandas"
     ],
 )
