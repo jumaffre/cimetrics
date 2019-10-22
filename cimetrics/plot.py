@@ -66,13 +66,31 @@ class Metrics(object):
         def values_from(d):
             return {k: v.get("value") for k, v in d.items()}
 
+        def mrow(d):
+            v = values_from(d["metrics"])
+            v["build_id"] = int(d["build_id"] or 0)
+            return v
+
         def values(d):
             return {k: {"value": v} for k, v in d.items()}
 
         query = {"branch": branch}
         res = self.col.find(query)
         res = res.sort([("created", pymongo.ASCENDING)]).limit(100)
-        df = pandas.DataFrame.from_records([values_from(r["metrics"]) for r in res])
+
+        build_ids = []
+        for r in res:
+            build_ids.append(r["build_id"])
+
+        query = {"branch": branch, "build_id": {"$in": build_ids}}
+        res = self.col.find(query)
+        res = res.sort([("created", pymongo.ASCENDING)])
+
+        df = pandas.DataFrame.from_records([mrow(r) for r in res]).set_index("build_id")
+
+        df = df.groupby("build_id").mean()
+        df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
+
         ewr = df.ewm(span=5).mean().tail(1).to_dict("index")
         metrics = {}
         for data in ewr.values():
