@@ -4,6 +4,7 @@
 import os
 import sys
 import datetime
+import contextlib
 import yaml
 import pymongo
 
@@ -52,3 +53,10 @@ class Metrics(object):
         if self.env.is_pr:
             doc["target_branch"] = self.env.target_branch
         coll.insert_one(doc)
+
+
+@contextlib.contextmanager
+def metrics():
+    m = Metrics()
+    yield m
+    m.publish()

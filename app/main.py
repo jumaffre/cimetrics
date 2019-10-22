@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 
 import cimetrics.upload
-
 import random
 
 
@@ -22,14 +21,13 @@ def run_benchmark():
 
 results = run_benchmark()
 
-metrics = cimetrics.upload.Metrics()
-metrics.put("Throughput (tx/s)", results["throughput"])
-metrics.put("Latency (ms)", results["latency"])
-metrics.put("Peak working set size (GB)", results["peak_wss"])
-metrics.put("Accuracy (%)", results["accuracy"])
-metrics.put("Error rate (%)", results["error_rate"])
-metrics.put("Memory fragmentation (%)", results["memory_fragmentation"])
-metrics.put("CPU usage (%)", results["cpu_usage"])
-metrics.put("New metric (U)", results["new_metric"])
-metrics.put("Another new metric (m)", results["another_new_metric"])
-metrics.publish()
+with cimetrics.upload.metrics() as m:
+    m.put("Throughput (tx/s)", results["throughput"])
+    m.put("Latency (ms)", results["latency"])
+    m.put("Peak working set size (GB)", results["peak_wss"])
+    m.put("Accuracy (%)", results["accuracy"])
+    m.put("Error rate (%)", results["error_rate"])
+    m.put("Memory fragmentation (%)", results["memory_fragmentation"])
+    m.put("CPU usage (%)", results["cpu_usage"])
+    m.put("New metric (U)", results["new_metric"])
+    m.put("Another new metric (m)", results["another_new_metric"])
