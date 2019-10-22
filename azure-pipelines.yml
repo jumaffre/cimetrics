@@ -58,11 +58,11 @@ steps:
   displayName: 'Publish metrics graphs as build artifact'
   condition: eq(variables['Build.Reason'], 'PullRequest')
 
-# Automated release
+# Automated release of tagged commits to https://pypi.org/project/cimetrics/
 - script: |
     python setup.py sdist
     pip install twine
     twine upload -u __token__ -p $(pypi_token) dist/*
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-  displayName: Automated Release
+  displayName: Automated Release to https://pypi.org/project/cimetrics/
 
