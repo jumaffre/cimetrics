@@ -5,6 +5,7 @@ trigger:
   branches:
     include:
       - '*'
+      - refs/tags/*
     exclude:
       - cimetrics
 
@@ -32,7 +33,7 @@ steps:
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Run app and collect metrics'
 
-# This step generates a graph reporting the differences between 
+# This step generates a graph reporting the differences between
 # your branch and the target branch.
 # Only run on Pull Requests build.
 - script: python -m cimetrics.plot
@@ -41,7 +42,7 @@ steps:
   displayName: 'Plot metrics'
   condition: eq(variables['Build.Reason'], 'PullRequest')
 
-# This step publishes a report comment on the GitHub Pull Request 
+# This step publishes a report comment on the GitHub Pull Request
 # using GITHUB_TOKEN as authentication (use secret variables!)
 # Only run on Pull Requests build.
 - script: python -m cimetrics.github_pr
@@ -56,3 +57,12 @@ steps:
     artifactName: metrics
   displayName: 'Publish metrics graphs as build artifact'
   condition: eq(variables['Build.Reason'], 'PullRequest')
+
+# Automated release of tagged commits to https://pypi.org/project/cimetrics/
+- script: |
+    python setup.py sdist
+    pip install twine
+    twine upload -u __token__ -p $(pypi_token) dist/*
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+  displayName: Automated Release to https://pypi.org/project/cimetrics/
+
