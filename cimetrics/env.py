@@ -107,6 +107,10 @@ class AzurePipelinesEnv(GitEnv):
         return os.environ["BUILD_BUILDID"]
 
     @property
+    def build_number(self) -> str:
+        return os.environ["BUILD_BUILDNUMBER"]
+
+    @property
     def is_pr(self) -> bool:
         return "SYSTEM_PULLREQUEST_SOURCEBRANCH" in os.environ
 
@@ -138,3 +142,9 @@ class AzurePipelinesEnv(GitEnv):
     @property
     def repo_id(self) -> str:
         return os.environ["BUILD_REPOSITORY_ID"]
+
+    @property
+    def build_url(self) -> str:
+        prefix = os.environ["SYSTEM_TEAMFOUNDATIONSERVERURI"]
+        project = os.environ["SYSTEM_TEAMPROJECT"]
+        return f"{prefix}{project}/_apis/build/builds/{self.build_id}?api-version=5.1"

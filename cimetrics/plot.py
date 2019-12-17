@@ -224,7 +224,7 @@ if __name__ == "__main__":
 
     comment = ""
     if not diff_against_self:
-        comment = f"{BRANCH}@{BUILD_ID} vs {target_branch}"
+        comment = f"{BRANCH}@[{env.build_number}]({env.build_url}) vs {target_branch}"
     else:
         comment = f"WARNING: {target_branch} does not have any data"
     print(comment)
