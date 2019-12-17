@@ -30,4 +30,3 @@ with cimetrics.upload.metrics() as m:
     m.put("Memory fragmentation (%)", results["memory_fragmentation"])
     m.put("CPU usage (%)", results["cpu_usage"])
     m.put("New metric (U)", results["new_metric"])
-    m.put("Another new metric (m)", results["another_new_metric"])
