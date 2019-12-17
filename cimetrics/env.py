@@ -147,4 +147,4 @@ class AzurePipelinesEnv(GitEnv):
     def build_url(self) -> str:
         prefix = os.environ["SYSTEM_TEAMFOUNDATIONSERVERURI"]
         project = os.environ["SYSTEM_TEAMPROJECT"]
-        return f"{prefix}{project}/_apis/build/builds/{self.build_id}?api-version=5.1"
+        return f"{prefix}{project}/_build/results?buildId={self.build_id}&view=results"
