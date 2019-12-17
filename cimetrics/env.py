@@ -143,8 +143,11 @@ class AzurePipelinesEnv(GitEnv):
     def repo_id(self) -> str:
         return os.environ["BUILD_REPOSITORY_ID"]
 
-    @property
-    def build_url(self) -> str:
+    def build_url_by_id(self, build_id) -> str:
         prefix = os.environ["SYSTEM_TEAMFOUNDATIONSERVERURI"]
         project = os.environ["SYSTEM_TEAMPROJECT"]
-        return f"{prefix}{project}/_build/results?buildId={self.build_id}&view=results"
+        return f"{prefix}{project}/_build/results?buildId={build_id}&view=results"
+
+    @property
+    def build_url(self) -> str:
+        return self.build_url_by_id(self.build_id)
