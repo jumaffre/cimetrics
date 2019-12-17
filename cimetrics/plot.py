@@ -222,11 +222,14 @@ if __name__ == "__main__":
                 ha="right",
             )
 
+    comment = ""
     if not diff_against_self:
-        print(f"Comparing {BRANCH} and {target_branch}")
-        ax.set_title(f"{BRANCH} vs {target_branch}")
+        comment = f"{BRANCH} vs {target_branch}"
     else:
-        ax.set_title(f"WARNING: {target_branch} does not have any data")
+        comment = f"WARNING: {target_branch} does not have any data"
+    print(comment)
+    with open("diff.txt", "w") as dtext:
+        dtext.write(comment)
 
     ax.set_yticks(index)
     ax.yaxis.set_ticks_position("none")
