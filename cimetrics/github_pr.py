@@ -13,6 +13,7 @@ from cimetrics.env import get_env
 # Always the same for metrics-devops
 IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
+COMMENT_PATH = "_cimetrics/diff.txt"
 
 
 class GithubPRPublisher(object):
@@ -62,9 +63,9 @@ class GithubPRPublisher(object):
         else:
             raise Exception("Failed to upload image")
 
-    def publish_comment(self, image_report_url):
+    def publish_comment(self, image_report_url, comment):
         params = {}
-        params["body"] = f"![images]({image_report_url})"
+        params["body"] = f"{comment}\n![images]({image_report_url})"
 
         print(f"Publishing comment to pull request {self.pull_request_id}")
         rep = requests.post(
@@ -85,6 +86,9 @@ if __name__ == "__main__":
     encoded_image = None
     with open(os.path.join(env.repo_root, IMAGE_PATH), "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read())
+    comment = ""
+    with open(os.path.join(env.repo_root, COMMENT_PATH), "r") as comment_file:
+        comment = comment_file.read()
 
     image_url = publisher.upload_image(str(encoded_image.decode()))
-    publisher.publish_comment(image_url)
+    publisher.publish_comment(image_url, comment)
