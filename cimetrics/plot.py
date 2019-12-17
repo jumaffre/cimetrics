@@ -97,7 +97,8 @@ class Metrics(object):
         res = self.col.find(query, {"build_id": 1, "metrics": 1}).sort(
             [("build_id", pymongo.ASCENDING)]
         )
-        print(f"Build ids: {build_ids}")
+
+        bids = sorted(build_ids)
 
         # Index and collapse metrics by build_id
         df = (
@@ -115,11 +116,11 @@ class Metrics(object):
         for data in ewr.values():
             metrics.update(data)
 
-        return values(metrics)
+        return values(metrics), bids
 
     def bars(self, branch, build_id, reference):
         branch_metrics = self.all_for_branch_and_build(branch, build_id)
-        reference_metrics = self.ewma_all_for_branch(reference)
+        reference_metrics, bids = self.ewma_all_for_branch(reference)
 
         if branch_metrics == {}:
             raise ValueError(
@@ -158,7 +159,7 @@ class Metrics(object):
             r.append(r_v)
             ticks.append(f"{prefix} {field}")
 
-        return b, r, ticks, diff_against_self
+        return b, r, ticks, diff_against_self, bids
 
     def normalise(self, new, ref):
         return [100 * (n - r) / r for n, r in zip(new, ref)]
@@ -187,7 +188,9 @@ if __name__ == "__main__":
     BRANCH = env.branch
     BUILD_ID = env.build_id
     target_branch = env.target_branch
-    branch, main, ticks, diff_against_self = m.bars(BRANCH, BUILD_ID, target_branch)
+    branch, main, ticks, diff_against_self, bids = m.bars(
+        BRANCH, BUILD_ID, target_branch
+    )
 
     values = m.normalise(branch, main)
     pos, neg = m.split(values)
@@ -226,7 +229,9 @@ if __name__ == "__main__":
 
     comment = ""
     if not diff_against_self:
-        comment = f"{BRANCH}@[{env.build_number}]({env.build_url}) vs {target_branch}"
+        builds_ids = list(bids)
+        target_builds = f"{len(bids)} builds from {bids[0]} to {bids[-1]}"
+        comment = f"{BRANCH}@[{env.build_number}]({env.build_url}) vs {target_branch} ewma over {target_builds}"
     else:
         comment = f"WARNING: {target_branch} does not have any data"
     print(comment)
