@@ -144,10 +144,9 @@ class Metrics(object):
             r_v = reference_metrics.get(field, {}).get("value")
 
             # If there is no value for a given metric on the branch or reference,
-            # give it the value of the other and mark as deleted/new.
+            # it's either delete, in which case we drop it, or new
             if b_v is None:
-                b_v = r_v
-                prefix = "[DELETED]"
+                continue
             elif r_v is None:
                 r_v = b_v
                 prefix = "[NEW]"
