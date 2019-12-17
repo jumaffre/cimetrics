@@ -230,8 +230,8 @@ if __name__ == "__main__":
     comment = ""
     if not diff_against_self:
         builds_ids = list(bids)
-        target_builds = f"{len(bids)} builds from {env.build_url_by_id(bids[0])} to {env.build_url_by_id(bids[-1])}"
-        comment = f"{BRANCH}@[{env.build_number}]({env.build_number} aka {env.build_url}) vs {target_branch} ewma over {target_builds}"
+        target_builds = f"{len(bids)} builds from [bids[0]]({env.build_url_by_id(bids[0])}) to [bid[-1]]({env.build_url_by_id(bids[-1])})"
+        comment = f"{BRANCH}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {target_branch} ewma over {target_builds}"
     else:
         comment = f"WARNING: {target_branch} does not have any data"
     print(comment)
