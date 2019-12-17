@@ -97,6 +97,8 @@ class Metrics(object):
         res = self.col.find(query, {"build_id": 1, "metrics": 1}).sort(
             [("build_id", pymongo.ASCENDING)]
         )
+        print(f"Build ids: {build_ids}")
+
         # Index and collapse metrics by build_id
         df = (
             pandas.DataFrame.from_records([mrow(r) for r in res])
