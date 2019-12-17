@@ -228,7 +228,7 @@ if __name__ == "__main__":
     else:
         comment = f"WARNING: {target_branch} does not have any data"
     print(comment)
-    with open("diff.txt", "w") as dtext:
+    with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
         dtext.write(comment)
 
     ax.set_yticks(index)
