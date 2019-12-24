@@ -196,10 +196,11 @@ if __name__ == "__main__":
     df, ewm, _ = m.ewma_all_for_branch_series(target_branch, span)
     nrows = len(df.columns)
     br = m.all_for_branch_and_build(BRANCH, BUILD_ID)
-    def br_series(col):
-        return pandas.DataFrame([br[col]['value']], df.index[-1:])        
 
-    plt.rcParams['axes.titlesize'] = 8
+    def br_series(col):
+        return pandas.DataFrame([br[col]["value"]], df.index[-1:])
+
+    plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     fax = None
     for index, column in enumerate(df.columns):
@@ -208,12 +209,16 @@ if __name__ == "__main__":
         ax.grid(color="whitesmoke", axis="x")
         if not fax:
             fax = ax
-        ax.plot(df[column], color="green", marker="o", markersize=2, linestyle='')
+        ax.plot(df[column], color="green", marker="o", markersize=2, linestyle="")
         ax.plot(ewm[column], color="green", linewidth=1)
         if column in br:
-            ax.plot(br_series(column), color="red", marker=4, markersize=6, linestyle='')
-        ax.set_yticks([br[column]['value'], ewm[column].values[-1]])
-        ax.set_yticklabels([br[column]['value'], ewm[column].values[-1]], {'fontsize': 7})
+            ax.plot(
+                br_series(column), color="red", marker=4, markersize=6, linestyle=""
+            )
+        ax.set_yticks([br[column]["value"], ewm[column].values[-1]])
+        ax.set_yticklabels(
+            [br[column]["value"], ewm[column].values[-1]], {"fontsize": 7}
+        )
         fmt = "%.1e"
         ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         ax.title.set_text(column)
@@ -222,7 +227,10 @@ if __name__ == "__main__":
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
         ax.set_xticks([df.index.values[0], df.index.values[-span], df.index.values[-1]])
-        ax.set_xticklabels([df.index.values[0], df.index.values[-span], df.index.values[-1]], {'fontsize': 7})
+        ax.set_xticklabels(
+            [df.index.values[0], df.index.values[-span], df.index.values[-1]],
+            {"fontsize": 7},
+        )
 
     plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, "diff.png"))
