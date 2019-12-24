@@ -193,7 +193,7 @@ if __name__ == "__main__":
     BUILD_ID = env.build_id
     target_branch = env.target_branch
     span = 10
-    df, ewm, _ = m.ewma_all_for_branch_series(target_branch, span)
+    df, ewm, bids = m.ewma_all_for_branch_series(target_branch, span)
     nrows = len(df.columns)
     br = m.all_for_branch_and_build(BRANCH, BUILD_ID)
 
@@ -234,6 +234,16 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, "diff.png"))
+
+    if bids:
+        builds_ids = list(bids)
+        target_builds = f"{len(bids)} builds from [{bids[0]}]({env.build_url_by_id(bids[0])}) to [{bids[-1]}]({env.build_url_by_id(bids[-1])})"
+        comment = f"{BRANCH}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {target_branch} ewma over {target_builds}"
+    else:
+        comment = f"WARNING: {target_branch} does not have any data"
+    print(comment)
+    with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
+        dtext.write(comment)
 
 if __name__ == "___main__":
     env = get_env()
