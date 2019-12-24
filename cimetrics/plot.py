@@ -62,7 +62,7 @@ class Metrics(object):
 
         return metrics
 
-    def ewma_all_for_branch(self, branch, span=5):
+    def ewma_all_for_branch_series(self, branch, span=10):
         """
         Return exponentially moving averages for all current metrics on
         the specified branch.
@@ -77,10 +77,7 @@ class Metrics(object):
             v["build_id"] = int(d["build_id"] or 0)
             return v
 
-        def values(d):
-            return {k: {"value": v} for k, v in d.items()}
-
-        # Find the 20 most recent build ids
+        # Find the span * 2 most recent build ids
         query = {"branch": branch}
         res = self.col.find(query, {"build_id": 1, "created": 1}).sort(
             [("created", pymongo.DESCENDING)]
@@ -89,7 +86,7 @@ class Metrics(object):
         for r in res:
             if r.get("build_id"):
                 build_ids.add(r["build_id"])
-                if len(build_ids) >= 20:
+                if len(build_ids) >= span * 2:
                     break
 
         # Get metrics for those build ids
@@ -110,7 +107,15 @@ class Metrics(object):
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
         # Run EWM over metrics, and select the last row
-        ewr = df.ewm(span=span).mean().tail(1).to_dict("index")
+        ewr = df.ewm(span=span).mean()
+        return df, ewr, bids
+
+    def ewma_all_for_branch(self, branch, span=5):
+        def values(d):
+            return {k: {"value": v} for k, v in d.items()}
+
+        _, df, bids = self.ewma_all_for_branch_series(branch, span)
+        ewr = df.tail(1).to_dict("index")
 
         metrics = {}
         for data in ewr.values():
@@ -176,6 +181,53 @@ class Metrics(object):
 
 
 if __name__ == "__main__":
+    env = get_env()
+    metrics_path = os.path.join(env.repo_root, "_cimetrics")
+    os.makedirs(metrics_path, exist_ok=True)
+    try:
+        m = Metrics(env)
+    except ValueError as e:
+        sys.exit(str(e))
+
+    BRANCH = env.branch
+    BUILD_ID = env.build_id
+    target_branch = env.target_branch
+    span = 10
+    df, ewm, _ = m.ewma_all_for_branch_series(target_branch, span)
+    nrows = len(df.columns)
+    br = m.all_for_branch_and_build(BRANCH, BUILD_ID)
+    def br_series(col):
+        return pandas.DataFrame([br[col]['value']], df.index[-1:])        
+
+    plt.rcParams['axes.titlesize'] = 8
+    fig = plt.figure()
+    fax = None
+    for index, column in enumerate(df.columns):
+        ax = fig.add_subplot(nrows / 2, 2, index + 1, sharex=fax)
+        ax.set_facecolor("white")
+        ax.grid(color="whitesmoke", axis="x")
+        if not fax:
+            fax = ax
+        ax.plot(df[column], color="green", marker="o", markersize=2, linestyle='')
+        ax.plot(ewm[column], color="green", linewidth=1)
+        if column in br:
+            ax.plot(br_series(column), color="red", marker=4, markersize=6, linestyle='')
+        ax.set_yticks([br[column]['value'], ewm[column].values[-1]])
+        ax.set_yticklabels([br[column]['value'], ewm[column].values[-1]], {'fontsize': 7})
+        fmt = "%.1e"
+        ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+        ax.title.set_text(column)
+        if index + 1 < nrows - 1:
+            plt.setp(ax.get_xticklabels(), visible=False)
+            plt.setp(ax.get_xticklines(), visible=False)
+            plt.setp(ax.spines.values(), visible=False)
+        ax.set_xticks([df.index.values[0], df.index.values[-span], df.index.values[-1]])
+        ax.set_xticklabels([df.index.values[0], df.index.values[-span], df.index.values[-1]], {'fontsize': 7})
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(metrics_path, "diff.png"))
+
+if __name__ == "___main__":
     env = get_env()
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)

@@ -99,7 +99,21 @@ class GitEnv(Env):
             f"Target branch defaulting to {self.DEFAULT_TARGET_BRANCH}. Set CIMETRICS_TARGET_BRANCH env var to change it."
         )
         return self.DEFAULT_TARGET_BRANCH
+    
+    def build_url_by_id(self, build_id) -> str:
+        return f"{build_id}"
 
+    @property
+    def build_url(self) -> str:
+        return self.build_url_by_id(self.build_id)
+
+    @property
+    def build_id(self) -> str:
+        return "2"
+
+    @property
+    def build_number(self) -> str:
+        return "0000.0"
 
 class AzurePipelinesEnv(GitEnv):
     @property
