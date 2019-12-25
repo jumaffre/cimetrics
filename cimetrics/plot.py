@@ -15,6 +15,10 @@ from cimetrics.env import get_env
 
 plt.style.use("ggplot")
 
+TARGET_COLOR = "steelblue"
+BRANCH_COLOR = "darkorange"
+TICK_COLOR = "silver"
+
 
 class Metrics(object):
     def __init__(self, env):
@@ -206,22 +210,31 @@ if __name__ == "__main__":
     for index, column in enumerate(df.columns):
         ax = fig.add_subplot(nrows / 2, 2, index + 1, sharex=fax)
         ax.set_facecolor("white")
-        ax.grid(color="whitesmoke", axis="x")
+        ax.grid(color="gainsboro", axis="x")
         if not fax:
             fax = ax
-        ax.plot(df[column], color="green", marker="o", markersize=2, linestyle="")
-        ax.plot(ewm[column], color="green", linewidth=1)
+        ax.plot(df[column], color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
+        ax.plot(ewm[column], color=TARGET_COLOR, linewidth=1)
         if column in br:
             ax.plot(
-                br_series(column), color="red", marker=4, markersize=6, linestyle=""
+                br_series(column),
+                color=BRANCH_COLOR,
+                marker=4,
+                markersize=6,
+                linestyle="",
             )
         ax.set_yticks([br[column]["value"], ewm[column].values[-1]])
         ax.set_yticklabels(
-            [br[column]["value"], ewm[column].values[-1]], {"fontsize": 7}
+            [br[column]["value"], ewm[column].values[-1]], {"fontsize": 6}
         )
         fmt = "%.1e"
         ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         ax.title.set_text(column)
+        ax.tick_params(axis="y", which="both", color=TICK_COLOR)
+        ax.tick_params(axis="x", which="both", color=TICK_COLOR)
+        bv, tv = ax.yaxis.get_ticklabels()
+        bv.set_color(BRANCH_COLOR)
+        tv.set_color(TARGET_COLOR)
         if index + 1 < nrows - 1:
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
@@ -229,7 +242,7 @@ if __name__ == "__main__":
         ax.set_xticks([df.index.values[0], df.index.values[-span], df.index.values[-1]])
         ax.set_xticklabels(
             [df.index.values[0], df.index.values[-span], df.index.values[-1]],
-            {"fontsize": 7},
+            {"fontsize": 6},
         )
 
     plt.tight_layout()
