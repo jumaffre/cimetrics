@@ -6,6 +6,7 @@ import pymongo
 import pandas
 import os
 import sys
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -14,6 +15,7 @@ import matplotlib.ticker as mtick
 from cimetrics.env import get_env
 
 plt.style.use("ggplot")
+matplotlib.rcParams["text.hinting"] = 1
 
 TARGET_COLOR = "steelblue"
 BRANCH_COLOR = "darkorange"
