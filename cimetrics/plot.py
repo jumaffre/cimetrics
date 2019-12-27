@@ -16,9 +16,11 @@ from cimetrics.env import get_env
 
 plt.style.use("ggplot")
 matplotlib.rcParams["text.hinting"] = 1
+matplotlib.rcParams["font.size"] = 6
 
 TARGET_COLOR = "steelblue"
-BRANCH_COLOR = "darkorange"
+BRANCH_UP_COLOR = "darkorange"
+BRANCH_DOWN_COLOR = "darkviolet"
 TICK_COLOR = "silver"
 
 
@@ -218,12 +220,29 @@ if __name__ == "__main__":
         ax.plot(df[column], color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
         ax.plot(ewm[column], color=TARGET_COLOR, linewidth=1)
         if column in br:
-            ax.plot(
+            lewm = ewm[column][ewm.index[-1]]
+            bv = br[column]["value"]
+            marker, color = (
+                (7, BRANCH_DOWN_COLOR) if bv < lewm else (6, BRANCH_UP_COLOR)
+            )
+            s = ax.plot(
                 br_series(column),
-                color=BRANCH_COLOR,
-                marker=4,
-                markersize=6,
+                color=color,
+                marker=marker,
+                markersize=7,
                 linestyle="",
+            )
+            n = m.normalise([bv], [lewm])[0]
+            sign = "+" if n > 0 else ""
+            plt.annotate(
+                f"{sign}{n:.0f}%",
+                (ewm.index[-1], bv),
+                xytext=(3, 0),
+                textcoords="offset points",
+                va="center",
+                ha="left",
+                color=color,
+                weight="bold",
             )
         ax.set_yticks([br[column]["value"], ewm[column].values[-1]])
         ax.set_yticklabels(
@@ -235,7 +254,7 @@ if __name__ == "__main__":
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
         bv, tv = ax.yaxis.get_ticklabels()
-        bv.set_color(BRANCH_COLOR)
+        bv.set_color(color)
         tv.set_color(TARGET_COLOR)
         if index + 1 < nrows - 1:
             plt.setp(ax.get_xticklabels(), visible=False)
