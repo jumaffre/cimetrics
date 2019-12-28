@@ -232,6 +232,12 @@ if __name__ == "__main__":
                 markersize=7,
                 linestyle="",
             )
+            s = ax.plot(
+                [df.index[-1], df.index[-1]],
+                [lewm, [br[column]["value"]][0]],
+                color=color,
+                linestyle="-",
+            )
             n = m.normalise([bv], [lewm])[0]
             sign = "+" if n > 0 else ""
             plt.annotate(
