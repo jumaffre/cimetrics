@@ -244,12 +244,17 @@ if __name__ == "__main__":
                 color=color,
                 weight="bold",
             )
-        ax.set_yticks([br[column]["value"], ewm[column].values[-1]])
-        ax.set_yticklabels(
-            [br[column]["value"], ewm[column].values[-1]], {"fontsize": 6}
-        )
-        fmt = "%.1e"
-        ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+        yt = [br[column]["value"], ewm[column].values[-1]]
+        ax.set_yticks(yt)
+        ax.set_yticklabels(yt, {"fontsize": 6})
+        bvs = str(yt[0])
+        if len(bvs) < 7:
+            fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
+            fmt = f"%.{fp}f"
+            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+        else:
+            fmt = "%.1e"
+            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         ax.title.set_text(column)
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
