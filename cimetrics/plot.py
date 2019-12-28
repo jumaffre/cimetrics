@@ -238,6 +238,7 @@ if __name__ == "__main__":
                 color=color,
                 linestyle="-",
             )
+
             n = m.normalise([bv], [lewm])[0]
             sign = "+" if n > 0 else ""
             plt.annotate(
