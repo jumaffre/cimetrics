@@ -204,8 +204,8 @@ def trend_view(env):
     target_branch = env.target_branch
     span = 10
     df, ewm, bids = m.ewma_all_for_branch_series(target_branch, span)
-    nrows = len(df.columns)
     br = m.all_for_branch_and_build(BRANCH, BUILD_ID)
+    nrows = len(br.keys())
 
     def br_series(col):
         return pandas.DataFrame([br[col]["value"]], df.index[-1:])
@@ -222,21 +222,26 @@ def trend_view(env):
         ax.grid(color="gainsboro", axis="x")
         if not fax:
             fax = ax
-        ax.plot(
-            df[column].values,
-            color=TARGET_COLOR,
-            marker="o",
-            markersize=1,
-            linestyle="",
-        )
-        ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=0.5)
+        if column in df.columns:
+            ax.plot(
+                df[column].values,
+                color=TARGET_COLOR,
+                marker="o",
+                markersize=1,
+                linestyle="",
+            )
+            ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=0.5)
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
         if column.endswith("^"):
             good_col, bad_col = (bad_col, good_col)
         if column in br:
-            lewm = ewm[column][ewm.index[-1]]
             bv = br[column]["value"]
-            marker, color = (7, good_col) if bv < lewm else (6, bad_col)
+            if column in ewm:
+                lewm = ewm[column][ewm.index[-1]]
+                marker, color = (7, good_col) if bv < lewm else (6, bad_col)
+            else:
+                lewm = bv
+                marker, color = (".", BRANCH_GOOD_COLOR)
             s = ax.plot(
                 [len(df) - 1],
                 br_series(column).values,
@@ -253,19 +258,22 @@ def trend_view(env):
                 linewidth=1,
             )
 
-            n = m.normalise([bv], [lewm])[0]
-            sign = "+" if n > 0 else ""
-            plt.annotate(
-                f"{sign}{n:.0f}%",
-                (len(df) - 1, bv),
-                xytext=(3, 0),
-                textcoords="offset points",
-                va="center",
-                ha="left",
-                color=color,
-                weight="bold",
-            )
-        yt = [br[column]["value"], ewm[column].values[-1]]
+            if column in ewm:
+                n = m.normalise([bv], [lewm])[0]
+                sign = "+" if n > 0 else ""
+                plt.annotate(
+                    f"{sign}{n:.0f}%",
+                    (len(df) - 1, bv),
+                    xytext=(3, 0),
+                    textcoords="offset points",
+                    va="center",
+                    ha="left",
+                    color=color,
+                    weight="bold",
+                )
+        yt = [br[column]["value"]]
+        if column in ewm.columns:
+            yt.append(ewm[column].values[-1])
         ax.set_yticks(yt)
         ax.set_yticklabels(yt, {"fontsize": 6})
         bvs = str(yt[0])
@@ -281,9 +289,10 @@ def trend_view(env):
         )
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
-        bv, tv = ax.yaxis.get_ticklabels()
-        bv.set_color(color)
-        tv.set_color(TARGET_COLOR)
+        tls = ax.yaxis.get_ticklabels()
+        tls[0].set_color(color)
+        if len(tls) > 1:
+            tls[1].set_color(TARGET_COLOR)
         if index + 1 < nrows - 1:
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
