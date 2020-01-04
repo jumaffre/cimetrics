@@ -203,67 +203,68 @@ def trend_view(env):
     BUILD_ID = env.build_id
     target_branch = env.target_branch
     span = 10
-    df, ewm, bids = m.ewma_all_for_branch_series(target_branch, span)
-    br = m.all_for_branch_and_build(BRANCH, BUILD_ID)
-    nrows = len(br.keys())
+    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(target_branch, span)
+    tgt_cols = tgt_raw.columns
+    branch = m.all_for_branch_and_build(BRANCH, BUILD_ID)
+    nrows = len(branch.keys())
 
-    def br_series(col):
-        return pandas.DataFrame([br[col]["value"]], df.index[-1:])
+    def branch_series(column):
+        return pandas.DataFrame([branch[column]["value"]], tgt_raw.index[-1:])
 
     plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
-    fax = None
+    first_ax = None
     ncol = env.columns
-    for index, column in enumerate(sorted(br.keys())):
+    for index, col in enumerate(sorted(branch.keys())):
         ax = fig.add_subplot(
-            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=fax
+            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
         )
         ax.set_facecolor("white")
         ax.grid(color="gainsboro", axis="x")
-        if not fax:
-            fax = ax
-        if column in df.columns:
+        if not first_ax:
+            first_ax = ax
+        if col in tgt_cols:
             ax.plot(
-                df[column].values,
+                tgt_raw[col].values,
                 color=TARGET_COLOR,
                 marker="o",
                 markersize=1,
                 linestyle="",
             )
-            ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=0.5)
+            ax.plot(tgt_ewma[col].values, color=TARGET_COLOR, linewidth=0.5)
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
-        if column.endswith("^"):
+        if col.endswith("^"):
             good_col, bad_col = (bad_col, good_col)
-        if column in br:
-            bv = br[column]["value"]
-            if column in ewm:
-                lewm = ewm[column][ewm.index[-1]]
-                marker, color = (7, good_col) if bv < lewm else (6, bad_col)
+        if col in branch:
+            branch_val = branch[col]["value"]
+            if col in tgt_cols:
+                lewm = tgt_ewma[col][tgt_ewma.index[-1]]
+                marker, color = (7, good_col) if branch_val < lewm else (6, bad_col)
             else:
-                lewm = bv
+                lewm = branch_val
                 marker, color = (".", BRANCH_GOOD_COLOR)
             s = ax.plot(
-                [len(df) - 1],
-                br_series(column).values,
+                [len(tgt_raw) - 1],
+                branch_series(col).values,
                 color=color,
                 marker=marker,
                 markersize=6,
                 linestyle="",
             )
             s = ax.plot(
-                [len(df) - 1, len(df) - 1],
-                [lewm, [br[column]["value"]][0]],
+                [len(tgt_raw) - 1, len(tgt_raw) - 1],
+                [lewm, [branch[col]["value"]][0]],
                 color=color,
                 linestyle="-",
                 linewidth=1,
             )
 
-            if column in ewm:
-                n = m.normalise([bv], [lewm])[0]
-                sign = "+" if n > 0 else ""
+            if col in tgt_ewma:
+                percent_change = m.normalise([branch_val], [lewm])[0]
+                sign = "+" if percent_change > 0 else ""
                 plt.annotate(
-                    f"{sign}{n:.0f}%",
-                    (len(df) - 1, bv),
+                    f"{sign}{percent_change:.0f}%",
+                    (len(tgt_raw) - 1, branch_val),
                     xytext=(3, 0),
                     textcoords="offset points",
                     va="center",
@@ -271,9 +272,9 @@ def trend_view(env):
                     color=color,
                     weight="bold",
                 )
-        yt = [br[column]["value"]]
-        if column in ewm.columns:
-            yt.append(ewm[column].values[-1])
+        yt = [branch_val]
+        if col in tgt_cols:
+            yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
         ax.set_yticklabels(yt, {"fontsize": 6})
         bvs = str(yt[0])
@@ -285,7 +286,7 @@ def trend_view(env):
             fmt = "%.1e"
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         ax.set_title(
-            column, loc="left", fontdict={"fontweight": "bold"}, color="dimgray"
+            col, loc="left", fontdict={"fontweight": "bold"}, color="dimgray"
         )
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
@@ -297,18 +298,17 @@ def trend_view(env):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
-        ax.set_xticks([0, len(df) - span, len(df) - 1])
+        ax.set_xticks([0, len(tgt_raw) - span, len(tgt_raw) - 1])
         ax.set_xticklabels(
-            [df.index.values[0], df.index.values[-span], df.index.values[-1]],
+            [tgt_raw.index.values[0], tgt_raw.index.values[-span], tgt_raw.index.values[-1]],
             {"fontsize": 6},
         )
 
     plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, "diff.png"))
 
-    if bids:
-        builds_ids = list(bids)
-        target_builds = f"{len(bids)} builds from [{bids[0]}]({env.build_url_by_id(bids[0])}) to [{bids[-1]}]({env.build_url_by_id(bids[-1])})"
+    if build_ids:
+        target_builds = f"{len(build_ids)} builds from [{build_ids[0]}]({env.build_url_by_id(build_ids[0])}) to [{build_ids[-1]}]({env.build_url_by_id(build_ids[-1])})"
         comment = f"{BRANCH}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {target_branch} ewma over {target_builds}"
     else:
         comment = f"WARNING: {target_branch} does not have any data"
