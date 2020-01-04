@@ -218,7 +218,13 @@ def trend_view(env):
         ax.grid(color="gainsboro", axis="x")
         if not fax:
             fax = ax
-        ax.plot(df[column].values, color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
+        ax.plot(
+            df[column].values,
+            color=TARGET_COLOR,
+            marker="o",
+            markersize=1,
+            linestyle="",
+        )
         ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=1)
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
         if column.endswith("^"):
@@ -247,7 +253,7 @@ def trend_view(env):
             sign = "+" if n > 0 else ""
             plt.annotate(
                 f"{sign}{n:.0f}%",
-                (ewm.index[-1], bv),
+                (len(df) - 1, bv),
                 xytext=(3, 0),
                 textcoords="offset points",
                 va="center",
