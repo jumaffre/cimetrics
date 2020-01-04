@@ -18,10 +18,10 @@ plt.style.use("ggplot")
 matplotlib.rcParams["text.hinting"] = 1
 matplotlib.rcParams["font.size"] = 6
 
-TARGET_COLOR = "steelblue"
+TARGET_COLOR = "lightsteelblue"
 
-BRANCH_GOOD_COLOR = "green"
-BRANCH_BAD_COLOR = "red"
+BRANCH_GOOD_COLOR = "forestgreen"
+BRANCH_BAD_COLOR = "firebrick"
 
 TICK_COLOR = "silver"
 
@@ -231,14 +231,15 @@ def trend_view(env):
                 br_series(column),
                 color=color,
                 marker=marker,
-                markersize=7,
-                linestyle="",
+                markersize=6,
+                linestyle=""
             )
             s = ax.plot(
                 [df.index[-1], df.index[-1]],
                 [lewm, [br[column]["value"]][0]],
                 color=color,
                 linestyle="-",
+                linewidth=1
             )
 
             n = m.normalise([bv], [lewm])[0]
@@ -264,7 +265,8 @@ def trend_view(env):
         else:
             fmt = "%.1e"
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        ax.title.set_text(column)
+        #ax.title.set_text(column)
+        ax.set_title(column, loc="left", fontdict={"fontweight": "bold"}, color="dimgray")
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
         bv, tv = ax.yaxis.get_ticklabels()
