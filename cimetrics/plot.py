@@ -117,7 +117,7 @@ class Metrics(object):
         )
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
-        # Run EWM over metrics, and select the last row
+        # Run EWM over metrics
         ewr = df.ewm(span=span).mean()
         return df, ewr, bids
 
@@ -200,14 +200,13 @@ def trend_view(env):
         sys.exit(str(e))
 
     span = 10
+    # TODO: merge dfs, get rid of build_ids
     tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(env.target_branch, span)
     tgt_cols = tgt_raw.columns
     branch = m.all_for_branch_and_build(env.branch, env.build_id)
     nrows = len(branch.keys())
 
-    def branch_series(column):
-        return pandas.DataFrame([branch[column]["value"]], tgt_raw.index[-1:])
-
+    # TODO: get rid of rcPaaram if possible?
     plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     first_ax = None
@@ -221,6 +220,7 @@ def trend_view(env):
         if not first_ax:
             first_ax = ax
         if col in tgt_cols:
+            # Plot raw target branch data as markers
             ax.plot(
                 tgt_raw[col].values,
                 color=TARGET_COLOR,
@@ -228,28 +228,34 @@ def trend_view(env):
                 markersize=1,
                 linestyle="",
             )
+            # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=TARGET_COLOR, linewidth=0.5)
+        # Pick color direction for change arrow
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
         if col.endswith("^"):
             good_col, bad_col = (bad_col, good_col)
+
         if col in branch:
             branch_val = branch[col]["value"]
+            # Pick a marker, either caret up, down, or circle for new metrics
             if col in tgt_cols:
                 lewm = tgt_ewma[col][tgt_ewma.index[-1]]
                 marker, color = (7, good_col) if branch_val < lewm else (6, bad_col)
             else:
                 lewm = branch_val
                 marker, color = (".", BRANCH_GOOD_COLOR)
+            # Plot marker for branch value
             s = ax.plot(
                 [len(tgt_raw) - 1],
-                branch_series(col).values,
+                [branch_val],
                 color=color,
                 marker=marker,
                 markersize=6,
                 linestyle="",
             )
+            # Plot stem of arrow for branch value
             s = ax.plot(
-                [len(tgt_raw) - 1, len(tgt_raw) - 1],
+                [len(tgt_raw) - 1] * 2,
                 [lewm, [branch[col]["value"]][0]],
                 color=color,
                 linestyle="-",
@@ -257,6 +263,7 @@ def trend_view(env):
             )
 
             if col in tgt_ewma:
+                # Annotate plot with % change
                 percent_change = m.normalise([branch_val], [lewm])[0]
                 sign = "+" if percent_change > 0 else ""
                 plt.annotate(
@@ -269,11 +276,15 @@ def trend_view(env):
                     color=color,
                     weight="bold",
                 )
+        # Set yticks to branch value and last ewma when applicable
         yt = [branch_val]
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
         ax.set_yticklabels(yt, {"fontsize": 6})
+        # Pick formatter for ytick labels. If possible, just print out the
+        # value with the same precision as the branch value. If that doesn't
+        # fit, switch to scientific format.
         bvs = str(yt[0])
         if len(bvs) < 7:
             fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
@@ -285,10 +296,12 @@ def trend_view(env):
         ax.set_title(col, loc="left", fontdict={"fontweight": "bold"}, color="dimgray")
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
+        # Match tick colors with series they belong to
         tls = ax.yaxis.get_ticklabels()
         tls[0].set_color(color)
         if len(tls) > 1:
             tls[1].set_color(TARGET_COLOR)
+        # Don't print xticks for rows other than bottom
         if index + 1 < nrows - 1:
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)

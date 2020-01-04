@@ -76,6 +76,8 @@ class Env(object):
 
 
 class GitEnv(Env):
+    _target_branch = None
+
     def __init__(self) -> None:
         self.repo = Repo(os.getcwd(), search_parent_directories=True)
         super().__init__()
@@ -100,13 +102,18 @@ class GitEnv(Env):
 
     @property
     def target_branch(self) -> str:
-        target_branch_ = os.environ.get("CIMETRICS_TARGET_BRANCH")
-        if target_branch_ is not None:
-            return target_branch_
+        if self._target_branch is not None:
+            return self._target_branch
+
+        self._target_branch = os.environ.get("CIMETRICS_TARGET_BRANCH")
+        if self._target_branch is not None:
+            return self._target_branch
+
         print(
             f"Target branch defaulting to {self.DEFAULT_TARGET_BRANCH}. Set CIMETRICS_TARGET_BRANCH env var to change it."
         )
-        return self.DEFAULT_TARGET_BRANCH
+        self._target_branch = self.DEFAULT_TARGET_BRANCH
+        return self._target_branch
 
     def build_url_by_id(self, build_id) -> str:
         return f"{build_id}"
