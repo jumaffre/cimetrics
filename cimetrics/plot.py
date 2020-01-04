@@ -206,7 +206,7 @@ def trend_view(env):
     branch = m.all_for_branch_and_build(env.branch, env.build_id)
     nrows = len(branch.keys())
 
-    # TODO: get rid of rcPaaram if possible?
+    # TODO: get rid of rcParam if possible?
     plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     first_ax = None
