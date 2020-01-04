@@ -199,13 +199,10 @@ def trend_view(env):
     except ValueError as e:
         sys.exit(str(e))
 
-    BRANCH = env.branch
-    BUILD_ID = env.build_id
-    target_branch = env.target_branch
     span = 10
-    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(target_branch, span)
+    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(env.target_branch, span)
     tgt_cols = tgt_raw.columns
-    branch = m.all_for_branch_and_build(BRANCH, BUILD_ID)
+    branch = m.all_for_branch_and_build(env.branch, env.build_id)
     nrows = len(branch.keys())
 
     def branch_series(column):
@@ -285,9 +282,7 @@ def trend_view(env):
         else:
             fmt = "%.1e"
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        ax.set_title(
-            col, loc="left", fontdict={"fontweight": "bold"}, color="dimgray"
-        )
+        ax.set_title(col, loc="left", fontdict={"fontweight": "bold"}, color="dimgray")
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
         tls = ax.yaxis.get_ticklabels()
@@ -300,7 +295,11 @@ def trend_view(env):
             plt.setp(ax.spines.values(), visible=False)
         ax.set_xticks([0, len(tgt_raw) - span, len(tgt_raw) - 1])
         ax.set_xticklabels(
-            [tgt_raw.index.values[0], tgt_raw.index.values[-span], tgt_raw.index.values[-1]],
+            [
+                tgt_raw.index.values[0],
+                tgt_raw.index.values[-span],
+                tgt_raw.index.values[-1],
+            ],
             {"fontsize": 6},
         )
 
@@ -309,9 +308,9 @@ def trend_view(env):
 
     if build_ids:
         target_builds = f"{len(build_ids)} builds from [{build_ids[0]}]({env.build_url_by_id(build_ids[0])}) to [{build_ids[-1]}]({env.build_url_by_id(build_ids[-1])})"
-        comment = f"{BRANCH}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {target_branch} ewma over {target_builds}"
+        comment = f"{env.branch}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {env.target_branch} ewma over {target_builds}"
     else:
-        comment = f"WARNING: {target_branch} does not have any data"
+        comment = f"WARNING: {env.target_branch} does not have any data"
     print(comment)
     with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
         dtext.write(comment)
