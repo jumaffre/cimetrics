@@ -10,6 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import math
 import matplotlib.ticker as mtick
 
 from cimetrics.env import get_env
@@ -212,8 +213,11 @@ def trend_view(env):
     plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     fax = None
+    ncol = env.columns
     for index, column in enumerate(br.keys()):
-        ax = fig.add_subplot(nrows / 2, 2, index + 1, sharex=fax)
+        ax = fig.add_subplot(
+            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=fax
+        )
         ax.set_facecolor("white")
         ax.grid(color="gainsboro", axis="x")
         if not fax:
@@ -225,7 +229,7 @@ def trend_view(env):
             markersize=1,
             linestyle="",
         )
-        ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=1)
+        ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=0.5)
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
         if column.endswith("^"):
             good_col, bad_col = (bad_col, good_col)

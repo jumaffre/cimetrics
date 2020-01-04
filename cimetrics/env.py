@@ -55,6 +55,10 @@ class Env(object):
         return self.cfg.get("view", "default")
 
     @property
+    def columns(self) -> int:
+        return self.cfg.get("columns", 2)
+
+    @property
     def mongo_connection(self) -> str:
         return os.environ["METRICS_MONGO_CONNECTION"]
 
