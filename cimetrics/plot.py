@@ -214,7 +214,7 @@ def trend_view(env):
     fig = plt.figure()
     fax = None
     ncol = env.columns
-    for index, column in enumerate(br.keys()):
+    for index, column in enumerate(sorted(br.keys())):
         ax = fig.add_subplot(
             math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=fax
         )
