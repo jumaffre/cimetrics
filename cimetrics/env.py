@@ -51,6 +51,10 @@ class Env(object):
         return self.cfg["collection"]
 
     @property
+    def view(self) -> str:
+        return self.cfg.get("view", "default")
+
+    @property
     def mongo_connection(self) -> str:
         return os.environ["METRICS_MONGO_CONNECTION"]
 

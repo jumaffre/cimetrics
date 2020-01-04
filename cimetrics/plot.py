@@ -19,8 +19,10 @@ matplotlib.rcParams["text.hinting"] = 1
 matplotlib.rcParams["font.size"] = 6
 
 TARGET_COLOR = "steelblue"
-BRANCH_UP_COLOR = "darkorange"
-BRANCH_DOWN_COLOR = "darkviolet"
+
+BRANCH_GOOD_COLOR = "green"
+BRANCH_BAD_COLOR = "red"
+
 TICK_COLOR = "silver"
 
 
@@ -188,8 +190,7 @@ class Metrics(object):
         return pos, neg
 
 
-if __name__ == "__main__":
-    env = get_env()
+def trend_view(env):
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
     try:
@@ -219,12 +220,13 @@ if __name__ == "__main__":
             fax = ax
         ax.plot(df[column], color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
         ax.plot(ewm[column], color=TARGET_COLOR, linewidth=1)
+        good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
+        if column.endswith("^"):
+            good_col, bad_col = (bad_col, good_col)
         if column in br:
             lewm = ewm[column][ewm.index[-1]]
             bv = br[column]["value"]
-            marker, color = (
-                (7, BRANCH_DOWN_COLOR) if bv < lewm else (6, BRANCH_UP_COLOR)
-            )
+            marker, color = (7, good_col) if bv < lewm else (6, bad_col)
             s = ax.plot(
                 br_series(column),
                 color=color,
@@ -291,8 +293,8 @@ if __name__ == "__main__":
     with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
         dtext.write(comment)
 
-if __name__ == "___main__":
-    env = get_env()
+
+def default_view(env):
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
     try:
@@ -362,3 +364,8 @@ if __name__ == "___main__":
     xticks = mtick.FormatStrFormatter(fmt)
     ax.xaxis.set_major_formatter(xticks)
     plt.savefig(os.path.join(metrics_path, "diff.png"))
+
+
+if __name__ == "__main__":
+    env = get_env()
+    (trend_view if env.view == "trend" else default_view)(env)
