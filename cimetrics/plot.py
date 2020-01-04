@@ -218,8 +218,8 @@ def trend_view(env):
         ax.grid(color="gainsboro", axis="x")
         if not fax:
             fax = ax
-        ax.plot(df[column], color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
-        ax.plot(ewm[column], color=TARGET_COLOR, linewidth=1)
+        ax.plot(df[column].values, color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
+        ax.plot(ewm[column].values, color=TARGET_COLOR, linewidth=1)
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
         if column.endswith("^"):
             good_col, bad_col = (bad_col, good_col)
@@ -228,14 +228,15 @@ def trend_view(env):
             bv = br[column]["value"]
             marker, color = (7, good_col) if bv < lewm else (6, bad_col)
             s = ax.plot(
-                br_series(column),
+                [len(df) - 1],
+                br_series(column).values,
                 color=color,
                 marker=marker,
                 markersize=6,
                 linestyle="",
             )
             s = ax.plot(
-                [df.index[-1], df.index[-1]],
+                [len(df) - 1, len(df) - 1],
                 [lewm, [br[column]["value"]][0]],
                 color=color,
                 linestyle="-",
@@ -278,7 +279,7 @@ def trend_view(env):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
-        ax.set_xticks([df.index.values[0], df.index.values[-span], df.index.values[-1]])
+        ax.set_xticks([0, len(df) - span, len(df) - 1])
         ax.set_xticklabels(
             [df.index.values[0], df.index.values[-span], df.index.values[-1]],
             {"fontsize": 6},
