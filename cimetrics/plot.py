@@ -218,8 +218,8 @@ def trend_view(env):
         ax.grid(color="gainsboro", axis="x")
         if not fax:
             fax = ax
-        ax.plot(df[column].drop_index(), color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
-        ax.plot(ewm[column].drop_index(), color=TARGET_COLOR, linewidth=1)
+        ax.plot(df[column], color=TARGET_COLOR, marker="o", markersize=1, linestyle="")
+        ax.plot(ewm[column], color=TARGET_COLOR, linewidth=1)
         good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
         if column.endswith("^"):
             good_col, bad_col = (bad_col, good_col)
