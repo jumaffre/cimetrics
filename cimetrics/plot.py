@@ -212,7 +212,7 @@ def trend_view(env):
     plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     fax = None
-    for index, column in enumerate(df.columns):
+    for index, column in enumerate(br.keys()):
         ax = fig.add_subplot(nrows / 2, 2, index + 1, sharex=fax)
         ax.set_facecolor("white")
         ax.grid(color="gainsboro", axis="x")
@@ -272,7 +272,6 @@ def trend_view(env):
         else:
             fmt = "%.1e"
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        # ax.title.set_text(column)
         ax.set_title(
             column, loc="left", fontdict={"fontweight": "bold"}, color="dimgray"
         )
