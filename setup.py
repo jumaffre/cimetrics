@@ -10,13 +10,9 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-VERSION = run(
-    ["git", "describe", "--tags"], capture_output=True, check=True, encoding="utf-8"
-).stdout.strip()
-
 setup(
     name="cimetrics",
-    version=VERSION,
+    version="0.2.4",
     description="Lightweight python module to track crucial metrics",
     url="https://github.com/jumaffre/cimetrics",
     author="Julien Maffre",
