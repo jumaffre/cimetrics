@@ -318,6 +318,7 @@ def trend_view(env):
 
     plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, "diff.png"))
+    plt.close(fig)
 
     if build_ids:
         target_builds = f"{len(build_ids)} builds from [{build_ids[0]}]({env.build_url_by_id(build_ids[0])}) to [{build_ids[-1]}]({env.build_url_by_id(build_ids[-1])})"
