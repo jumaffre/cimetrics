@@ -6,14 +6,23 @@ import pymongo
 import pandas
 import os
 import sys
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import math
 import matplotlib.ticker as mtick
 
 from cimetrics.env import get_env
 
 plt.style.use("ggplot")
+matplotlib.rcParams["text.hinting"] = 1
+matplotlib.rcParams["font.size"] = 6
+
+TARGET_COLOR = "lightsteelblue"
+BRANCH_GOOD_COLOR = "forestgreen"
+BRANCH_BAD_COLOR = "firebrick"
+TICK_COLOR = "silver"
 
 
 class Metrics(object):
@@ -62,7 +71,7 @@ class Metrics(object):
 
         return metrics
 
-    def ewma_all_for_branch(self, branch, span=5):
+    def ewma_all_for_branch_series(self, branch, span=10):
         """
         Return exponentially moving averages for all current metrics on
         the specified branch.
@@ -77,10 +86,7 @@ class Metrics(object):
             v["build_id"] = int(d["build_id"] or 0)
             return v
 
-        def values(d):
-            return {k: {"value": v} for k, v in d.items()}
-
-        # Find the 20 most recent build ids
+        # Find the span * 2 most recent build ids
         query = {"branch": branch}
         res = self.col.find(query, {"build_id": 1, "created": 1}).sort(
             [("created", pymongo.DESCENDING)]
@@ -89,7 +95,7 @@ class Metrics(object):
         for r in res:
             if r.get("build_id"):
                 build_ids.add(r["build_id"])
-                if len(build_ids) >= 20:
+                if len(build_ids) >= span * 2:
                     break
 
         # Get metrics for those build ids
@@ -109,8 +115,16 @@ class Metrics(object):
         )
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
-        # Run EWM over metrics, and select the last row
-        ewr = df.ewm(span=span).mean().tail(1).to_dict("index")
+        # Run EWM over metrics
+        ewr = df.ewm(span=span).mean()
+        return df, ewr, bids
+
+    def ewma_all_for_branch(self, branch, span=5):
+        def values(d):
+            return {k: {"value": v} for k, v in d.items()}
+
+        _, df, bids = self.ewma_all_for_branch_series(branch, span)
+        ewr = df.tail(1).to_dict("index")
 
         metrics = {}
         for data in ewr.values():
@@ -175,8 +189,151 @@ class Metrics(object):
         return pos, neg
 
 
-if __name__ == "__main__":
-    env = get_env()
+def trend_view(env):
+    metrics_path = os.path.join(env.repo_root, "_cimetrics")
+    os.makedirs(metrics_path, exist_ok=True)
+    try:
+        m = Metrics(env)
+    except ValueError as e:
+        sys.exit(str(e))
+
+    span = 10
+    # TODO: merge dfs, get rid of build_ids
+    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(env.target_branch, span)
+    tgt_cols = tgt_raw.columns
+    branch = m.all_for_branch_and_build(env.branch, env.build_id)
+    nrows = len(branch.keys())
+
+    # TODO: get rid of rcParam if possible?
+    plt.rcParams["axes.titlesize"] = 8
+    fig = plt.figure()
+    first_ax = None
+    ncol = env.columns
+    for index, col in enumerate(sorted(branch.keys())):
+        ax = fig.add_subplot(
+            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
+        )
+        ax.set_facecolor("white")
+        ax.grid(color="gainsboro", axis="x")
+        if not first_ax:
+            first_ax = ax
+        if col in tgt_cols:
+            # Plot raw target branch data as markers
+            ax.plot(
+                tgt_raw[col].values,
+                color=TARGET_COLOR,
+                marker="o",
+                markersize=1,
+                linestyle="",
+            )
+            # Plot ewma of target branch data
+            ax.plot(tgt_ewma[col].values, color=TARGET_COLOR, linewidth=0.5)
+        # Pick color direction for change arrow
+        good_col, bad_col = (BRANCH_GOOD_COLOR, BRANCH_BAD_COLOR)
+        if col.endswith("^"):
+            good_col, bad_col = (bad_col, good_col)
+
+        if col in branch:
+            branch_val = branch[col]["value"]
+            # Pick a marker, either caret up, down, or circle for new metrics
+            if col in tgt_cols:
+                lewm = tgt_ewma[col][tgt_ewma.index[-1]]
+                marker, color = (7, good_col) if branch_val < lewm else (6, bad_col)
+            else:
+                lewm = branch_val
+                marker, color = (".", BRANCH_GOOD_COLOR)
+            # Plot marker for branch value
+            s = ax.plot(
+                [len(tgt_raw) - 1],
+                [branch_val],
+                color=color,
+                marker=marker,
+                markersize=6,
+                linestyle="",
+            )
+            # Plot stem of arrow for branch value
+            s = ax.plot(
+                [len(tgt_raw) - 1] * 2,
+                [lewm, [branch[col]["value"]][0]],
+                color=color,
+                linestyle="-",
+                linewidth=1,
+            )
+
+            if col in tgt_ewma:
+                # Annotate plot with % change
+                percent_change = m.normalise([branch_val], [lewm])[0]
+                sign = "+" if percent_change > 0 else ""
+                plt.annotate(
+                    f"{sign}{percent_change:.0f}%",
+                    (len(tgt_raw) - 1, branch_val),
+                    xytext=(3, 0),
+                    textcoords="offset points",
+                    va="center",
+                    ha="left",
+                    color=color,
+                    weight="bold",
+                )
+        # Set yticks to branch value and last ewma when applicable
+        yt = [branch_val]
+        if col in tgt_cols:
+            yt.append(tgt_ewma[col].values[-1])
+        ax.set_yticks(yt)
+        ax.set_yticklabels(yt, {"fontsize": 6})
+        # Pick formatter for ytick labels. If possible, just print out the
+        # value with the same precision as the branch value. If that doesn't
+        # fit, switch to scientific format.
+        bvs = str(yt[0])
+        if len(bvs) < 7:
+            fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
+            fmt = f"%.{fp}f"
+            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+        else:
+            fmt = "%.1e"
+            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+        ax.set_title(
+            col.strip("^").strip(),
+            loc="left",
+            fontdict={"fontweight": "bold"},
+            color="dimgray",
+        )
+        ax.tick_params(axis="y", which="both", color=TICK_COLOR)
+        ax.tick_params(axis="x", which="both", color=TICK_COLOR)
+        # Match tick colors with series they belong to
+        tls = ax.yaxis.get_ticklabels()
+        tls[0].set_color(color)
+        if len(tls) > 1:
+            tls[1].set_color(TARGET_COLOR)
+        # Don't print xticks for rows other than bottom
+        if index + 1 < nrows - 1:
+            plt.setp(ax.get_xticklabels(), visible=False)
+            plt.setp(ax.get_xticklines(), visible=False)
+            plt.setp(ax.spines.values(), visible=False)
+        ax.set_xticks([0, len(tgt_raw) - span, len(tgt_raw) - 1])
+        ax.set_xticklabels(
+            [
+                tgt_raw.index.values[0],
+                tgt_raw.index.values[-span],
+                tgt_raw.index.values[-1],
+            ],
+            {"fontsize": 6},
+        )
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(metrics_path, "diff.png"))
+    plt.close(fig)
+
+    if build_ids:
+        target_builds = f"{len(build_ids)} builds from [{build_ids[0]}]({env.build_url_by_id(build_ids[0])}) to [{build_ids[-1]}]({env.build_url_by_id(build_ids[-1])})"
+        comment = f"{env.branch}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {env.target_branch} ewma over {target_builds}"
+    else:
+        comment = f"WARNING: {env.target_branch} does not have any data"
+    print(comment)
+    with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
+        dtext.write(comment)
+
+
+def default_view(env):
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
     try:
@@ -246,3 +403,12 @@ if __name__ == "__main__":
     xticks = mtick.FormatStrFormatter(fmt)
     ax.xaxis.set_major_formatter(xticks)
     plt.savefig(os.path.join(metrics_path, "diff.png"))
+
+
+def render_and_save():
+    env = get_env()
+    (trend_view if env.view == "trend" else default_view)(env)
+
+
+if __name__ == "__main__":
+    render_and_save()

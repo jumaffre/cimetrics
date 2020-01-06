@@ -1,2 +1,4 @@
 db: 'metrics'
 collection: 'metrics_my_app'
+view: "trend"
+columns: 3
