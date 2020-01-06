@@ -20,10 +20,8 @@ matplotlib.rcParams["text.hinting"] = 1
 matplotlib.rcParams["font.size"] = 6
 
 TARGET_COLOR = "lightsteelblue"
-
 BRANCH_GOOD_COLOR = "forestgreen"
 BRANCH_BAD_COLOR = "firebrick"
-
 TICK_COLOR = "silver"
 
 
@@ -293,7 +291,12 @@ def trend_view(env):
         else:
             fmt = "%.1e"
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        ax.set_title(col, loc="left", fontdict={"fontweight": "bold"}, color="dimgray")
+        ax.set_title(
+            col.strip("^").strip(),
+            loc="left",
+            fontdict={"fontweight": "bold"},
+            color="dimgray",
+        )
         ax.tick_params(axis="y", which="both", color=TICK_COLOR)
         ax.tick_params(axis="x", which="both", color=TICK_COLOR)
         # Match tick colors with series they belong to
@@ -402,6 +405,10 @@ def default_view(env):
     plt.savefig(os.path.join(metrics_path, "diff.png"))
 
 
-if __name__ == "__main__":
+def render_and_save():
     env = get_env()
     (trend_view if env.view == "trend" else default_view)(env)
+
+
+if __name__ == "__main__":
+    render_and_save()
