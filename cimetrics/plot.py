@@ -198,7 +198,9 @@ def trend_view(env):
         sys.exit(str(e))
 
     # TODO: merge dfs, get rid of build_ids
-    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(env.target_branch, env.span)
+    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(
+        env.target_branch, env.span
+    )
     tgt_cols = tgt_raw.columns
     branch = m.all_for_branch_and_build(env.branch, env.build_id)
     nrows = len(branch.keys())
