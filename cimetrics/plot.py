@@ -320,7 +320,7 @@ def trend_view(env):
         )
 
     plt.tight_layout()
-    plt.savefig(os.path.join(metrics_path, "diff.png"))
+    plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200)
     plt.close(fig)
 
     if build_ids:
