@@ -197,9 +197,10 @@ def trend_view(env):
     except ValueError as e:
         sys.exit(str(e))
 
-    span = 10
     # TODO: merge dfs, get rid of build_ids
-    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(env.target_branch, span)
+    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(
+        env.target_branch, env.span
+    )
     tgt_cols = tgt_raw.columns
     branch = m.all_for_branch_and_build(env.branch, env.build_id)
     nrows = len(branch.keys())
@@ -309,11 +310,11 @@ def trend_view(env):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
-        ax.set_xticks([0, len(tgt_raw) - span, len(tgt_raw) - 1])
+        ax.set_xticks([0, len(tgt_raw) - env.span, len(tgt_raw) - 1])
         ax.set_xticklabels(
             [
                 tgt_raw.index.values[0],
-                tgt_raw.index.values[-span],
+                tgt_raw.index.values[-env.span],
                 tgt_raw.index.values[-1],
             ],
             {"fontsize": 6},
