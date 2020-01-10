@@ -81,16 +81,18 @@ class GithubPRPublisher(object):
         params = {}
         params["body"] = f"{comment}\n![images]({image_report_url})"
 
-        print(f"Publishing comment to pull request {self.pull_request_id}")
-
         comment_id = self.first_self_comment()
         if comment_id is None:
+            print(f"Publishing comment to pull request {self.pull_request_id}")
             rep = requests.post(
                 f"{self.github_url}/issues/{self.pull_request_id}/comments",
                 data=json.dumps(params),
                 headers=self.request_header,
             )
         else:
+            print(
+                f"Updating comment {comment_id} on pull request {self.pull_request_id}"
+            )
             rep = requests.patch(
                 f"{self.github_url}/issues/{self.pull_request_id}/comments/{comment_id}",
                 data=json.dumps(params),
