@@ -69,7 +69,7 @@ class GithubPRPublisher(object):
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
             headers=self.request_header,
         )
-        
+
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
             if login == USER_ID:
@@ -81,14 +81,24 @@ class GithubPRPublisher(object):
         params = {}
         params[
             "body"
-        ] = f"{comment}\n![images]({image_report_url})\nID of first self comment {self.first_self_comment()}"
+        ] = f"{comment}\n![images]({image_report_url})"
 
         print(f"Publishing comment to pull request {self.pull_request_id}")
-        rep = requests.post(
-            f"{self.github_url}/issues/{self.pull_request_id}/comments",
-            data=json.dumps(params),
-            headers=self.request_header,
-        )
+
+        comment_id = self.first_self_comment()
+        if comment_id is None:
+            rep = requests.post(
+                f"{self.github_url}/issues/{self.pull_request_id}/comments",
+                data=json.dumps(params),
+                headers=self.request_header,
+            )
+        else:
+            rep = requests.patch(
+                f"{self.github_url}/issues/{self.pull_request_id}/comments/{comment_id}",
+                data=json.dumps(params),
+                headers=self.request_header,
+            )
+
 
 
 if __name__ == "__main__":
