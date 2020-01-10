@@ -69,6 +69,7 @@ class GithubPRPublisher(object):
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
             headers=self.request_header,
         )
+        pprint.pprint(rep)
 
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
@@ -98,6 +99,8 @@ class GithubPRPublisher(object):
                 data=json.dumps(params),
                 headers=self.request_header,
             )
+        import pprint
+        pprint.pprint(rep)
 
 
 if __name__ == "__main__":
