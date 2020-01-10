@@ -79,9 +79,7 @@ class GithubPRPublisher(object):
 
     def publish_comment(self, image_report_url, comment):
         params = {}
-        params[
-            "body"
-        ] = f"{comment}\n![images]({image_report_url})"
+        params["body"] = f"{comment}\n![images]({image_report_url})"
 
         print(f"Publishing comment to pull request {self.pull_request_id}")
 
@@ -98,7 +96,6 @@ class GithubPRPublisher(object):
                 data=json.dumps(params),
                 headers=self.request_header,
             )
-
 
 
 if __name__ == "__main__":
