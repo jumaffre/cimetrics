@@ -7,6 +7,7 @@ import sys
 import base64
 import datetime
 import os
+import pprint
 
 from cimetrics.env import get_env
 
@@ -14,6 +15,7 @@ from cimetrics.env import get_env
 IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
 COMMENT_PATH = "_cimetrics/diff.txt"
+USER_ID = "cimetrics"
 
 
 class GithubPRPublisher(object):
@@ -68,25 +70,37 @@ class GithubPRPublisher(object):
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
             headers=self.request_header,
         )
-        for comment in rep:
+        pprint.pprint(rep.json())
+
+        for comment in rep.json():
             login = comment.get("user", {}).get("login")
-            if login == "cimetrics":
+            if login == USER_ID:
                 return comment["id"]
             else:
                 return None
 
     def publish_comment(self, image_report_url, comment):
         params = {}
-        params[
-            "body"
-        ] = f"{comment}\n![images]({image_report_url})\nID of first self comment {self.first_self_comment()}"
+        params["body"] = f"{comment}\n![images]({image_report_url})"
 
-        print(f"Publishing comment to pull request {self.pull_request_id}")
-        rep = requests.post(
-            f"{self.github_url}/issues/{self.pull_request_id}/comments",
-            data=json.dumps(params),
-            headers=self.request_header,
-        )
+        comment_id = self.first_self_comment()
+        if comment_id is None:
+            print(f"Publishing comment to pull request {self.pull_request_id}")
+            rep = requests.post(
+                f"{self.github_url}/issues/{self.pull_request_id}/comments",
+                data=json.dumps(params),
+                headers=self.request_header,
+            )
+        else:
+            print(
+                f"Updating comment {comment_id} on pull request {self.pull_request_id}"
+            )
+            rep = requests.patch(
+                f"{self.github_url}/issues/comments/{comment_id}",
+                data=json.dumps(params),
+                headers=self.request_header,
+            )
+        pprint.pprint(rep.json())
 
 
 if __name__ == "__main__":
