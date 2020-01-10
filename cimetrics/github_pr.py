@@ -7,6 +7,7 @@ import sys
 import base64
 import datetime
 import os
+import pprint
 
 from cimetrics.env import get_env
 
@@ -99,8 +100,6 @@ class GithubPRPublisher(object):
                 data=json.dumps(params),
                 headers=self.request_header,
             )
-        import pprint
-
         pprint.pprint(rep)
 
 
