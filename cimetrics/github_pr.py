@@ -100,6 +100,7 @@ class GithubPRPublisher(object):
                 headers=self.request_header,
             )
         import pprint
+
         pprint.pprint(rep)
 
 
