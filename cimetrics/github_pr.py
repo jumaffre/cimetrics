@@ -63,9 +63,23 @@ class GithubPRPublisher(object):
         else:
             raise Exception("Failed to upload image")
 
+    def first_self_comment(self):
+        rep = requests.get(
+            f"{self.github_url}/issues/{self.pull_request_id}/comments",
+            headers=self.request_header,
+        )
+        for comment in rep:
+            login = comment.get("user", {}).get("login")
+            if login == "cimetrics":
+                return comment["id"]
+            else:
+                return None
+
     def publish_comment(self, image_report_url, comment):
         params = {}
-        params["body"] = f"{comment}\n![images]({image_report_url})"
+        params[
+            "body"
+        ] = f"{comment}\n![images]({image_report_url})\nID of first self comment {self.first_self_comment()}"
 
         print(f"Publishing comment to pull request {self.pull_request_id}")
         rep = requests.post(
