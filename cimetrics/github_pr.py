@@ -96,7 +96,7 @@ class GithubPRPublisher(object):
                 f"Updating comment {comment_id} on pull request {self.pull_request_id}"
             )
             rep = requests.patch(
-                f"{self.github_url}/issues/{self.pull_request_id}/comments/{comment_id}",
+                f"{self.github_url}/issues/comments/{comment_id}",
                 data=json.dumps(params),
                 headers=self.request_header,
             )
