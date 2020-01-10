@@ -69,6 +69,7 @@ class GithubPRPublisher(object):
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
             headers=self.request_header,
         )
+        
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
             if login == USER_ID:
