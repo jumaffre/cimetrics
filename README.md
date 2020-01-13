@@ -3,9 +3,9 @@
 [![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.metrics-devops?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=1&branchName=master)
 [![PyPI version](https://badge.fury.io/py/cimetrics.svg)](https://badge.fury.io/py/cimetrics)
 
-`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/28#issuecomment-519552043). 
+`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/66#issuecomment-573324351). 
 
-<p align="center"> <img src="https://raw.githubusercontent.com/jumaffre/cimetrics/master/cimetrics_demo.PNG" width="600"></p>
+<p align="center"> <img src="https://raw.githubusercontent.com/jumaffre/cimetrics/cimetrics/cimetrics/image2020-01-11%2015%3A03%3A37.764906.png" width="600"></p>
 
 
 ## Development
@@ -38,17 +38,13 @@ You can use the simple python API to push your metrics to your storage. First, m
 ```python
 import cimetrics.upload
 
-metrics = cimetrics.upload.Metrics()
-
-# Run some tests and collect some data
-
-metrics.put("metric1 name (unit)", metric_1)
-metrics.put("metric2 name (unit)", metric_2)
-
-metrics.publish()
+with cimetrics.upload.Metrics() as metrics:
+  # Run some tests and collect some data
+  metrics.put("metric1 name (unit)", metric_1)
+  metrics.put("metric2 name (unit)", metric_2)
 ```
 
-Note that `metric_1` and `metric_2` should _not_ be string but integer or float.
+Note that `metric_1` and `metric_2` must be instances of [numbers.Real](https://docs.python.org/3.7/library/numbers.html#numbers.Real), for example `float` or `int`.
 
 ### Setup the CI
 
@@ -98,17 +94,9 @@ That's it! The next time you create a Pull Request, your CI will automatically s
 
 ## Caveats
 
-- If the CI has never run on the target branch (e.g. `master` - likely to happen when you first set up `cimetrics`), the report will show the metrics results of the branch to merge against itself. It will be displayed fine once the CI has run on the target branch.
+- If the CI has never run on the target branch (e.g. `master` - likely to happen when you first set up `cimetrics`), the report will only show the values that have been uploaded, without any comparison.
 - The rendered images are currently hosted in the target GitHub repository itself, under the `cimetrics` branch, in the `cimetrics` directory.
-
-## to-do
-
-- [x] Publish to PyPi (https://pypi.org/project/cimetrics/)
-- [ ] Use a GitHub bot instead of tokens
-- [ ] Improve plotting (standard deviation, etc.)
-- [ ] Add personalised PR message
 
 ## Supported CI pipelines
 
 CI Metrics currently supports [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/), but it should be very easy to add support for other build pipelines by [subclassing GitEnv](https://github.com/jumaffre/cimetrics/blob/master/cimetrics/env.py#L72) and providing the right attributes.
-
