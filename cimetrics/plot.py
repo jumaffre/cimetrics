@@ -216,6 +216,10 @@ def trend_view(env):
         )
         ax.set_facecolor("white")
         ax.grid(color="gainsboro", axis="x")
+
+        ax.yaxis.set_label_position("right")
+        ax.yaxis.tick_right()
+
         if not first_ax:
             first_ax = ax
         if col in tgt_cols:
@@ -265,10 +269,11 @@ def trend_view(env):
                 # Annotate plot with % change
                 percent_change = m.normalise([branch_val], [lewm])[0]
                 sign = "+" if percent_change > 0 else ""
+                offset = 10
                 plt.annotate(
                     f"{sign}{percent_change:.0f}%",
                     (len(tgt_raw) - 1, branch_val),
-                    xytext=(3, 0),
+                    xytext=(offset, offset if percent_change > 0 else -offset),
                     textcoords="offset points",
                     va="center",
                     ha="left",
