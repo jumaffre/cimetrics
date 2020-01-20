@@ -1,5 +1,12 @@
 ## Development
 
+Clone the repository:
+
+```sh
+git clone git@github.com:jumaffre/cimetrics.git
+cd cimetrics
+```
+
 Install as editable/dev package:
 ```sh
 pip install -e .

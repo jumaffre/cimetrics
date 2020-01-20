@@ -23,7 +23,7 @@ An easy way to get storage set up is to spin up a [Cosmos DB](https://docs.micro
 
 ### Pushing metrics from your tests
 
-You can use the simple python API to push your metrics to your storage. Once this is done, you will be able to write:
+You can use the simple python API to push your metrics to your storage:
 
 ```python
 import cimetrics.upload
