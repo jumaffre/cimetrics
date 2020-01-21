@@ -3,27 +3,17 @@
 [![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.metrics-devops?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=1&branchName=master)
 [![PyPI version](https://badge.fury.io/py/cimetrics.svg)](https://badge.fury.io/py/cimetrics)
 
-`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/66#issuecomment-573324351). 
+`cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/66#issuecomment-573324351).
 
 <p align="center"> <img src="https://raw.githubusercontent.com/jumaffre/cimetrics/cimetrics/cimetrics/image2020-01-11%2015%3A03%3A37.764906.png" width="600"></p>
 
+## Install
 
-## Development
-
-Install as editable/dev package:
 ```sh
-pip install -e .
+pip install cimetrics
 ```
 
-Submit sample metrics and create plots:
-```sh
-export METRICS_MONGO_CONNECTION=...
-python app/main.py
-python -m cimetrics.plot
-ls _cimetrics
-```
-
-## Using cimetrics in your own project
+## Using cimetrics
 
 ### Setup storage
 
@@ -33,7 +23,7 @@ An easy way to get storage set up is to spin up a [Cosmos DB](https://docs.micro
 
 ### Pushing metrics from your tests
 
-You can use the simple python API to push your metrics to your storage. First, make sure to install the `cimetrics` python module (for example, by running `pip install cimetrics` or adding `cimetrics` to your `requirements.txt`). Once this is done, you will be able to write:
+You can use the simple python API to push your metrics to your storage:
 
 ```python
 import cimetrics.upload
@@ -60,7 +50,7 @@ Then, you should add the following steps to your CI configuration file, e.g. for
     METRICS_MONGO_CONNECTION: $(METRICS_MONGO_CONNECTION)
   displayName: 'Run app and collect metrics'
 
-# This step generates a graph reporting the differences between 
+# This step generates a graph reporting the differences between
 # your branch and the target branch.
 # Only run on Pull Requests build.
 - script: python -m cimetrics.plot
@@ -69,7 +59,7 @@ Then, you should add the following steps to your CI configuration file, e.g. for
   displayName: 'Plot metrics'
   condition: eq(variables['Build.Reason'], 'PullRequest')
 
-# This step publishes a report comment on the GitHub Pull Request 
+# This step publishes a report comment on the GitHub Pull Request
 # using GITHUB_TOKEN as authentication (use secret variables!)
 # Only run on Pull Requests build.
 - script: python -m cimetrics.github_pr
@@ -88,9 +78,10 @@ The last step is to create a new `metrics.yml` configuration file at the root of
 ```yaml
 db: 'metrics'
 collection: 'metrics_performance'
+view: 'trend'
 ```
 
-That's it! The next time you create a Pull Request, your CI will automatically store your metrics and publish a graph comparing your metrics against the same metrics on the branch you are merging to.
+That's it! The next time you create a Pull Request, your CI will automatically store your metrics and publish a graph comparing your metrics against the same metrics on the branch you are merging to. Note that the cimetrics PR comment is updated for each subsequent build.
 
 ## Caveats
 
