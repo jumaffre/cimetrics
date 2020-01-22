@@ -74,8 +74,7 @@ class GithubPRPublisher(object):
             login = comment.get("user", {}).get("login")
             if login == USER_ID:
                 return comment["id"]
-            else:
-                return None
+        return None
 
     def publish_comment(self, image_report_url, comment):
         params = {}
