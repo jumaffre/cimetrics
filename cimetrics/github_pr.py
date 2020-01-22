@@ -70,7 +70,7 @@ class GithubPRPublisher(object):
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
             headers=self.request_header,
         )
-        
+
         pprint.pprint(rep.json())
 
         for comment in rep.json():
