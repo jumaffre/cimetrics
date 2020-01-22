@@ -7,6 +7,7 @@ import sys
 import base64
 import datetime
 import os
+import pprint
 
 from cimetrics.env import get_env
 
@@ -69,6 +70,8 @@ class GithubPRPublisher(object):
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
             headers=self.request_header,
         )
+        
+        pprint.pprint(rep.json())
 
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
@@ -82,6 +85,7 @@ class GithubPRPublisher(object):
         params["body"] = f"{comment}\n![images]({image_report_url})"
 
         comment_id = self.first_self_comment()
+        print(f"First comment id: {comment_id}")
         if comment_id is None:
             print(f"Publishing comment to pull request {self.pull_request_id}")
             rep = requests.post(
