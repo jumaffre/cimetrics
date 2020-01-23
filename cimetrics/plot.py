@@ -315,7 +315,7 @@ def trend_view(env):
                     # [lewm, [branch[col]["value"]][0]],
                     [lewm, vid_],
                     color=color,
-                    linestyle="-",
+                    linestyle=":",
                     linewidth=1,
                 )
 
