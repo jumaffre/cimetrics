@@ -293,23 +293,26 @@ def trend_view(env):
                 lewm = branch_val
                 marker, color = (".", BRANCH_GOOD_COLOR)
             # Plot marker for branch value
-            """
             s = ax.plot(
-                list(range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series))),
-                list(branch_series[col]),
+                list(range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series)))[
+                    -1
+                ],
+                list(branch_series[col])[-1],
                 color=color,
                 marker=marker,
                 markersize=6,
                 linestyle="",
             )
-            """
-            for bid_, vid_ in zip(range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series)), branch_series[col]):
+            for bid_, vid_ in zip(
+                range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series)),
+                branch_series[col],
+            ):
                 marker, color = (7, good_col) if vid_ < lewm else (6, bad_col)
                 # Plot stem of arrow for branch value
                 s = ax.plot(
-                    #[len(tgt_raw) - 1] * 2,
+                    # [len(tgt_raw) - 1] * 2,
                     [bid_, bid_],
-                    #[lewm, [branch[col]["value"]][0]],
+                    # [lewm, [branch[col]["value"]][0]],
                     [lewm, vid_],
                     color=color,
                     linestyle="-",
