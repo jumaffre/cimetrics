@@ -327,7 +327,7 @@ def trend_view(env):
                 plt.annotate(
                     f"{sign}{percent_change:.0f}%",
                     (len(tgt_raw) - 1, branch_val),
-                    xytext=(offset, offset if percent_change > 0 else -offset),
+                    xytext=(offset + 5, offset if percent_change > 0 else -offset),
                     textcoords="offset points",
                     va="center",
                     ha="left",
