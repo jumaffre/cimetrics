@@ -91,7 +91,7 @@ class Metrics(object):
         for r in res:
             if r.get("build_id") and int(r.get("build_id")) <= int(max_build_id):
                 build_ids.add(r["build_id"])
-                if len(build_ids) >= span * 2:
+                if len(build_ids) >= span:
                     break
 
         # Get metrics for those build ids
