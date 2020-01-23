@@ -71,6 +71,48 @@ class Metrics(object):
 
         return metrics
 
+    def branch_series(self, branch, max_build_id, span=5):
+        # Slightly unhappy wrapping/unwrapping calls, we should probably
+        # simplify the data format to make it more pandable
+        def values_from(d):
+            return {k: v.get("value") for k, v in d.items()}
+
+        def mrow(d):
+            v = values_from(d["metrics"])
+            v["build_id"] = int(d["build_id"] or 0)
+            return v
+
+        # Find the span * 2 most recent build ids
+        query = {"branch": branch}
+        res = self.col.find(query, {"build_id": 1, "created": 1}).sort(
+            [("created", pymongo.DESCENDING)]
+        )
+        build_ids = set()
+        for r in res:
+            if r.get("build_id") and int(r.get("build_id")) <= int(max_build_id):
+                build_ids.add(r["build_id"])
+                if len(build_ids) >= span * 2:
+                    break
+
+        # Get metrics for those build ids
+        query = {"branch": branch, "build_id": {"$in": list(build_ids)}}
+        res = self.col.find(query, {"build_id": 1, "metrics": 1}).sort(
+            [("build_id", pymongo.ASCENDING)]
+        )
+
+        bids = sorted(build_ids)
+
+        # Index and collapse metrics by build_id
+        df = (
+            pandas.DataFrame.from_records([mrow(r) for r in res])
+            .set_index("build_id")
+            .groupby("build_id")
+            .mean()
+        )
+        # Drop columns for metrics that don't exist in the last build
+        df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
+        return df, bids
+
     def ewma_all_for_branch_series(self, branch, span=10):
         """
         Return exponentially moving averages for all current metrics on
@@ -205,12 +247,15 @@ def trend_view(env):
     branch = m.all_for_branch_and_build(env.branch, env.build_id)
     nrows = len(branch.keys())
 
+    branch_series, _ = m.branch_series(env.branch, env.build_id)
+    print(branch_series)
+
     # TODO: get rid of rcParam if possible?
     plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     first_ax = None
     ncol = env.columns
-    for index, col in enumerate(sorted(branch.keys())):
+    for index, col in enumerate(sorted(branch_series.columns)):
         ax = fig.add_subplot(
             math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
         )
@@ -248,22 +293,28 @@ def trend_view(env):
                 lewm = branch_val
                 marker, color = (".", BRANCH_GOOD_COLOR)
             # Plot marker for branch value
+            """
             s = ax.plot(
-                [len(tgt_raw) - 1],
-                [branch_val],
+                list(range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series))),
+                list(branch_series[col]),
                 color=color,
                 marker=marker,
                 markersize=6,
                 linestyle="",
             )
-            # Plot stem of arrow for branch value
-            s = ax.plot(
-                [len(tgt_raw) - 1] * 2,
-                [lewm, [branch[col]["value"]][0]],
-                color=color,
-                linestyle="-",
-                linewidth=1,
-            )
+            """
+            for bid_, vid_ in zip(range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series)), branch_series[col]):
+                marker, color = (7, good_col) if vid_ < lewm else (6, bad_col)
+                # Plot stem of arrow for branch value
+                s = ax.plot(
+                    #[len(tgt_raw) - 1] * 2,
+                    [bid_, bid_],
+                    #[lewm, [branch[col]["value"]][0]],
+                    [lewm, vid_],
+                    color=color,
+                    linestyle="-",
+                    linewidth=1,
+                )
 
             if col in tgt_ewma:
                 # Annotate plot with % change
