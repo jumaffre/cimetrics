@@ -26,7 +26,6 @@ class Color:
     GOOD = "forestgreen"
     BAD = "firebrick"
     TICK = "silver"
-    GRID = "gainsboro"
     BACKGROUND = "white"
 
 
@@ -131,8 +130,6 @@ def trend_view(env):
             math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
         )
         ax.set_facecolor(Color.BACKGROUND)
-        # ax.grid(color=Color.GRID, axis="x")
-
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
 
