@@ -18,6 +18,7 @@ from cimetrics.env import get_env
 plt.style.use("ggplot")
 matplotlib.rcParams["text.hinting"] = 1
 matplotlib.rcParams["font.size"] = 6
+matplotlib.rcParams["axes.titlesize"] = 8
 
 
 class Color:
@@ -93,8 +94,6 @@ class Metrics(object):
             [("build_id", pymongo.ASCENDING)]
         )
 
-        bids = sorted(build_ids)
-
         # Index and collapse metrics by build_id
         df = (
             pandas.DataFrame.from_records([flatten(r) for r in records])
@@ -104,7 +103,7 @@ class Metrics(object):
         )
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
-        return df, bids
+        return df
 
 
 def trend_view(env):
@@ -115,15 +114,13 @@ def trend_view(env):
     except ValueError as e:
         sys.exit(str(e))
 
-    tgt_raw, build_ids = m.branch_history(env.target_branch, max_builds=env.span * 2)
+    tgt_raw = m.branch_history(env.target_branch, max_builds=env.span * 2)
     tgt_ewma = tgt_raw.ewm(span=env.span).mean()
     tgt_cols = tgt_raw.columns
 
-    branch_series, _ = m.branch_history(env.branch, env.build_id)
+    branch_series = m.branch_history(env.branch, env.build_id)
     nrows = len(branch_series.columns)
 
-    # TODO: get rid of rcParam if possible?
-    plt.rcParams["axes.titlesize"] = 8
     fig = plt.figure()
     first_ax = None
     ncol = env.columns
@@ -268,6 +265,7 @@ def trend_view(env):
     plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200)
     plt.close(fig)
 
+    build_ids = sorted(tgt_raw.index)
     if build_ids:
         target_builds = f"{len(build_ids)} builds from [{build_ids[0]}]({env.build_url_by_id(build_ids[0])}) to [{build_ids[-1]}]({env.build_url_by_id(build_ids[-1])})"
         comment = f"{env.branch}@[{env.build_id} aka {env.build_number}]({env.build_url}) vs {env.target_branch} ewma over {target_builds}"
