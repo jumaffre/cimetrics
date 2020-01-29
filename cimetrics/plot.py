@@ -137,7 +137,7 @@ def trend_view(env):
         if not first_ax:
             first_ax = ax
         if col in tgt_cols:
-            # Plot raw target branch data as markers
+            # Plot raw target branch data
             ax.plot(
                 tgt_raw[col].values,
                 color=Color.TARGET,
@@ -147,10 +147,11 @@ def trend_view(env):
             )
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
-        # Pick color direction for change arrow
-        good_col, bad_col = (Color.GOOD, Color.BAD)
+
+        # Pick color direction
+        good_col, bad_col = Color.GOOD, Color.BAD
         if col.endswith("^"):
-            good_col, bad_col = (bad_col, good_col)
+            good_col, bad_col = bad_col, good_col
 
         if col in branch_series.columns:
             branch_val = branch_series[col].values[-1]
@@ -161,13 +162,12 @@ def trend_view(env):
             else:
                 lewm = branch_val
                 marker, color = (".", Color.GOOD)
+
             # Plot marker for branch value
-            bvx = list(range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series)))[
-                -1
-            ]
+            marker_x = len(tgt_raw) + len(branch_series) - 1
             s = ax.plot(
-                bvx,
-                list(branch_series[col])[-1],
+                marker_x,
+                [branch_val],
                 color=color,
                 marker=marker,
                 markersize=6,
@@ -175,30 +175,21 @@ def trend_view(env):
             )
             # Plot stem of arrow for branch value
             s = ax.plot(
-                # [len(tgt_raw) - 1] * 2,
-                [bvx, bvx],
-                # [lewm, [branch[col]["value"]][0]],
+                [marker_x, marker_x],
                 [lewm, branch_val],
                 color=color,
                 linestyle="-",
+                linewidth=1,
             )
-            for bid_, vid_ in list(
-                zip(
-                    range(len(tgt_raw) - 1, len(tgt_raw) - 1 + len(branch_series)),
-                    branch_series[col],
-                )
-            )[:-1]:
-                marker, color = (7, good_col) if vid_ < lewm else (6, bad_col)
-                # Plot stem of arrow for branch value
+
+            # Plot previous branch runs
+            for bx, by in zip(range(len(tgt_raw), marker_x), branch_series[col]):
                 s = ax.plot(
-                    # [len(tgt_raw) - 1] * 2,
-                    [bid_],
-                    # [lewm, [branch[col]["value"]][0]],
-                    [vid_],
-                    color=color,
-                    marker=".",
-                    markersize=2,
-                    linestyle="",
+                    [bx, bx],
+                    [lewm, by],
+                    color=good_col if by < lewm else bad_col,
+                    linestyle=":",
+                    linewidth=1,
                 )
 
             if col in tgt_ewma:
