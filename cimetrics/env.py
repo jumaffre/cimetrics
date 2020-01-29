@@ -128,7 +128,7 @@ class GitEnv(Env):
 
     @property
     def build_id(self) -> str:
-        return "7"
+        return "2"
 
     @property
     def build_number(self) -> str:
