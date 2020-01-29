@@ -117,6 +117,8 @@ def trend_view(env):
     tgt_raw = m.branch_history(env.target_branch, max_builds=env.span * 2)
     tgt_ewma = tgt_raw.ewm(span=env.span).mean()
     tgt_cols = tgt_raw.columns
+    tgt_raw = tgt_raw[env.span :]
+    tgt_ewma = tgt_ewma[env.span :]
 
     branch_series = m.branch_history(env.branch, env.build_id)
     nrows = len(branch_series.columns)
@@ -242,14 +244,9 @@ def trend_view(env):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
-        ax.set_xticks([0, len(tgt_raw) - env.span, len(tgt_raw) - 1])
+        ax.set_xticks([0, len(tgt_raw) - 1])
         ax.set_xticklabels(
-            [
-                tgt_raw.index.values[0],
-                tgt_raw.index.values[-env.span],
-                tgt_raw.index.values[-1],
-            ],
-            {"fontsize": 6},
+            [tgt_raw.index.values[0], tgt_raw.index.values[-1],], {"fontsize": 6},
         )
 
     plt.tight_layout()
