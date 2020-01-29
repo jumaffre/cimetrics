@@ -25,6 +25,8 @@ class Color:
     GOOD = "forestgreen"
     BAD = "firebrick"
     TICK = "silver"
+    GRID = "gainsboro"
+    BACKGROUND = "white"
 
 
 class Metrics(object):
@@ -51,12 +53,18 @@ class Metrics(object):
             )
 
     def branch_history(self, branch, max_build_id=None, max_builds=5):
-        def values_from(d):
-            return {k: v.get("value") for k, v in d.items()}
+        """
+        Branch history as a dataframe, up to max_build_id, going back
+        at most max_builds.
+        """
 
-        def mrow(d):
-            v = values_from(d["metrics"])
-            v["build_id"] = int(d["build_id"] or 0)
+        def flatten(entry):
+            """
+            Flatten an entry from the DB to a dict of metric: value,
+            and numerical build_id
+            """
+            v = {k: v.get("value") for k, v in entry["metrics"].items()}
+            v["build_id"] = int(entry["build_id"] or 0)
             return v
 
         # Discover build ids by descending order of created timestamp
@@ -89,7 +97,7 @@ class Metrics(object):
 
         # Index and collapse metrics by build_id
         df = (
-            pandas.DataFrame.from_records([mrow(r) for r in records])
+            pandas.DataFrame.from_records([flatten(r) for r in records])
             .set_index("build_id")
             .groupby("build_id")
             .mean()
@@ -97,81 +105,6 @@ class Metrics(object):
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
         return df, bids
-
-    def ewma_all_for_branch_series(self, branch, span=10):
-        """
-        Return exponentially moving averages for all current metrics on
-        the specified branch.
-        """
-        # Slightly unhappy wrapping/unwrapping calls, we should probably
-        # simplify the data format to make it more pandable
-        def values_from(d):
-            return {k: v.get("value") for k, v in d.items()}
-
-        def mrow(d):
-            v = values_from(d["metrics"])
-            v["build_id"] = int(d["build_id"] or 0)
-            return v
-
-        # Find the span * 2 most recent build ids
-        query = {"branch": branch}
-        res = self.col.find(query, {"build_id": 1, "created": 1}).sort(
-            [("created", pymongo.DESCENDING)]
-        )
-        build_ids = set()
-        for r in res:
-            if r.get("build_id"):
-                build_ids.add(r["build_id"])
-                if len(build_ids) >= span * 2:
-                    break
-
-        # Get metrics for those build ids
-        query = {"branch": branch, "build_id": {"$in": list(build_ids)}}
-        res = self.col.find(query, {"build_id": 1, "metrics": 1}).sort(
-            [("build_id", pymongo.ASCENDING)]
-        )
-
-        bids = sorted(build_ids)
-
-        # Index and collapse metrics by build_id
-        df = (
-            pandas.DataFrame.from_records([mrow(r) for r in res])
-            .set_index("build_id")
-            .groupby("build_id")
-            .mean()
-        )
-        # Drop columns for metrics that don't exist in the last build
-        df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
-        # Run EWM over metrics
-        ewr = df.ewm(span=span).mean()
-        return df, ewr, bids
-
-    def ewma_all_for_branch(self, branch, span=5):
-        def values(d):
-            return {k: {"value": v} for k, v in d.items()}
-
-        _, df, bids = self.ewma_all_for_branch_series(branch, span)
-        ewr = df.tail(1).to_dict("index")
-
-        metrics = {}
-        for data in ewr.values():
-            metrics.update(data)
-
-        return values(metrics), bids
-
-    def normalise(self, new, ref):
-        return [100 * (n - r) / r for n, r in zip(new, ref)]
-
-    def split(self, series):
-        pos, neg = [], []
-        for v in series:
-            if v >= 0:
-                pos.append(v)
-                neg.append(0)
-            else:
-                pos.append(0)
-                neg.append(v)
-        return pos, neg
 
 
 def trend_view(env):
@@ -182,14 +115,11 @@ def trend_view(env):
     except ValueError as e:
         sys.exit(str(e))
 
-    # TODO: merge dfs, get rid of build_ids
-    tgt_raw, tgt_ewma, build_ids = m.ewma_all_for_branch_series(
-        env.target_branch, env.span
-    )
+    tgt_raw, build_ids = m.branch_history(env.target_branch, max_builds=env.span * 2)
+    tgt_ewma = tgt_raw.ewm(span=env.span).mean()
     tgt_cols = tgt_raw.columns
 
     branch_series, _ = m.branch_history(env.branch, env.build_id)
-    print(branch_series)
     nrows = len(branch_series.columns)
 
     # TODO: get rid of rcParam if possible?
@@ -201,8 +131,8 @@ def trend_view(env):
         ax = fig.add_subplot(
             math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
         )
-        ax.set_facecolor("white")
-        ax.grid(color="gainsboro", axis="x")
+        ax.set_facecolor(Color.BACKGROUND)
+        ax.grid(color=Color.GRID, axis="x")
 
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
@@ -276,7 +206,7 @@ def trend_view(env):
 
             if col in tgt_ewma:
                 # Annotate plot with % change
-                percent_change = m.normalise([branch_val], [lewm])[0]
+                percent_change = 100 * (branch_val - lewm) / lewm
                 sign = "+" if percent_change > 0 else ""
                 offset = 10
                 plt.annotate(
@@ -348,9 +278,5 @@ def trend_view(env):
         dtext.write(comment)
 
 
-def render_and_save():
-    trend_view(get_env())
-
-
 if __name__ == "__main__":
-    render_and_save()
+    trend_view(get_env())
