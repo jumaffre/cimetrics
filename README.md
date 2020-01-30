@@ -1,6 +1,6 @@
 # cimetrics
 
-[![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.metrics-devops?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.cimetrics?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=2&branchName=master)
 [![PyPI version](https://badge.fury.io/py/cimetrics.svg)](https://badge.fury.io/py/cimetrics)
 
 `cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/66#issuecomment-573324351).
