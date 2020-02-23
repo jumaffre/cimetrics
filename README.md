@@ -36,6 +36,29 @@ with cimetrics.upload.Metrics() as metrics:
 
 Note that `metric_1` and `metric_2` must be instances of [numbers.Real](https://docs.python.org/3.7/library/numbers.html#numbers.Real), for example `float` or `int`.
 
+If a build publishes metrics from multiple instances of a `cimetrics.upload.Metrics`, for example because
+it is running multiple concurrent jobs, it it necessary to publish those as "incomplete",
+and to publish a "complete" entry only once they have all run. This is to prevent metrics comparison from
+happening against an incomplete set of metrics for a build.
+
+For example:
+
+```python
+# Job 1
+with cimetrics.upload.Metrics(complete=False) as metrics:
+  metrics.put("metric1 name (unit)", metric_1)
+
+# Job 2
+with cimetrics.upload.Metrics(complete=False) as metrics:
+  metrics.put("metric2 name (unit)", metric_2)
+
+# Job running after Job 1 and 2 are complete
+with cimetrics.upload.Metrics() as metrics:
+  pass
+```
+
+It is often convenient to use the same job to mark a set of metrics as complete and to plot them.
+
 ### Setup the CI
 
 Your CI is responsible for rendering the metrics report and posting them to your Pull Requests in GitHub. For this, you should create a [personal authentication token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line) with Write access to the repository for the account you want to post on behalf of `cimetrics`. Then, you should set up the token as the `GITHUB_TOKEN` secret variable in your CI system. Don't forget to add that user as a personal contributor (Write access) to your Github repository as well.
