@@ -120,8 +120,8 @@ def trend_view(env):
     tgt_raw = m.branch_history(env.target_branch, max_builds=env.span * 2)
     tgt_ewma = tgt_raw.ewm(span=env.span).mean()
     tgt_cols = tgt_raw.columns
-    tgt_raw = tgt_raw[env.span :]
-    tgt_ewma = tgt_ewma[env.span :]
+    tgt_raw = tgt_raw.tail(env.span)
+    tgt_ewma = tgt_ewma.tail(env.span)
 
     branch_series = m.branch_history(env.branch, env.build_id)
     nrows = len(branch_series.columns)
