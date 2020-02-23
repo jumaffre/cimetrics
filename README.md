@@ -58,6 +58,11 @@ with cimetrics.upload.Metrics() as metrics:
 ```
 
 It is often convenient to use the same job to mark a set of metrics as complete and to plot them.
+A convenience entry-point is supplied to mark the metrics complete for a build:
+
+```python
+python -m cimetrics.upload_complete
+```
 
 ### Setup the CI
 
