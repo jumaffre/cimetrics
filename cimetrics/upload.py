@@ -61,7 +61,7 @@ class Metrics(object):
 
 
 @contextlib.contextmanager
-def metrics():
-    m = Metrics()
+def metrics(complete: bool = False) -> None:
+    m = Metrics(complete=complete)
     yield m
     m.publish()
