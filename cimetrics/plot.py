@@ -100,6 +100,10 @@ class Metrics(object):
             .groupby("build_id")
             .mean()
         )
+        # Drop incomplete rows
+        if "__complete" in df.columns:
+            df = df.dropna(subset=["__complete"])
+            df = df.drop(columns=["__complete"])
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
         return df
