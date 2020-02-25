@@ -4,14 +4,19 @@
 from typing import Optional
 import os
 import yaml
-from git import Repo
+from git import Repo, exc
 
 
 def get_env():
     if "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI" in os.environ:
         return AzurePipelinesEnv()
     else:
-        return GitEnv()
+        try:
+            repo = Repo(os.getcwd(), search_parent_directories=True)
+            return GitEnv(repo)
+        except exc.InvalidGitRepositoryError:
+            print("Environment is not Azure Pipelines or git repository.")
+            return None
 
 
 class Env(object):
@@ -28,8 +33,8 @@ class Env(object):
                     self.cfg = {}
         else:
             print(
-                f"{self.CONFIG_FILE} does not exist at the root of your repo."
-                " Your metrics will not be recorded."
+                f"{self.CONFIG_FILE} does not exist at the root of the repo."
+                " Metrics will not be recorded."
             )
             self.cfg = {}
 
@@ -82,8 +87,8 @@ class Env(object):
 class GitEnv(Env):
     _target_branch = None
 
-    def __init__(self) -> None:
-        self.repo = Repo(os.getcwd(), search_parent_directories=True)
+    def __init__(self, repo) -> None:
+        self.repo = repo
         super().__init__()
 
     @property

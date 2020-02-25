@@ -20,6 +20,10 @@ USER_ID = "cimetrics"
 class GithubPRPublisher(object):
     def __init__(self):
         self.env = get_env()
+        if self.env is None:
+            print("GithubPRPublisher requires valid environment")
+            return
+
         self.request_header = {
             "content-type": "application/json",
             "Authorization": f"token {self.env.github_token}",
@@ -102,6 +106,9 @@ class GithubPRPublisher(object):
 if __name__ == "__main__":
 
     env = get_env()
+    if env is None:
+        print("Skipping publishing of PR comment (env)")
+        sys.exit(0)
 
     publisher = GithubPRPublisher()
 
