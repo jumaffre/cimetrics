@@ -8,15 +8,16 @@ from git import Repo, exc
 
 
 def get_env():
+    try:
+        repo = Repo(os.getcwd(), search_parent_directories=True)
+    except exc.InvalidGitRepositoryError:
+        print("Environment is not a valid git repository.")
+        return None
+
     if "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI" in os.environ:
-        return AzurePipelinesEnv()
+        return AzurePipelinesEnv(repo)
     else:
-        try:
-            repo = Repo(os.getcwd(), search_parent_directories=True)
-            return GitEnv(repo)
-        except exc.InvalidGitRepositoryError:
-            print("Environment is not Azure Pipelines or git repository.")
-            return None
+        return GitEnv(repo)
 
 
 class Env(object):
