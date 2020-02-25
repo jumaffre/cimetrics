@@ -122,17 +122,19 @@ def trend_view(env, tgt_only=False):
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(env.span)
     tgt_ewma = tgt_ewma.tail(env.span)
+    first_ax = None
 
     if tgt_only:
         columns = sorted(tgt_raw.columns)
+        ncol = 1
+        fig = plt.figure(figsize=matplotlib.figure.figaspect(env.columns))
     else:
         branch_series = m.branch_history(env.branch, env.build_id)
         columns = sorted(branch_series.columns)
+        ncol = env.columns
+        fig = plt.figure()
     nrows = len(columns)
 
-    fig = plt.figure()
-    first_ax = None
-    ncol = env.columns
     for index, col in enumerate(columns):
         ax = fig.add_subplot(
             math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
