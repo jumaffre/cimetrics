@@ -12,9 +12,10 @@ from cimetrics.env import get_env
 
 
 class Metrics(object):
-    def __init__(self) -> None:
+    def __init__(self, complete: bool = True) -> None:
         self.env = get_env()
         self.metrics = {}
+        self.complete = complete
 
     def put(self, name: str, value: float) -> None:
         self.metrics[name] = {"value": value}
@@ -42,6 +43,9 @@ class Metrics(object):
             )
             return
 
+        if self.complete:
+            self.put("__complete", 1)
+
         doc = {
             "created": datetime.datetime.now(),
             "build_id": self.env.build_id,
@@ -52,11 +56,12 @@ class Metrics(object):
         }
         if self.env.is_pr:
             doc["target_branch"] = self.env.target_branch
+
         coll.insert_one(doc)
 
 
 @contextlib.contextmanager
-def metrics():
-    m = Metrics()
+def metrics(complete: bool = True) -> None:
+    m = Metrics(complete=complete)
     yield m
     m.publish()
