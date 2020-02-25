@@ -3,3 +3,4 @@ collection: 'metrics_my_app'
 view: "trend"
 columns: 3
 span: 30
+monitoring_issue: 76

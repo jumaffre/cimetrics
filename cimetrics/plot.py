@@ -109,7 +109,7 @@ class Metrics(object):
         return df
 
 
-def trend_view(env):
+def trend_view(env, tgt_only=False):
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
     try:
@@ -123,13 +123,17 @@ def trend_view(env):
     tgt_raw = tgt_raw.tail(env.span)
     tgt_ewma = tgt_ewma.tail(env.span)
 
-    branch_series = m.branch_history(env.branch, env.build_id)
-    nrows = len(branch_series.columns)
+    if tgt_only:
+        columns = sorted(tgt_raw.columns)
+    else:
+        branch_series = m.branch_history(env.branch, env.build_id)
+        columns = sorted(branch_series.columns)
+    nrows = len(columns)
 
     fig = plt.figure()
     first_ax = None
     ncol = env.columns
-    for index, col in enumerate(sorted(branch_series.columns)):
+    for index, col in enumerate(columns):
         ax = fig.add_subplot(
             math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
         )
@@ -139,6 +143,7 @@ def trend_view(env):
 
         if not first_ax:
             first_ax = ax
+
         if col in tgt_cols:
             # Plot raw target branch data
             ax.plot(
@@ -151,67 +156,70 @@ def trend_view(env):
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
 
-        # Pick color direction
-        good_col, bad_col = Color.GOOD, Color.BAD
-        if col.endswith("^"):
-            good_col, bad_col = bad_col, good_col
+        if not tgt_only:
+            # Pick color direction
+            good_col, bad_col = Color.GOOD, Color.BAD
+            if col.endswith("^"):
+                good_col, bad_col = bad_col, good_col
 
-        if col in branch_series.columns:
-            branch_val = branch_series[col].values[-1]
-            # Pick a marker, either caret up, down, or circle for new metrics
-            if col in tgt_cols:
-                lewm = tgt_ewma[col][tgt_ewma.index[-1]]
-                marker, color = (7, good_col) if branch_val < lewm else (6, bad_col)
-            else:
-                lewm = branch_val
-                marker, color = (".", Color.GOOD)
+            if col in branch_series.columns:
+                branch_val = branch_series[col].values[-1]
+                # Pick a marker, either caret up, down, or circle for new metrics
+                if col in tgt_cols:
+                    lewm = tgt_ewma[col][tgt_ewma.index[-1]]
+                    marker, color = (7, good_col) if branch_val < lewm else (6, bad_col)
+                else:
+                    lewm = branch_val
+                    marker, color = (".", Color.GOOD)
 
-            # Plot marker for branch value
-            marker_x = len(tgt_raw) + len(branch_series) - 1
-            s = ax.plot(
-                marker_x,
-                [branch_val],
-                color=color,
-                marker=marker,
-                markersize=6,
-                linestyle="",
-            )
-            # Plot stem of arrow for branch value
-            s = ax.plot(
-                [marker_x, marker_x],
-                [lewm, branch_val],
-                color=color,
-                linestyle="-",
-                linewidth=1,
-            )
-
-            # Plot previous branch runs
-            for bx, by in zip(range(len(tgt_raw), marker_x), branch_series[col]):
+                # Plot marker for branch value
+                marker_x = len(tgt_raw) + len(branch_series) - 1
                 s = ax.plot(
-                    [bx, bx],
-                    [lewm, by],
-                    color=good_col if by < lewm else bad_col,
-                    linestyle=":",
+                    marker_x,
+                    [branch_val],
+                    color=color,
+                    marker=marker,
+                    markersize=6,
+                    linestyle="",
+                )
+                # Plot stem of arrow for branch value
+                s = ax.plot(
+                    [marker_x, marker_x],
+                    [lewm, branch_val],
+                    color=color,
+                    linestyle="-",
                     linewidth=1,
                 )
 
-            if col in tgt_ewma:
-                # Annotate plot with % change
-                percent_change = 100 * (branch_val - lewm) / lewm
-                sign = "+" if percent_change > 0 else ""
-                offset = 10
-                plt.annotate(
-                    f"{sign}{percent_change:.0f}%",
-                    (len(tgt_raw) - 1, branch_val),
-                    xytext=(offset + 10, offset if percent_change > 0 else -offset),
-                    textcoords="offset points",
-                    va="center",
-                    ha="left",
-                    color=color,
-                    weight="bold",
-                )
+                # Plot previous branch runs
+                for bx, by in zip(range(len(tgt_raw), marker_x), branch_series[col]):
+                    s = ax.plot(
+                        [bx, bx],
+                        [lewm, by],
+                        color=good_col if by < lewm else bad_col,
+                        linestyle=":",
+                        linewidth=1,
+                    )
+
+                if col in tgt_ewma:
+                    # Annotate plot with % change
+                    percent_change = 100 * (branch_val - lewm) / lewm
+                    sign = "+" if percent_change > 0 else ""
+                    offset = 10
+                    plt.annotate(
+                        f"{sign}{percent_change:.0f}%",
+                        (len(tgt_raw) - 1, branch_val),
+                        xytext=(offset + 10, offset if percent_change > 0 else -offset),
+                        textcoords="offset points",
+                        va="center",
+                        ha="left",
+                        color=color,
+                        weight="bold",
+                    )
         # Set yticks to branch value and last ewma when applicable
-        yt = [branch_val]
+        yt = []
+        if not tgt_only:
+            yt.append(branch_val)
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
@@ -237,9 +245,12 @@ def trend_view(env):
         ax.tick_params(axis="x", which="both", color=Color.TICK)
         # Match tick colors with series they belong to
         tls = ax.yaxis.get_ticklabels()
-        tls[0].set_color(color)
-        if len(tls) > 1:
-            tls[1].set_color(Color.TARGET)
+        if tgt_only:
+            tls[0].set_color(Color.TARGET)
+        else:
+            tls[0].set_color(color)
+            if len(tls) > 1:
+                tls[1].set_color(Color.TARGET)
         # Don't print xticks for rows other than bottom
         if index + 1 < nrows - 1:
             plt.setp(ax.get_xticklabels(), visible=False)
@@ -266,4 +277,4 @@ def trend_view(env):
 
 
 if __name__ == "__main__":
-    trend_view(get_env())
+    trend_view(get_env(), sys.argv[1] == "--tgt-only")

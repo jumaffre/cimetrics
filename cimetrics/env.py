@@ -146,7 +146,8 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def is_pr(self) -> bool:
-        return "SYSTEM_PULLREQUEST_SOURCEBRANCH" in os.environ
+        return False
+        # return "SYSTEM_PULLREQUEST_SOURCEBRANCH" in os.environ
 
     @property
     def target_branch(self) -> str:
@@ -170,8 +171,10 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def pull_request_id(self) -> str:
-        assert self.is_pr
-        return os.environ["SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"]
+        if self.is_pr:
+            return os.environ["SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"]
+        else:
+            return self.cfg["monitoring_issue"]
 
     @property
     def repo_id(self) -> str:
