@@ -277,4 +277,4 @@ def trend_view(env, tgt_only=False):
 
 
 if __name__ == "__main__":
-    trend_view(get_env(), sys.argv[1] == "--tgt-only")
+    trend_view(get_env(), not get_env().is_pr)
