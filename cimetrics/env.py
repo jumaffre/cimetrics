@@ -11,7 +11,7 @@ def get_env():
     try:
         repo = Repo(os.getcwd(), search_parent_directories=True)
     except exc.InvalidGitRepositoryError:
-        print("Environment is not a valid git repository.")
+        print(f"Environment {os.getcwd()} is not a valid git repository.")
         return None
 
     if "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI" in os.environ:
@@ -34,8 +34,8 @@ class Env(object):
                     self.cfg = {}
         else:
             print(
-                f"{self.CONFIG_FILE} does not exist at the root of the repo."
-                " Metrics will not be recorded."
+                f"{self.CONFIG_FILE} does not exist at the root {root} of the repo,"
+                " metrics will not be recorded."
             )
             self.cfg = {}
 

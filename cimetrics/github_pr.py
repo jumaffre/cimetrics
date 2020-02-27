@@ -21,7 +21,6 @@ class GithubPRPublisher(object):
     def __init__(self):
         self.env = get_env()
         if self.env is None:
-            print("GithubPRPublisher requires valid environment")
             return
 
         self.request_header = {
