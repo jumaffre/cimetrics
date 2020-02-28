@@ -31,6 +31,10 @@ class Color:
 
 class Metrics(object):
     def __init__(self, env):
+        if env is None:
+            print("Environment is not Azure Pipelines or git repo. Skipping plotting.")
+            return
+
         try:
             env.mongo_connection
         except KeyError:
@@ -110,12 +114,17 @@ class Metrics(object):
 
 
 def trend_view(env):
-    metrics_path = os.path.join(env.repo_root, "_cimetrics")
-    os.makedirs(metrics_path, exist_ok=True)
+    if env is None:
+        print("Skipping plotting (env)")
+        return
+
     try:
         m = Metrics(env)
     except ValueError as e:
         sys.exit(str(e))
+
+    metrics_path = os.path.join(env.repo_root, "_cimetrics")
+    os.makedirs(metrics_path, exist_ok=True)
 
     tgt_raw = m.branch_history(env.target_branch, max_builds=env.span * 2)
     tgt_ewma = tgt_raw.ewm(span=env.span).mean()

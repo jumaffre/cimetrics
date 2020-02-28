@@ -21,6 +21,10 @@ class Metrics(object):
         self.metrics[name] = {"value": value}
 
     def publish(self):
+        if self.env is None:
+            print("Skipping publishing of metrics (env)")
+            return
+
         try:
             self.env.mongo_connection
         except KeyError:
