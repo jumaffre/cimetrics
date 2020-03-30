@@ -86,7 +86,7 @@ class Env(object):
 
     @property
     def pr_user(self) -> str:
-        retrun self.cfg.get("pr_user", "cimetrics")
+        return self.cfg.get("pr_user", "cimetrics")
 
 
 class GitEnv(Env):
