@@ -126,8 +126,12 @@ def trend_view(env):
     metrics_path = os.path.join(env.repo_root, "_cimetrics")
     os.makedirs(metrics_path, exist_ok=True)
 
-    tgt_raw = m.branch_history(env.target_branch, max_builds=env.span * 2)
-    tgt_ewma = tgt_raw.ewm(span=env.span).mean()
+    # Try to have enough data for all ewma points to be
+    # calculated from a full window
+    build_span = env.span + env.ewma_span
+
+    tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
+    tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(env.span)
     tgt_ewma = tgt_ewma.tail(env.span)
