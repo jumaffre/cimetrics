@@ -84,6 +84,10 @@ class Env(object):
     def github_token(self) -> str:
         return os.environ["GITHUB_TOKEN"]
 
+    @property
+    def pr_user(self) -> str:
+        retrun self.cfg.get("pr_user", "cimetrics")
+
 
 class GitEnv(Env):
     _target_branch = None

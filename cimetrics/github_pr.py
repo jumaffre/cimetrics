@@ -14,7 +14,6 @@ from cimetrics.env import get_env
 IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
 COMMENT_PATH = "_cimetrics/diff.txt"
-USER_ID = "cimetrics"
 
 
 class GithubPRPublisher(object):
@@ -75,7 +74,7 @@ class GithubPRPublisher(object):
 
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
-            if login == USER_ID:
+            if login == self.env.pr_user():
                 return comment["id"]
         return None
 
