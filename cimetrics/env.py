@@ -66,7 +66,11 @@ class Env(object):
 
     @property
     def span(self) -> int:
-        return self.cfg.get("span", 10)
+        return self.cfg.get("span", 30)
+
+    @property
+    def ewma_span(self) -> int:
+        return self.cfg.get("ewma_span", 5)
 
     @property
     def mongo_connection(self) -> str:
