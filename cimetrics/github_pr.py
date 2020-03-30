@@ -74,7 +74,7 @@ class GithubPRPublisher(object):
 
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
-            if login == self.env.pr_user():
+            if login == self.env.pr_user:
                 return comment["id"]
         return None
 
