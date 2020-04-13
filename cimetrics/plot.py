@@ -12,6 +12,7 @@ import numpy as np
 import sys
 import math
 import matplotlib.ticker as mtick
+import random
 
 from cimetrics.env import get_env
 
@@ -131,10 +132,13 @@ def trend_view(env, tgt_only=False):
     # calculated from a full window
     build_span = span + env.ewma_span
 
+    def noise(s):
+        return [e + random.random() - 1 for e in s]
+
     tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
-    tgt_raw["test"] = [5] * (len(tgt_raw.index) - 4) + [7] * 4
+    tgt_raw["test"] = noise([5] * (len(tgt_raw.index) - 6) + [10] * 6)
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
-    tgt_rm = tgt_raw.rolling(5, center=True).median().tail(span)
+    tgt_rm = tgt_raw.rolling(5).std().tail(span)
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
     tgt_ewma = tgt_ewma.tail(span)
@@ -150,12 +154,11 @@ def trend_view(env, tgt_only=False):
         columns = sorted(branch_series.columns)
         ncol = env.columns
         fig = plt.figure()
-    nrows = len(columns)
+    nplot = len(columns)
 
     for index, col in enumerate(columns):
-        ax = fig.add_subplot(
-            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
-        )
+        nrow = math.ceil(float(nplot) / ncol)
+        ax = fig.add_subplot(nrow, ncol, index + 1, sharex=first_ax)
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
@@ -273,7 +276,7 @@ def trend_view(env, tgt_only=False):
             if len(tls) > 1:
                 tls[1].set_color(Color.TARGET)
         # Don't print xticks for rows other than bottom
-        if index + 1 < nrows - 1:
+        if index < (ncol * (nrow - 1)):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
