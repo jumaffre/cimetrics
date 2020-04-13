@@ -31,6 +31,10 @@ class Color:
 
 class Metrics(object):
     def __init__(self, env):
+        if env is None:
+            print("Environment is not Azure Pipelines or git repo. Skipping plotting.")
+            return
+
         try:
             env.mongo_connection
         except KeyError:
@@ -110,18 +114,28 @@ class Metrics(object):
 
 
 def trend_view(env, tgt_only=False):
-    metrics_path = os.path.join(env.repo_root, "_cimetrics")
-    os.makedirs(metrics_path, exist_ok=True)
+    if env is None:
+        print("Skipping plotting (env)")
+        return
+
     try:
         m = Metrics(env)
     except ValueError as e:
         sys.exit(str(e))
 
-    tgt_raw = m.branch_history(env.target_branch, max_builds=env.span * 2)
-    tgt_ewma = tgt_raw.ewm(span=env.span).mean()
+    metrics_path = os.path.join(env.repo_root, "_cimetrics")
+    os.makedirs(metrics_path, exist_ok=True)
+
+    span = env.monitoring_span if tgt_only else env.span
+    # Try to have enough data for all ewma points to be
+    # calculated from a full window
+    build_span = span + env.ewma_span
+
+    tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
+    tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
     tgt_cols = tgt_raw.columns
-    tgt_raw = tgt_raw.tail(env.span)
-    tgt_ewma = tgt_ewma.tail(env.span)
+    tgt_raw = tgt_raw.tail(span)
+    tgt_ewma = tgt_ewma.tail(span)
     first_ax = None
 
     if tgt_only:

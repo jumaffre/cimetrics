@@ -14,12 +14,14 @@ from cimetrics.env import get_env
 IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
 COMMENT_PATH = "_cimetrics/diff.txt"
-USER_ID = "cimetrics"
 
 
 class GithubPRPublisher(object):
     def __init__(self):
         self.env = get_env()
+        if self.env is None:
+            return
+
         self.request_header = {
             "content-type": "application/json",
             "Authorization": f"token {self.env.github_token}",
@@ -72,7 +74,7 @@ class GithubPRPublisher(object):
 
         for comment in rep.json():
             login = comment.get("user", {}).get("login")
-            if login == USER_ID:
+            if login == self.env.pr_user:
                 return comment["id"]
         return None
 
@@ -102,6 +104,9 @@ class GithubPRPublisher(object):
 if __name__ == "__main__":
 
     env = get_env()
+    if env is None:
+        print("Skipping publishing of PR comment (env)")
+        sys.exit(0)
 
     publisher = GithubPRPublisher()
 

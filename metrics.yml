@@ -2,5 +2,8 @@ db: 'metrics'
 collection: 'metrics_my_app'
 view: "trend"
 columns: 3
-span: 30
 monitoring_issue: 73
+span: 50
+ewma_span: 5
+monitoring_span: 150
+pr_user: cimetrics
