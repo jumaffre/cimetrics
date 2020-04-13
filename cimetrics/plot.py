@@ -133,7 +133,6 @@ def trend_view(env, tgt_only=False):
 
     tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
-    tgt_rm = tgt_raw.rolling(env.ewma_span).mean().tail(span)
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
     tgt_ewma = tgt_ewma.tail(span)
@@ -148,12 +147,11 @@ def trend_view(env, tgt_only=False):
         columns = sorted(branch_series.columns)
         ncol = env.columns
         fig = plt.figure()
-    nrows = len(columns)
+    nplot = len(columns)
 
     for index, col in enumerate(columns):
-        ax = fig.add_subplot(
-            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
-        )
+        nrow = math.ceil(float(nplot) / ncol)
+        ax = fig.add_subplot(nrow, ncol, index + 1, sharex=first_ax)
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
@@ -172,8 +170,6 @@ def trend_view(env, tgt_only=False):
             )
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
-            # Plot rolling median
-            ax.plot(tgt_rm[col].values, color=Color.TARGET, linewidth=0.5)
 
         if not tgt_only:
             # Pick color direction
@@ -271,7 +267,7 @@ def trend_view(env, tgt_only=False):
             if len(tls) > 1:
                 tls[1].set_color(Color.TARGET)
         # Don't print xticks for rows other than bottom
-        if index + 1 < nrows - 1:
+        if index < (ncol * (nrow - 1)):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
