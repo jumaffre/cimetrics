@@ -164,8 +164,7 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def is_pr(self) -> bool:
-        return False
-        # return "SYSTEM_PULLREQUEST_SOURCEBRANCH" in os.environ
+        return "SYSTEM_PULLREQUEST_SOURCEBRANCH" in os.environ
 
     @property
     def target_branch(self) -> str:
