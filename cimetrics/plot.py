@@ -146,7 +146,7 @@ def trend_view(env, tgt_only=False):
         fig = plt.figure(figsize=matplotlib.figure.figaspect(env.columns))
     else:
         branch_series = m.branch_history(env.branch, env.build_id)
-        branch_series["test"] = [5] * len(tgt_branch_series.index)
+        branch_series["test"] = [5] * len(branch_series.index)
         columns = sorted(branch_series.columns)
         ncol = env.columns
         fig = plt.figure()
