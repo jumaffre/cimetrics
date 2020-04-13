@@ -134,7 +134,7 @@ def trend_view(env, tgt_only=False):
     tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
     tgt_raw["test"] = [5] * (len(tgt_raw.index) - 4) + [7] * 4
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
-    tgt_rm = tgt_raw.rolling(env.ewma_span).mean().tail(span)
+    tgt_rm = tgt_raw.rolling(env.ewma_span, center=True).mean().tail(span)
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
     tgt_ewma = tgt_ewma.tail(span)
