@@ -133,6 +133,7 @@ def trend_view(env, tgt_only=False):
 
     tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
+    tgt_rm = tgt_raw.rolling(env.ewma_span).mean().tail(span)
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
     tgt_ewma = tgt_ewma.tail(span)
@@ -171,6 +172,8 @@ def trend_view(env, tgt_only=False):
             )
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
+            # Plot rolling median
+            ax.plot(tgt_rm[col].values, color=Color.TARGET, linewidth=0.5)
 
         if not tgt_only:
             # Pick color direction
