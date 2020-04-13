@@ -73,6 +73,10 @@ class Env(object):
         return self.cfg.get("ewma_span", 5)
 
     @property
+    def monitoring_span(self) -> int:
+        return self.cfg.get("monitoring_span", 50)
+
+    @property
     def mongo_connection(self) -> str:
         return os.environ["METRICS_MONGO_CONNECTION"]
 
@@ -184,8 +188,10 @@ class AzurePipelinesEnv(GitEnv):
 
     @property
     def pull_request_id(self) -> str:
-        assert self.is_pr
-        return os.environ["SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"]
+        if self.is_pr:
+            return os.environ["SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"]
+        else:
+            return self.cfg["monitoring_issue"]
 
     @property
     def repo_id(self) -> str:
