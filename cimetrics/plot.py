@@ -145,7 +145,7 @@ def trend_view(env, tgt_only=False):
         fsize = matplotlib.figure.figaspect(env.columns)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         matplotlib.rcParams["axes.titlesize"] = 6
-        matplotlib.rcParams["font.size"] = 5
+        matplotlib.rcParams["font.size"] = 4
         fig = plt.figure(figsize=fsize)
     else:
         branch_series = m.branch_history(env.branch, env.build_id)
