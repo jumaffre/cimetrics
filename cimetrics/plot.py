@@ -113,7 +113,7 @@ class Metrics(object):
         return df
 
 
-def trend_view(env, tgt_only=False):
+def trend_view(env, tgt_only=True):
     if env is None:
         print("Skipping plotting (env)")
         return
@@ -141,11 +141,14 @@ def trend_view(env, tgt_only=False):
     if tgt_only:
         columns = sorted(tgt_raw.columns)
         ncol = 1
-        fig = plt.figure(figsize=matplotlib.figure.figaspect(env.columns))
+        fsize = matplotlib.figure.figaspect(env.columns)
+        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
+        fig = plt.figure(figsize=fsize)
     else:
         branch_series = m.branch_history(env.branch, env.build_id)
         columns = sorted(branch_series.columns)
         ncol = env.columns
+        dpi_adjust = 1
         fig = plt.figure()
     nplot = len(columns)
 
@@ -278,7 +281,7 @@ def trend_view(env, tgt_only=False):
         )
 
     plt.tight_layout()
-    plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200)
+    plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200 * dpi_adjust)
     plt.close(fig)
 
     build_ids = sorted(tgt_raw.index)
