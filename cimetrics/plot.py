@@ -114,7 +114,6 @@ class Metrics(object):
 
 
 def trend_view(env, tgt_only=False):
-    tgt_only = True
     if env is None:
         print("Skipping plotting (env)")
         return
