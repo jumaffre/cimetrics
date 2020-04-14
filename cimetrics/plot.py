@@ -125,11 +125,13 @@ class Metrics(object):
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
         return df
 
+
 def anomalies(series):
-    ts = series.set_index(pandas.date_range(start='1/1/1970', periods=len(series)))
+    ts = series.set_index(pandas.date_range(start="1/1/1970", periods=len(series)))
     ad = LevelShiftAD(window=3)
     an = ad.fit_detect(ts).fillna(0).diff().fillna(0).reset_index(drop=True)
     return an[an > 0].dropna().index
+
 
 def trend_view(env, tgt_only=False):
     if env is None:
@@ -200,7 +202,7 @@ def trend_view(env, tgt_only=False):
 
             if tgt_only:
                 for anomaly in anomalies(tgt_raw[col].to_frame()):
-                    ax.axvline(x=anomaly, color=Color.BAD, linestyle='--')
+                    ax.axvline(x=anomaly, color=Color.BAD, linestyle="--")
 
         if not tgt_only:
             # Pick color direction
