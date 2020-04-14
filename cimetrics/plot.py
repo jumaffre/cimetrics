@@ -162,6 +162,10 @@ def trend_view(env, tgt_only=False):
         dpi_adjust = 1
         fig = plt.figure()
         font_size = StandardFontSize
+
+    # There is no easy way to set the size on annotate(), but we
+    # otherwise explicitly set the size on each text element
+    matplotlib.rcParams.update({"font.size": font_size.DEFAULT})
     nplot = len(columns)
 
     for index, col in enumerate(columns):
