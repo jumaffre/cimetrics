@@ -147,12 +147,11 @@ def trend_view(env, tgt_only=False):
         columns = sorted(branch_series.columns)
         ncol = env.columns
         fig = plt.figure()
-    nrows = len(columns)
+    nplot = len(columns)
 
     for index, col in enumerate(columns):
-        ax = fig.add_subplot(
-            math.ceil(float(nrows) / ncol), ncol, index + 1, sharex=first_ax
-        )
+        nrow = math.ceil(float(nplot) / ncol)
+        ax = fig.add_subplot(nrow, ncol, index + 1, sharex=first_ax)
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
@@ -267,8 +266,9 @@ def trend_view(env, tgt_only=False):
             tls[0].set_color(color)
             if len(tls) > 1:
                 tls[1].set_color(Color.TARGET)
-        # Don't print xticks for rows other than bottom
-        if index + 1 < nrows - 1:
+        # Don't print xticks for rows other than bottom if not
+        # in tgt_only mode
+        if (index < (ncol * (nrow - 1))) and not tgt_only:
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
