@@ -31,12 +31,14 @@ class StandardFontSize:
     XTICKS = 6
     YTICKS = 6
     TITLE = 8
+    DEFAULT = 6
 
 
 class SmallFontSize:
     XTICKS = 4
     YTICKS = 4
     TITLE = 6
+    DEFAULT = 4
 
 
 class Metrics(object):
