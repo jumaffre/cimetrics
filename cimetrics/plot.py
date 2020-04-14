@@ -17,8 +17,6 @@ from cimetrics.env import get_env
 
 plt.style.use("ggplot")
 matplotlib.rcParams["text.hinting"] = 1
-matplotlib.rcParams["font.size"] = 6
-matplotlib.rcParams["axes.titlesize"] = 8
 
 
 class Color:
@@ -27,6 +25,18 @@ class Color:
     BAD = "firebrick"
     TICK = "silver"
     BACKGROUND = "white"
+
+
+class StandardFontSize:
+    XTICKS = 6
+    YTICKS = 6
+    TITLE = 8
+
+
+class SmallFontSize:
+    XTICKS = 4
+    YTICKS = 4
+    TITLE = 6
 
 
 class Metrics(object):
@@ -143,15 +153,15 @@ def trend_view(env, tgt_only=False):
         ncol = 1
         fsize = matplotlib.figure.figaspect(env.columns)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
-        matplotlib.rcParams["font.size"] = 4
-        matplotlib.rcParams["axes.titlesize"] = 6
         fig = plt.figure(figsize=fsize)
+        font_size = SmallFontSize
     else:
         branch_series = m.branch_history(env.branch, env.build_id)
         columns = sorted(branch_series.columns)
         ncol = env.columns
         dpi_adjust = 1
         fig = plt.figure()
+        font_size = StandardFontSize
     nplot = len(columns)
 
     for index, col in enumerate(columns):
@@ -243,7 +253,7 @@ def trend_view(env, tgt_only=False):
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
-        ax.set_yticklabels(yt, {"fontsize": 6})
+        ax.set_yticklabels(yt, {"fontsize": font_size.YTICKS})
         # Pick formatter for ytick labels. If possible, just print out the
         # value with the same precision as the branch value. If that doesn't
         # fit, switch to scientific format.
@@ -260,6 +270,7 @@ def trend_view(env, tgt_only=False):
             loc="left",
             fontdict={"fontweight": "bold"},
             color="dimgray",
+            fontsize=font_size.TITLE,
         )
         ax.tick_params(axis="y", which="both", color=Color.TICK)
         ax.tick_params(axis="x", which="both", color=Color.TICK)
@@ -279,7 +290,8 @@ def trend_view(env, tgt_only=False):
             plt.setp(ax.spines.values(), visible=False)
         ax.set_xticks([0, len(tgt_raw) - 1])
         ax.set_xticklabels(
-            [tgt_raw.index.values[0], tgt_raw.index.values[-1],], {"fontsize": 6},
+            [tgt_raw.index.values[0], tgt_raw.index.values[-1],],
+            {"fontsize": font_size.XTICKS},
         )
 
     plt.tight_layout()
