@@ -38,5 +38,6 @@ setup(
         "numpy",
         "black",
         "pandas",
+        "adtk"
     ],
 )
