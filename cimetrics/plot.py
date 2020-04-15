@@ -127,10 +127,14 @@ class Metrics(object):
 
 
 def anomalies(series, window_size):
-    ts = series.set_index(pandas.date_range(start="1/1/1970", periods=len(series)))
-    ad = LevelShiftAD(window=window_size, c=3)
-    an = ad.fit_detect(ts).fillna(0).diff().fillna(0).reset_index(drop=True)
-    return an[an > 0].dropna().index
+    try:
+        ts = series.set_index(pandas.date_range(start="1/1/1970", periods=len(series)))
+        ad = LevelShiftAD(window=window_size, c=3)
+        an = ad.fit_detect(ts).fillna(0).diff().fillna(0).reset_index(drop=True)
+        return an[an > 0].dropna().index
+    except RuntimeError as err:
+        print(f"Could not detect anomalies: {err}")
+        return []
 
 
 def trend_view(env, tgt_only=False):
