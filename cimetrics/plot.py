@@ -126,9 +126,9 @@ class Metrics(object):
         return df
 
 
-def anomalies(series, window_size):
+def anomalies(series):
     ts = series.set_index(pandas.date_range(start="1/1/1970", periods=len(series)))
-    ad = LevelShiftAD(window=window_size, c=3)
+    ad = LevelShiftAD(window=3)
     an = ad.fit_detect(ts).fillna(0).diff().fillna(0).reset_index(drop=True)
     return an[an > 0].dropna().index
 
