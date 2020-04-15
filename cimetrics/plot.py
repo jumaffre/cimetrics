@@ -201,7 +201,7 @@ def trend_view(env, tgt_only=False):
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
 
             if tgt_only:
-                for anomaly in anomalies(tgt_raw[col].to_frame()):
+                for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
                     ax.axvline(x=anomaly, color=Color.BAD, linestyle="--")
 
         if not tgt_only:
