@@ -42,6 +42,20 @@ class SmallFontSize:
     DEFAULT = 4
 
 
+def ticklabel_format(value):
+    """
+    Pick formatter for ytick labels. If possible, just print out the
+    value with the same precision as the branch value. If that doesn't
+    fit, switch to scientific format.
+    """
+    bvs = str(value)
+    if len(bvs) < 7:
+        fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
+        return f"%.{fp}f"
+    else:
+        return "%.1e"
+
+
 class Metrics(object):
     def __init__(self, env):
         if env is None:
@@ -209,10 +223,15 @@ def trend_view(env, tgt_only=False):
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
 
+            _, ymax = plt.ylim()
             if tgt_only:
                 for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
                     interesting_ticks.append(anomaly)
-                    ax.axvline(x=anomaly, color=Color.BAD, linestyle="--")
+                    ax.axvline(x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5)
+                    ev = tgt_ewma[col].iloc[anomaly]
+                    ax.annotate(
+                        ticklabel_format(ev) % ev, xy=(anomaly, ymax), color=Color.BAD
+                    )
 
         if not tgt_only:
             # Pick color direction
@@ -278,23 +297,13 @@ def trend_view(env, tgt_only=False):
         yt = []
         if not tgt_only:
             yt.append(branch_val)
-        else:
-            yt.append(tgt_ewma[col].values[0])
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
         ax.set_yticklabels(yt, {"fontsize": font_size.YTICKS})
-        # Pick formatter for ytick labels. If possible, just print out the
-        # value with the same precision as the branch value. If that doesn't
-        # fit, switch to scientific format.
-        bvs = str(yt[0])
-        if len(bvs) < 7:
-            fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
-            fmt = f"%.{fp}f"
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        else:
-            fmt = "%.1e"
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+
+        fmt = ticklabel_format(yt[0])
+        ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         ax.set_title(
             col.strip("^").strip(),
             loc="left",
