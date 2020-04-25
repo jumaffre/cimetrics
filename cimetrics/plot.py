@@ -184,13 +184,18 @@ def trend_view(env, tgt_only=False):
 
     for index, col in enumerate(columns):
         nrow = math.ceil(float(nplot) / ncol)
-        ax = fig.add_subplot(nrow, ncol, index + 1, sharex=first_ax)
+        share = {}
+        if not tgt_only:
+            share["sharex"] = first_ax
+        ax = fig.add_subplot(nrow, ncol, index + 1, **share)
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
 
         if not first_ax:
             first_ax = ax
+
+        interesting_ticks = []
 
         if col in tgt_cols:
             # Plot raw target branch data
@@ -206,6 +211,7 @@ def trend_view(env, tgt_only=False):
 
             if tgt_only:
                 for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
+                    interesting_ticks.append(anomaly)
                     ax.axvline(x=anomaly, color=Color.BAD, linestyle="--")
 
         if not tgt_only:
@@ -272,6 +278,8 @@ def trend_view(env, tgt_only=False):
         yt = []
         if not tgt_only:
             yt.append(branch_val)
+        else:
+            yt.append(tgt_ewma[col].values[0])
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
@@ -298,9 +306,7 @@ def trend_view(env, tgt_only=False):
         ax.tick_params(axis="x", which="both", color=Color.TICK)
         # Match tick colors with series they belong to
         tls = ax.yaxis.get_ticklabels()
-        if tgt_only:
-            tls[0].set_color(Color.TARGET)
-        else:
+        if not tgt_only:
             tls[0].set_color(color)
             if len(tls) > 1:
                 tls[1].set_color(Color.TARGET)
@@ -310,10 +316,13 @@ def trend_view(env, tgt_only=False):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
-        ax.set_xticks([0, len(tgt_raw) - 1])
+
+        xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
+        xticks_labels = [tgt_raw.index.values[i] for i in xticks]
+
+        ax.set_xticks(xticks)
         ax.set_xticklabels(
-            [tgt_raw.index.values[0], tgt_raw.index.values[-1],],
-            {"fontsize": font_size.XTICKS},
+            xticks_labels, {"fontsize": font_size.XTICKS},
         )
 
     plt.tight_layout()
