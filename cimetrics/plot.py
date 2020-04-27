@@ -42,6 +42,20 @@ class SmallFontSize:
     DEFAULT = 4
 
 
+def ticklabel_format(value):
+    """
+    Pick formatter for ytick labels. If possible, just print out the
+    value with the same precision as the branch value. If that doesn't
+    fit, switch to scientific format.
+    """
+    bvs = str(value)
+    if len(bvs) < 7:
+        fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
+        return f"%.{fp}f"
+    else:
+        return "%.1e"
+
+
 class Metrics(object):
     def __init__(self, env):
         if env is None:
@@ -184,13 +198,18 @@ def trend_view(env, tgt_only=False):
 
     for index, col in enumerate(columns):
         nrow = math.ceil(float(nplot) / ncol)
-        ax = fig.add_subplot(nrow, ncol, index + 1, sharex=first_ax)
+        share = {}
+        if not tgt_only:
+            share["sharex"] = first_ax
+        ax = fig.add_subplot(nrow, ncol, index + 1, **share)
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
 
         if not first_ax:
             first_ax = ax
+
+        interesting_ticks = []
 
         if col in tgt_cols:
             # Plot raw target branch data
@@ -204,9 +223,15 @@ def trend_view(env, tgt_only=False):
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
 
+            _, ymax = plt.ylim()
             if tgt_only:
                 for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
-                    ax.axvline(x=anomaly, color=Color.BAD, linestyle="--")
+                    interesting_ticks.append(anomaly)
+                    ax.axvline(x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5)
+                    ev = tgt_ewma[col].iloc[anomaly]
+                    ax.annotate(
+                        ticklabel_format(ev) % ev, xy=(anomaly, ymax), color=Color.BAD
+                    )
 
         if not tgt_only:
             # Pick color direction
@@ -276,17 +301,9 @@ def trend_view(env, tgt_only=False):
             yt.append(tgt_ewma[col].values[-1])
         ax.set_yticks(yt)
         ax.set_yticklabels(yt, {"fontsize": font_size.YTICKS})
-        # Pick formatter for ytick labels. If possible, just print out the
-        # value with the same precision as the branch value. If that doesn't
-        # fit, switch to scientific format.
-        bvs = str(yt[0])
-        if len(bvs) < 7:
-            fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
-            fmt = f"%.{fp}f"
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        else:
-            fmt = "%.1e"
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+
+        fmt = ticklabel_format(yt[0])
+        ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         ax.set_title(
             col.strip("^").strip(),
             loc="left",
@@ -298,9 +315,7 @@ def trend_view(env, tgt_only=False):
         ax.tick_params(axis="x", which="both", color=Color.TICK)
         # Match tick colors with series they belong to
         tls = ax.yaxis.get_ticklabels()
-        if tgt_only:
-            tls[0].set_color(Color.TARGET)
-        else:
+        if not tgt_only:
             tls[0].set_color(color)
             if len(tls) > 1:
                 tls[1].set_color(Color.TARGET)
@@ -310,10 +325,13 @@ def trend_view(env, tgt_only=False):
             plt.setp(ax.get_xticklabels(), visible=False)
             plt.setp(ax.get_xticklines(), visible=False)
             plt.setp(ax.spines.values(), visible=False)
-        ax.set_xticks([0, len(tgt_raw) - 1])
+
+        xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
+        xticks_labels = [tgt_raw.index.values[i] for i in xticks]
+
+        ax.set_xticks(xticks)
         ax.set_xticklabels(
-            [tgt_raw.index.values[0], tgt_raw.index.values[-1],],
-            {"fontsize": font_size.XTICKS},
+            xticks_labels, {"fontsize": font_size.XTICKS},
         )
 
     plt.tight_layout()
