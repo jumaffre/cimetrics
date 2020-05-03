@@ -53,6 +53,7 @@ class Metrics(object):
         doc = {
             "created": datetime.datetime.now(),
             "build_id": self.env.build_id,
+            "build_number": self.env.build_number,
             "branch": self.env.branch,
             "is_pr": self.env.is_pr,
             "commit": self.env.commit,
