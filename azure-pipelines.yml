@@ -26,6 +26,9 @@ steps:
 - script: black --check cimetrics
   displayName: 'Check code format'
 
+- script: mypy -p cimetrics --ignore-missing-imports
+  displayName: 'Type checking'
+
 # Your application. This step collects and uploads your metrics
 # to your MongoDB instance.
 - script: python app/main.py
