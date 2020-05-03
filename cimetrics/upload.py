@@ -8,6 +8,7 @@ import contextlib
 import yaml
 import pymongo
 
+from typing import Optional
 from cimetrics.env import get_env
 
 
@@ -17,8 +18,11 @@ class Metrics(object):
         self.metrics = {}
         self.complete = complete
 
-    def put(self, name: str, value: float) -> None:
-        self.metrics[name] = {"value": value}
+    def put(self, name: str, value: float, label: Optional[str] = None) -> None:
+        metric = {"value": value}
+        if label:
+            metric["label"] = label
+        self.metrics[name] = metric
 
     def publish(self):
         if self.env is None:
