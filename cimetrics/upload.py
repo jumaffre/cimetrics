@@ -18,10 +18,10 @@ class Metrics(object):
         self.metrics = {}
         self.complete = complete
 
-    def put(self, name: str, value: float, label: Optional[str] = None) -> None:
+    def put(self, name: str, value: float, group: Optional[str] = None) -> None:
         metric = {"value": value}
-        if label:
-            metric["label"] = label
+        if group:
+            metric["group"] = group
         self.metrics[name] = metric
 
     def publish(self):
