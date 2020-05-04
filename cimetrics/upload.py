@@ -9,6 +9,7 @@ import yaml
 import pymongo
 from typing import Dict, Union, Iterator
 
+from typing import Optional
 from cimetrics.env import get_env
 
 
@@ -18,8 +19,11 @@ class Metrics(object):
         self.metrics: Dict[str, Union[Dict[str, float]]] = {}
         self.complete = complete
 
-    def put(self, name: str, value: float) -> None:
-        self.metrics[name] = {"value": value}
+    def put(self, name: str, value: float, group: Optional[str] = None) -> None:
+        metric = {"value": value}
+        if group:
+            metric["group"] = group
+        self.metrics[name] = metric
 
     def publish(self):
         if self.env is None:
