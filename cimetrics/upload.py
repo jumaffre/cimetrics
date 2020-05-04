@@ -7,6 +7,7 @@ import datetime
 import contextlib
 import yaml
 import pymongo
+from typing import Dict, Union, Iterator
 
 from cimetrics.env import get_env
 
@@ -14,7 +15,7 @@ from cimetrics.env import get_env
 class Metrics(object):
     def __init__(self, complete: bool = True) -> None:
         self.env = get_env()
-        self.metrics = {}
+        self.metrics: Dict[str, Union[Dict[str, float]]] = {}
         self.complete = complete
 
     def put(self, name: str, value: float) -> None:
@@ -66,7 +67,7 @@ class Metrics(object):
 
 
 @contextlib.contextmanager
-def metrics(complete: bool = True) -> None:
+def metrics(complete: bool = True) -> Iterator[Metrics]:
     m = Metrics(complete=complete)
     yield m
     m.publish()
