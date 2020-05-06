@@ -8,22 +8,26 @@ import contextlib
 import yaml
 import pymongo
 from typing import Dict, Union, Iterator
+from dataclasses import dataclass, asdict
 
 from typing import Optional
 from cimetrics.env import get_env
 
 
-class Metrics(object):
+@dataclass
+class Metric:
+    value: float
+    group: Optional[str] = None
+
+
+class Metrics:
     def __init__(self, complete: bool = True) -> None:
         self.env = get_env()
-        self.metrics: Dict[str, Union[Dict[str, float]]] = {}
+        self.metrics: Dict[str, Metric] = {}
         self.complete = complete
 
     def put(self, name: str, value: float, group: Optional[str] = None) -> None:
-        metric = {"value": value}
-        if group:
-            metric["group"] = group
-        self.metrics[name] = metric
+        self.metrics[name] = Metric(value, group)
 
     def publish(self):
         if self.env is None:
@@ -62,7 +66,7 @@ class Metrics(object):
             "branch": self.env.branch,
             "is_pr": self.env.is_pr,
             "commit": self.env.commit,
-            "metrics": self.metrics,
+            "metrics": {key: asdict(metric) for key, metric in self.metrics.items()},
         }
         if self.env.is_pr:
             doc["target_branch"] = self.env.target_branch
