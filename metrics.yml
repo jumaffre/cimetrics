@@ -1,6 +1,5 @@
 db: 'metrics'
 collection: 'metrics_my_app'
-view: "trend"
 columns: 3
 monitoring_issue: 73
 span: 50

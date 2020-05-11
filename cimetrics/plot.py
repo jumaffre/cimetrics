@@ -89,13 +89,17 @@ class Metrics(object):
         at most max_builds.
         """
 
+        id_to_number = {}
+
         def flatten(entry):
             """
             Flatten an entry from the DB to a dict of metric: value,
             and numerical build_id
             """
             v = {k: v.get("value") for k, v in entry["metrics"].items()}
-            v["build_id"] = int(entry["build_id"] or 0)
+            bid = int(entry["build_id"] or 0)
+            v["build_id"] = bid
+            id_to_number[bid] = entry.get("build_number", str(bid))
             return v
 
         # Discover build ids by descending order of created timestamp
@@ -120,9 +124,9 @@ class Metrics(object):
 
         # Get metrics for those build ids, ordered by build_ids
         query = {"branch": branch, "build_id": {"$in": list(build_ids)}}
-        records = self.col.find(query, {"build_id": 1, "metrics": 1}).sort(
-            [("build_id", pymongo.ASCENDING)]
-        )
+        records = self.col.find(
+            query, {"build_id": 1, "metrics": 1, "build_number": 1}
+        ).sort([("build_id", pymongo.ASCENDING)])
 
         # Index and collapse metrics by build_id
         df = (
@@ -137,7 +141,7 @@ class Metrics(object):
             df = df.drop(columns=["__complete"])
         # Drop columns for metrics that don't exist in the last build
         df = df[list(df.tail(1).dropna(axis="columns", how="all"))]
-        return df
+        return df, id_to_number
 
 
 def anomalies(series, window_size):
@@ -169,7 +173,7 @@ def trend_view(env, tgt_only=False):
     # calculated from a full window
     build_span = span + env.ewma_span
 
-    tgt_raw = m.branch_history(env.target_branch, max_builds=build_span)
+    tgt_raw, tick_map = m.branch_history(env.target_branch, max_builds=build_span)
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
@@ -184,7 +188,8 @@ def trend_view(env, tgt_only=False):
         fig = plt.figure(figsize=fsize)
         font_size = SmallFontSize
     else:
-        branch_series = m.branch_history(env.branch, env.build_id)
+        branch_series, branch_tick_map = m.branch_history(env.branch, env.build_id)
+        tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
         dpi_adjust = 1
@@ -327,7 +332,7 @@ def trend_view(env, tgt_only=False):
             plt.setp(ax.spines.values(), visible=False)
 
         xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
-        xticks_labels = [tgt_raw.index.values[i] for i in xticks]
+        xticks_labels = [tick_map[tgt_raw.index.values[i]] for i in xticks]
 
         ax.set_xticks(xticks)
         ax.set_xticklabels(
