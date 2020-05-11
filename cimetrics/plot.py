@@ -318,12 +318,16 @@ def trend_view(env, tgt_only=False):
 
         fmt = ticklabel_format(yt[0])
         ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+        padding = {}
+        if tgt_only:
+            padding["pad"] = 14
         ax.set_title(
             col.strip("^").strip(),
             loc="left",
             fontdict={"fontweight": "bold"},
             color="dimgray",
             fontsize=font_size.TITLE,
+            **padding,
         )
         ax.tick_params(axis="y", which="both", color=Color.TICK)
         ax.tick_params(axis="x", which="both", color=Color.TICK)
