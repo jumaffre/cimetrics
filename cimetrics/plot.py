@@ -349,6 +349,8 @@ def trend_view(env, tgt_only=False):
 
         if tgt_only:
             plt.xticks(rotation=-30, ha="left")
+        else:
+            plt.xticks(ha="left")
         ax.set_xticks(xticks)
         ax.set_xticklabels(
             xticks_labels, {"fontsize": font_size.XTICKS},
