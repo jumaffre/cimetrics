@@ -234,8 +234,13 @@ def trend_view(env, tgt_only=False):
                     interesting_ticks.append(anomaly)
                     ax.axvline(x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5)
                     ev = tgt_ewma[col].iloc[anomaly]
-                    ax.annotate(
-                        ticklabel_format(ev) % ev, xy=(anomaly, ymax), color=Color.BAD
+                    ax.text(
+                        anomaly,
+                        ymax,
+                        ticklabel_format(ev) % ev,
+                        color=Color.BAD,
+                        rotation=-30,
+                        ha="right",
                     )
 
         if not tgt_only:
@@ -334,6 +339,7 @@ def trend_view(env, tgt_only=False):
         xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
         xticks_labels = [tick_map[tgt_raw.index.values[i]] for i in xticks]
 
+        plt.xticks(rotation=-30, ha="left")
         ax.set_xticks(xticks)
         ax.set_xticklabels(
             xticks_labels, {"fontsize": font_size.XTICKS},
