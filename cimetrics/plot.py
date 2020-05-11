@@ -347,7 +347,8 @@ def trend_view(env, tgt_only=False):
         xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
         xticks_labels = [fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks]
 
-        plt.xticks(rotation=-30, ha="left")
+        if tgt_only:
+            plt.xticks(rotation=-30, ha="left")
         ax.set_xticks(xticks)
         ax.set_xticklabels(
             xticks_labels, {"fontsize": font_size.XTICKS},
