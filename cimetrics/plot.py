@@ -56,6 +56,10 @@ def ticklabel_format(value):
         return "%.1e"
 
 
+def fancy_date(ds):
+    return f"$_{{{ds[:4]}}}${ds[4:]}"
+
+
 class Metrics(object):
     def __init__(self, env):
         if env is None:
@@ -337,7 +341,7 @@ def trend_view(env, tgt_only=False):
             plt.setp(ax.spines.values(), visible=False)
 
         xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
-        xticks_labels = [tick_map[tgt_raw.index.values[i]] for i in xticks]
+        xticks_labels = [fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks]
 
         plt.xticks(rotation=-30, ha="left")
         ax.set_xticks(xticks)
