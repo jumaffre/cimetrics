@@ -57,10 +57,6 @@ class Env(object):
         return self.cfg["collection"]
 
     @property
-    def view(self) -> str:
-        return self.cfg.get("view", "default")
-
-    @property
     def columns(self) -> int:
         return self.cfg.get("columns", 2)
 

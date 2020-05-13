@@ -106,7 +106,6 @@ The last step is to create a new `metrics.yml` configuration file at the root of
 ```yaml
 db: 'metrics'
 collection: 'metrics_performance'
-view: 'trend'
 ```
 
 That's it! The next time you create a Pull Request, your CI will automatically store your metrics and publish a graph comparing your metrics against the same metrics on the branch you are merging to. Note that the cimetrics PR comment is updated for each subsequent build.
