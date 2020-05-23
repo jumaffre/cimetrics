@@ -337,7 +337,7 @@ def trend_view(env, tgt_only=False):
         if not tgt_only:
             tls[0].set_color(color)
             if len(tls) > 1:
-                tls[1].set_color(Color.TARGET)
+                tls[1].set_color(Color.TARGET_TREND)
         # Don't print xticks for rows other than bottom if not
         # in tgt_only mode
         if (index < (ncol * (nrow - 1))) and not tgt_only:
