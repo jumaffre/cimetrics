@@ -310,7 +310,10 @@ def trend_view(env, tgt_only=False):
                     )
         # Set yticks to branch value and last ewma when applicable
         yt = []
-        if not tgt_only:
+        if tgt_only:
+            yt.append(tgt_raw[col].values.min())
+            yt.append(tgt_raw[col].values.max())
+        else:
             yt.append(branch_val)
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
