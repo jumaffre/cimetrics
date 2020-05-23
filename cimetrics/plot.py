@@ -21,7 +21,8 @@ matplotlib.rcParams["text.hinting"] = 1
 
 
 class Color:
-    TARGET = "lightsteelblue"
+    TARGET_RAW = "lightsteelblue"
+    TARGET_TREND = "slategrey"
     GOOD = "forestgreen"
     BAD = "firebrick"
     TICK = "silver"
@@ -31,7 +32,7 @@ class Color:
 class StandardFontSize:
     XTICKS = 6
     YTICKS = 6
-    TITLE = 8
+    TITLE = 6
     DEFAULT = 6
 
 
@@ -187,7 +188,7 @@ def trend_view(env, tgt_only=False):
     if tgt_only:
         columns = sorted(tgt_raw.columns)
         ncol = 1
-        fsize = matplotlib.figure.figaspect(env.columns)
+        fsize = matplotlib.figure.figaspect(env.columns * 1.2)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         fig = plt.figure(figsize=fsize)
         font_size = SmallFontSize
@@ -224,13 +225,13 @@ def trend_view(env, tgt_only=False):
             # Plot raw target branch data
             ax.plot(
                 tgt_raw[col].values,
-                color=Color.TARGET,
+                color=Color.TARGET_RAW,
                 marker="o",
-                markersize=1,
+                markersize=0.5,
                 linestyle="",
             )
             # Plot ewma of target branch data
-            ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
+            ax.plot(tgt_ewma[col].values, color=Color.TARGET_TREND, linewidth=0.5)
 
             _, ymax = plt.ylim()
             if tgt_only:
@@ -309,7 +310,10 @@ def trend_view(env, tgt_only=False):
                     )
         # Set yticks to branch value and last ewma when applicable
         yt = []
-        if not tgt_only:
+        if tgt_only:
+            yt.append(tgt_raw[col].values.min())
+            yt.append(tgt_raw[col].values.max())
+        else:
             yt.append(branch_val)
         if col in tgt_cols:
             yt.append(tgt_ewma[col].values[-1])
@@ -336,7 +340,7 @@ def trend_view(env, tgt_only=False):
         if not tgt_only:
             tls[0].set_color(color)
             if len(tls) > 1:
-                tls[1].set_color(Color.TARGET)
+                tls[1].set_color(Color.TARGET_TREND)
         # Don't print xticks for rows other than bottom if not
         # in tgt_only mode
         if (index < (ncol * (nrow - 1))) and not tgt_only:
