@@ -21,7 +21,8 @@ matplotlib.rcParams["text.hinting"] = 1
 
 
 class Color:
-    TARGET = "lightsteelblue"
+    TARGET_RAW = "lightsteelblue"
+    TARGET_TREND = "slategrey"
     GOOD = "forestgreen"
     BAD = "firebrick"
     TICK = "silver"
@@ -187,7 +188,7 @@ def trend_view(env, tgt_only=False):
     if tgt_only:
         columns = sorted(tgt_raw.columns)
         ncol = 1
-        fsize = matplotlib.figure.figaspect(env.columns)
+        fsize = matplotlib.figure.figaspect(env.columns * 1.2)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         fig = plt.figure(figsize=fsize)
         font_size = SmallFontSize
@@ -224,13 +225,13 @@ def trend_view(env, tgt_only=False):
             # Plot raw target branch data
             ax.plot(
                 tgt_raw[col].values,
-                color=Color.TARGET,
+                color=Color.TARGET_RAW,
                 marker="o",
-                markersize=1,
+                markersize=0.5,
                 linestyle="",
             )
             # Plot ewma of target branch data
-            ax.plot(tgt_ewma[col].values, color=Color.TARGET, linewidth=0.5)
+            ax.plot(tgt_ewma[col].values, color=Color.TARGET_TREND, linewidth=0.5)
 
             _, ymax = plt.ylim()
             if tgt_only:
