@@ -32,7 +32,7 @@ class Color:
 class StandardFontSize:
     XTICKS = 6
     YTICKS = 6
-    TITLE = 8
+    TITLE = 6
     DEFAULT = 6
 
 
