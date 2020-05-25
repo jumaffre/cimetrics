@@ -334,14 +334,20 @@ def trend_view(env, tgt_only=False):
             fontsize=font_size.TITLE,
             **padding,
         )
-        ax.tick_params(
-            axis="y",
-            which="both",
-            color=Color.TARGET_TREND,
-            length=3,
-            width=1,
-            direction="in",
-        )
+        if tgt_only:
+            ax.tick_params(
+                axis="y",
+                which="both",
+                color=Color.TARGET_TREND,
+                length=3,
+                width=1,
+                direction="in",
+            )
+        else:
+            ax.tick_params(
+                axis="y",
+                bottom=False
+            )
         ax.tick_params(
             axis="x",
             which="both",
