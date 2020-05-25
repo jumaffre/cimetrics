@@ -344,10 +344,7 @@ def trend_view(env, tgt_only=False):
                 direction="in",
             )
         else:
-            ax.tick_params(
-                axis="y",
-                bottom=False
-            )
+            ax.tick_params(axis="y", bottom=False)
         ax.tick_params(
             axis="x",
             which="both",
