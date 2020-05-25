@@ -334,8 +334,22 @@ def trend_view(env, tgt_only=False):
             fontsize=font_size.TITLE,
             **padding,
         )
-        ax.tick_params(axis="y", which="both", color=Color.TICK)
-        ax.tick_params(axis="x", which="both", color=Color.TICK)
+        ax.tick_params(
+            axis="y",
+            which="both",
+            color=Color.TARGET_TREND,
+            length=3,
+            width=1,
+            direction="in",
+        )
+        ax.tick_params(
+            axis="x",
+            which="both",
+            color=Color.TARGET_TREND,
+            length=3,
+            width=1,
+            direction="in",
+        )
         # Match tick colors with series they belong to
         tls = ax.yaxis.get_ticklabels()
         if not tgt_only:
