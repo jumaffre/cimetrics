@@ -10,11 +10,6 @@ def run_benchmark():
         "throughput": random.randint(46000, 52000),
         "latency": random.randint(9, 11),
         "peak_wss": random.randint(45, 55),
-        "accuracy": random.randint(68, 73) / 100,
-        "error_rate": random.randint(4, 6) / 100,
-        "memory_fragmentation": random.randint(18, 22) / 1000,
-        "cpu_usage": random.randint(28, 32) / 100,
-        "new_metric": random.randint(100, 200),
         "another_new_metric": random.randint(100, 200),
     }
 
