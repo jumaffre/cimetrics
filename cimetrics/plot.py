@@ -375,7 +375,8 @@ def trend_view(env, tgt_only=False):
             plt.xticks(ha="left")
         ax.set_xticks(xticks)
         ax.set_xticklabels(
-            xticks_labels, {"fontsize": font_size.XTICKS},
+            xticks_labels,
+            {"fontsize": font_size.XTICKS},
         )
 
     plt.tight_layout()
