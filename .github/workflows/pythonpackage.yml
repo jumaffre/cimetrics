@@ -24,3 +24,11 @@ jobs:
     - name: Check format with black
       run: |
         black --check cimetrics
+    - name: Type checking
+       run: mypy -p cimetrics --ignore-missing-imports
+     - name: Run app
+       run: |
+         env
+         python app/main.py
+       env:
+         METRICS_MONGO_CONNECTION: ${{secrets.METRICS_MONGO_CONNECTION}}
