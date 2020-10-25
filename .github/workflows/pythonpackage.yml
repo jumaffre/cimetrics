@@ -29,6 +29,6 @@ jobs:
     - name: Run app
       run: |
         env
-        python app/main.py
+        python3 app/main.py
       env:
         METRICS_MONGO_CONNECTION: ${{secrets.METRICS_MONGO_CONNECTION}} 
