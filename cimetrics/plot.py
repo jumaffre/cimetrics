@@ -259,10 +259,10 @@ def trend_view(env, tgt_only=False):
                 # Pick a marker, either caret up, down, or circle for new metrics
                 if col in tgt_cols:
                     lewm = tgt_ewma[col][tgt_ewma.index[-1]]
-                    marker, color = (7, good_col) if branch_val < lewm else (6, bad_col)
+                    marker, color = (1, good_col) if branch_val < lewm else (1, bad_col)
                 else:
                     lewm = branch_val
-                    marker, color = (".", Color.GOOD)
+                    marker, color = (1, Color.GOOD)
 
                 # Plot marker for branch value
                 marker_x = len(tgt_raw) + len(branch_series) - 1
