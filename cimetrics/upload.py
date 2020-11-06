@@ -70,6 +70,7 @@ class Metrics:
         }
         if self.env.is_pr:
             doc["target_branch"] = self.env.target_branch
+            doc["pr_id"] = self.env.pull_request_id
 
         coll.insert_one(doc)
 
