@@ -187,7 +187,7 @@ def trend_view(env, tgt_only=False):
 
     if tgt_only:
         columns = sorted(tgt_raw.columns)
-        ncol = 1
+        ncol = env.monitoring_columns
         fsize = matplotlib.figure.figaspect(env.columns * 1.2)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         fig = plt.figure(figsize=fsize)
