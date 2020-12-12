@@ -195,6 +195,9 @@ def trend_view(env, tgt_only=False):
         fig = plt.figure(figsize=fsize)
         font_size = SmallFontSize
     else:
+        # On a PR, select older builds with the same PR id (assumed unique)
+        # failing that, use the branch name, in which case we may pick up
+        # uninteresting history if the branch name has been reused.
         if env.pull_request_id:
             query = {"pr_id": env.pull_request_id}
         else:
