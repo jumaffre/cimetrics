@@ -88,7 +88,7 @@ class Metrics(object):
                 f" Make sure you create the {env.config_file} file at the root of your repo."
             )
 
-    def branch_history(self, branch, max_build_id=None, max_builds=5):
+    def branch_history(self, branch_query, max_build_id=None, max_builds=5):
         """
         Branch history as a dataframe, up to max_build_id, going back
         at most max_builds.
@@ -108,8 +108,7 @@ class Metrics(object):
             return v
 
         # Discover build ids by descending order of created timestamp
-        query = {"branch": branch}
-        records = self.col.find(query, {"build_id": 1, "created": 1}).sort(
+        records = self.col.find(branch_query, {"build_id": 1, "created": 1}).sort(
             [("created", pymongo.DESCENDING)]
         )
 
@@ -128,7 +127,8 @@ class Metrics(object):
                     break
 
         # Get metrics for those build ids, ordered by build_ids
-        query = {"branch": branch, "build_id": {"$in": list(build_ids)}}
+        query = branch_query.copy()
+        query["build_id"] = {"$in": list(build_ids)}
         records = self.col.find(
             query, {"build_id": 1, "metrics": 1, "build_number": 1}
         ).sort([("build_id", pymongo.ASCENDING)])
@@ -178,7 +178,9 @@ def trend_view(env, tgt_only=False):
     # calculated from a full window
     build_span = span + env.ewma_span
 
-    tgt_raw, tick_map = m.branch_history(env.target_branch, max_builds=build_span)
+    tgt_raw, tick_map = m.branch_history(
+        {"branch": env.target_branch}, max_builds=build_span
+    )
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
     tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
@@ -193,7 +195,14 @@ def trend_view(env, tgt_only=False):
         fig = plt.figure(figsize=fsize)
         font_size = SmallFontSize
     else:
-        branch_series, branch_tick_map = m.branch_history(env.branch, env.build_id)
+        # On a PR, select older builds with the same PR id (assumed unique)
+        # failing that, use the branch name, in which case we may pick up
+        # uninteresting history if the branch name has been reused.
+        if env.pull_request_id:
+            query = {"pr_id": env.pull_request_id}
+        else:
+            query = {"branch": env.branch}
+        branch_series, branch_tick_map = m.branch_history(query, env.build_id)
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
