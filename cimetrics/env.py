@@ -92,6 +92,10 @@ class Env(object):
     def pr_user(self) -> str:
         return self.cfg.get("pr_user", "cimetrics")
 
+    @property
+    def monitoring_columns(self) -> int:
+        return self.cfg.get("monitoring_columns", 2)
+
 
 class GitEnv(Env):
     _target_branch = None

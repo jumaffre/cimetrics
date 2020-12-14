@@ -6,3 +6,4 @@ span: 50
 ewma_span: 5
 monitoring_span: 150
 pr_user: cimetrics
+monitoring_columns: 2
