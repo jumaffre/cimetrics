@@ -298,8 +298,9 @@ def trend_view(env, tgt_only=False):
                         [bx, bx],
                         [lewm, by],
                         color=good_col if by < lewm else bad_col,
-                        linestyle=":",
+                        linestyle="-",
                         linewidth=1,
+                        alpha=0.6,
                     )
 
                 if col in tgt_ewma:
