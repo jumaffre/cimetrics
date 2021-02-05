@@ -1,6 +1,6 @@
 # cimetrics
 
-[![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.cimetrics?branchName=master)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=2&branchName=master)
+[![Build Status](https://dev.azure.com/jumaffre/metrics-devops/_apis/build/status/jumaffre.cimetrics?branchName=main)](https://dev.azure.com/jumaffre/metrics-devops/_build/latest?definitionId=2&branchName=main)
 [![PyPI version](https://badge.fury.io/py/cimetrics.svg)](https://badge.fury.io/py/cimetrics)
 
 `cimetrics` lets you track crucial metrics to avoid unwanted regressions. It is easy to integrate with your existing projects and automatically provides quick feedback in your GitHub Pull Requests. See it in action [here](https://github.com/jumaffre/cimetrics/pull/66#issuecomment-573324351).
@@ -97,7 +97,7 @@ Then, you should add the following steps to your CI configuration file, e.g. for
   condition: eq(variables['Build.Reason'], 'PullRequest')
 ```
 
-See [azure-pipelines.yml](https://github.com/jumaffre/cimetrics/blob/master/azure-pipelines.yml) for a full working example.
+See [azure-pipelines.yml](https://github.com/jumaffre/cimetrics/blob/main/azure-pipelines.yml) for a full working example.
 
 ### Create the `metrics.yml` file
 
@@ -112,9 +112,9 @@ That's it! The next time you create a Pull Request, your CI will automatically s
 
 ## Caveats
 
-- If the CI has never run on the target branch (e.g. `master` - likely to happen when you first set up `cimetrics`), the report will only show the values that have been uploaded, without any comparison.
+- If the CI has never run on the target branch (e.g. `main` - likely to happen when you first set up `cimetrics`), the report will only show the values that have been uploaded, without any comparison.
 - The rendered images are currently hosted in the target GitHub repository itself, under the `cimetrics` branch, in the `cimetrics` directory.
 
 ## Supported CI pipelines
 
-CI Metrics currently supports [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/), but it should be very easy to add support for other build pipelines by [subclassing GitEnv](https://github.com/jumaffre/cimetrics/blob/master/cimetrics/env.py#L72) and providing the right attributes.
+CI Metrics currently supports [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/), but it should be very easy to add support for other build pipelines by [subclassing GitEnv](https://github.com/jumaffre/cimetrics/blob/main/cimetrics/env.py#L72) and providing the right attributes.
