@@ -39,7 +39,7 @@ class SmallFontSize:
 class StandardFontSize:
     XTICKS = 4
     YTICKS = 4
-    TITLE = 4.5
+    TITLE = 5
     DEFAULT = 4
 
 
