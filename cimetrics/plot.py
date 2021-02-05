@@ -28,14 +28,17 @@ class Color:
     TICK = "silver"
     BACKGROUND = "white"
 
+
 class SmallFontSize:
     XTICKS = 4
     YTICKS = 4
     TITLE = 4
     DEFAULT = 4
 
+
 class StandardFontSize(SmallFontSize):
     pass
+
 
 def ticklabel_format(value):
     """
