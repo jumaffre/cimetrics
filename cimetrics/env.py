@@ -24,7 +24,7 @@ class Env(object):
     def __init__(self) -> None:
         root = self.repo_root
         self.CONFIG_FILE = "metrics.yml"
-        self.DEFAULT_TARGET_BRANCH = "master"
+        self.DEFAULT_TARGET_BRANCH = "main"
 
         config_file_path = os.path.join(root, self.CONFIG_FILE)
         if os.path.exists(config_file_path):

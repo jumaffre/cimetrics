@@ -34,7 +34,7 @@ class GithubPRPublisher(object):
         params = {}
         params["ref"] = f"refs/heads/{IMAGE_BRANCH_NAME}"
         rep = requests.get(
-            f"{self.github_url}/git/refs/heads/master",
+            f"{self.github_url}/git/refs/heads/main",
             data="",
             headers=self.request_header,
         )
