@@ -28,20 +28,14 @@ class Color:
     TICK = "silver"
     BACKGROUND = "white"
 
-
-class StandardFontSize:
-    XTICKS = 6
-    YTICKS = 6
-    TITLE = 8
-    DEFAULT = 6
-
-
 class SmallFontSize:
     XTICKS = 4
     YTICKS = 4
     TITLE = 4
     DEFAULT = 4
 
+class StandardFontSize(SmallFontSize):
+    pass
 
 def ticklabel_format(value):
     """
@@ -206,8 +200,9 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        dpi_adjust = 1
-        fig = plt.figure()
+        fsize = matplotlib.figure.figaspect(columns / ncol + 1)
+        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
+        fig = plt.figure(figsize=fsize)
         font_size = StandardFontSize
 
     # There is no easy way to set the size on annotate(), but we
