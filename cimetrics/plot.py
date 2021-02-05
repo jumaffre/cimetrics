@@ -203,7 +203,7 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        fsize = matplotlib.figure.figaspect(1.2)
+        fsize = matplotlib.figure.figaspect(1)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         fig = plt.figure(figsize=fsize)
         font_size = StandardFontSize
