@@ -36,8 +36,11 @@ class SmallFontSize:
     DEFAULT = 4
 
 
-class StandardFontSize(SmallFontSize):
-    pass
+class StandardFontSize:
+    XTICKS = 4
+    YTICKS = 4
+    TITLE = 6
+    DEFAULT = 4
 
 
 def ticklabel_format(value):
