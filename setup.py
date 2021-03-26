@@ -15,7 +15,7 @@ setup(
     version="0.3.2",
     description="Lightweight python module to track crucial metrics",
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url="https://github.com/jumaffre/cimetrics",
     author="Julien Maffre",
     classifiers=[
@@ -39,6 +39,6 @@ setup(
         "black",
         "pandas",
         "adtk",
-        "mypy"
+        "mypy",
     ],
 )

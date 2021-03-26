@@ -17,7 +17,6 @@ from adtk.detector import LevelShiftAD
 from cimetrics.env import get_env
 
 plt.style.use("ggplot")
-matplotlib.rcParams["text.hinting"] = 1
 
 
 class Color:
