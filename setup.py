@@ -3,7 +3,6 @@
 
 from setuptools import setup
 from os import path
-from subprocess import run
 
 here = path.abspath(path.dirname(__file__))
 
@@ -36,9 +35,7 @@ setup(
         "requests",
         "matplotlib",
         "numpy",
-        "black",
         "pandas",
         "adtk",
-        "mypy",
     ],
 )

@@ -23,6 +23,9 @@ steps:
 - script: pip install .
   displayName: 'Install library'
 
+- script: pip install -r dev-requirements.txt
+  displayName: 'Install dev dependencies'
+
 - script: black --check cimetrics
   displayName: 'Check code format'
 
