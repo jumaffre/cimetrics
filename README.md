@@ -17,13 +17,13 @@ pip install cimetrics
 
 ### Setup storage
 
-Metrics data are stored by in any MongoDB-compatible database.
+Metrics data are stored in any MongoDB-compatible database.
 
 An easy way to get storage set up is to spin up a [Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction) instance in Azure. The connection string should be stored as the `METRICS_MONGO_CONNECTION` secret variable in your CI system.
 
 ### Pushing metrics from your tests
 
-You can use the simple python API to push your metrics to your storage:
+You can use the simple Python API to push your metrics to your storage:
 
 ```python
 import cimetrics.upload
