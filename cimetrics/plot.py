@@ -400,8 +400,18 @@ def trend_view(env, tgt_only=False):
     else:
         comment = f"WARNING: {env.target_branch} does not have any data"
     print(comment)
+
+    md = f"""
+<details>
+  <summary>Click to see table</summary>
+  
+  {tgt_raw.to_markdown()}
+</details>
+"""
+
     with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
         dtext.write(comment)
+        dtext.write(md)
 
 
 if __name__ == "__main__":
