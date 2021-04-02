@@ -400,8 +400,21 @@ def trend_view(env, tgt_only=False):
     else:
         comment = f"WARNING: {env.target_branch} does not have any data"
     print(comment)
+
+    build_number = [tick_map[tgt_raw.index.values[i]] for i in range(len(tgt_raw))]
+    tgt_raw.insert(loc=0, column="build_number", value=build_number)
+    disable_numparse = [1]  # 0 is the index (build_id), 1 is build_number
+    md = f"""
+<details>
+  <summary>Click to see table</summary>
+  
+  {tgt_raw.to_markdown(disable_numparse=disable_numparse)}
+</details>
+"""
+
     with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
         dtext.write(comment)
+        dtext.write(md)
 
 
 if __name__ == "__main__":
