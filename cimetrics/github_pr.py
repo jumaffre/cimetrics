@@ -16,8 +16,9 @@ IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
 COMMENT_PATH = "_cimetrics/diff.txt"
 
-AZURE_BLOB_URL=os.getenv("AZURE_BLOB_URL")
-AZURE_WEB_URL=os.getenv("AZURE_WEB_URL")
+AZURE_BLOB_URL = os.getenv("AZURE_BLOB_URL")
+AZURE_WEB_URL = os.getenv("AZURE_WEB_URL")
+
 
 class GithubPRPublisher(object):
     def __init__(self):
