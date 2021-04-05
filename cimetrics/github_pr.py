@@ -75,7 +75,7 @@ class GithubPRPublisher(object):
         name = f"image{datetime.datetime.now()}.png"
         blob = service.get_blob_client(container="$web", blob=name)
         blob.upload_blob(contents)
-        return f"{AZURE_WEB_URL}/name"
+        return f"{AZURE_WEB_URL}/{name}"
 
     def first_self_comment(self):
         rep = requests.get(
