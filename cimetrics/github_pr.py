@@ -7,7 +7,7 @@ import sys
 import base64
 import datetime
 import os
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContentSettings
 
 from cimetrics.env import get_env
 
@@ -74,7 +74,11 @@ class GithubPRPublisher(object):
         service = BlobServiceClient(account_url=AZURE_BLOB_URL)
         name = f"image{self.env.pull_request_id}.png"
         blob = service.get_blob_client(container="$web", blob=name)
-        blob.upload_blob(contents)
+        blob.upload_blob(
+            contents,
+            overwrite=True,
+            content_settings=ContentSettings(content_type="image/png"),
+        )
         return f"{AZURE_WEB_URL}/{name}"
 
     def first_self_comment(self):
