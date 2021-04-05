@@ -8,6 +8,7 @@ import base64
 import datetime
 import os
 from azure.storage.blob import BlobServiceClient
+import urllib.parse
 
 from cimetrics.env import get_env
 
@@ -72,7 +73,7 @@ class GithubPRPublisher(object):
 
     def upload_image_as_blob(self, contents):
         service = BlobServiceClient(account_url=AZURE_BLOB_URL)
-        name = f"image{datetime.datetime.now()}.png"
+        name = urllib.parse.quote(f"image{datetime.datetime.now()}.png")
         blob = service.get_blob_client(container="$web", blob=name)
         blob.upload_blob(contents)
         return f"{AZURE_WEB_URL}/{name}"
