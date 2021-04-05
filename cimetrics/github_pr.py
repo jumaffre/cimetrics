@@ -133,7 +133,7 @@ if __name__ == "__main__":
         comment = comment_file.read()
 
     if AZURE_BLOB_URL and AZURE_WEB_URL:
-        image_url = publisher.uplo(str(encoded_image.decode()))
+        image_url = publisher.upload_image(str(encoded_image.decode()))
     else:
         image_url = publisher.upload_image_as_blob(raw_image)
     publisher.publish_comment(image_url, comment)
