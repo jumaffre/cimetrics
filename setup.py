@@ -3,7 +3,6 @@
 
 from setuptools import setup
 from os import path
-from subprocess import run
 
 here = path.abspath(path.dirname(__file__))
 
@@ -12,10 +11,10 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="cimetrics",
-    version="0.3.1",
+    version="0.3.4",
     description="Lightweight python module to track crucial metrics",
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url="https://github.com/jumaffre/cimetrics",
     author="Julien Maffre",
     classifiers=[
@@ -36,9 +35,7 @@ setup(
         "requests",
         "matplotlib",
         "numpy",
-        "black",
         "pandas",
         "adtk",
-        "mypy"
     ],
 )
