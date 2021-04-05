@@ -7,6 +7,7 @@ import sys
 import base64
 import datetime
 import os
+from azure.storage.blob import BlobServiceClient
 
 from cimetrics.env import get_env
 
@@ -15,6 +16,8 @@ IMAGE_BRANCH_NAME = "cimetrics"
 IMAGE_PATH = "_cimetrics/diff.png"
 COMMENT_PATH = "_cimetrics/diff.txt"
 
+AZURE_BLOB_URL=os.getenv("AZURE_BLOB_URL")
+AZURE_WEB_URL=os.getenv("AZURE_WEB_URL")
 
 class GithubPRPublisher(object):
     def __init__(self):
@@ -66,6 +69,13 @@ class GithubPRPublisher(object):
         else:
             raise Exception("Failed to upload image")
 
+    def upload_image_as_blob(self, contents):
+        service = BlobServiceClient(account_url=AZURE_BLOB_URL)
+        name = f"image{datetime.datetime.now()}.png"
+        blob = service.get_blob_client(container="$web", blob=name)
+        blob.upload_blob(contents)
+        return f"{AZURE_WEB_URL}/name"
+
     def first_self_comment(self):
         rep = requests.get(
             f"{self.github_url}/issues/{self.pull_request_id}/comments",
@@ -113,11 +123,16 @@ if __name__ == "__main__":
     publisher.create_image_branch()
 
     encoded_image = None
+    raw_image = None
     with open(os.path.join(env.repo_root, IMAGE_PATH), "rb") as image_file:
-        encoded_image = base64.b64encode(image_file.read())
+        raw_image = image_file.read()
+        encoded_image = base64.b64encode(raw_image)
     comment = ""
     with open(os.path.join(env.repo_root, COMMENT_PATH), "r") as comment_file:
         comment = comment_file.read()
 
-    image_url = publisher.upload_image(str(encoded_image.decode()))
+    if AZURE_BLOB_URL and AZURE_WEB_URL:
+        image_url = publisher.uplo(str(encoded_image.decode()))
+    else:
+        image_url = publisher.upload_image_as_blob(raw_image)
     publisher.publish_comment(image_url, comment)
