@@ -77,7 +77,9 @@ class GithubPRPublisher(object):
         blob.upload_blob(
             contents,
             overwrite=True,
-            content_settings=ContentSettings(content_type="image/png"),
+            content_settings=ContentSettings(
+                content_type="image/png", cache_control="no-cache"
+            ),
         )
         return f"{AZURE_WEB_URL}/{name}"
 
