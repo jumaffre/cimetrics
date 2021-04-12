@@ -72,7 +72,7 @@ class GithubPRPublisher(object):
 
     def upload_image_as_blob(self, contents):
         service = BlobServiceClient(account_url=AZURE_BLOB_URL)
-        name = f"plot-{self.env.pull_request_id}.png"
+        name = f"plot-{self.env.repo_root}-{self.env.pull_request_id}.png"
         blob = service.get_blob_client(container="$web", blob=name)
         blob.upload_blob(
             contents,
