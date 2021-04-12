@@ -51,6 +51,8 @@ steps:
 - script: python -m cimetrics.github_pr
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
+    AZURE_BLOB_URL: $(AZURE_BLOB_URL)
+    AZURE_WEB_URL: $(AZURE_WEB_URL)
   displayName: 'Post metrics graphs as PR comment'
 
 - task: PublishBuildArtifacts@1

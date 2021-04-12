@@ -37,5 +37,6 @@ setup(
         "numpy",
         "pandas",
         "adtk",
+        "azure-storage-blob"
     ],
 )
