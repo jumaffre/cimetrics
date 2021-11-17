@@ -37,6 +37,7 @@ setup(
         "numpy",
         "pandas",
         "adtk",
-        "azure-storage-blob"
+        "azure-storage-blob",
+        "pyparsing<3,>=2.0.2",
     ],
 )

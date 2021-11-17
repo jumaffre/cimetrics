@@ -1,14 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-import yaml
 import pymongo
 import pandas
 import os
 import sys
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 import sys
 import math
 import matplotlib.ticker as mtick
@@ -319,19 +317,18 @@ def trend_view(env, tgt_only=False):
                         weight="bold",
                     )
         # Set yticks to branch value and last ewma when applicable
-        yt = []
+        yticks = []
         if tgt_only:
             yvals = tgt_raw[col].dropna().values
-            yt.append(yvals.min())
-            yt.append(yvals.max())
+            yticks.append(yvals.min())
+            yticks.append(yvals.max())
         else:
-            yt.append(branch_val)
+            yticks.append(branch_val)
         if col in tgt_cols:
-            yt.append(tgt_ewma[col].values[-1])
-        ax.set_yticks(yt)
-        ax.set_yticklabels(yt, {"fontsize": font_size.YTICKS})
+            yticks.append(tgt_ewma[col].values[-1])
+        ax.yaxis.set_ticks(yticks, fontsize=font_size.YTICKS)
 
-        fmt = ticklabel_format(yt[0])
+        fmt = ticklabel_format(yticks[0])
         ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         padding = {}
         if tgt_only:
@@ -383,11 +380,7 @@ def trend_view(env, tgt_only=False):
             plt.xticks(rotation=-30, ha="left")
         else:
             plt.xticks(ha="left")
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(
-            xticks_labels,
-            {"fontsize": font_size.XTICKS},
-        )
+        ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
 
     plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200 * dpi_adjust)
@@ -407,7 +400,7 @@ def trend_view(env, tgt_only=False):
     md = f"""
 <details>
   <summary>Click to see table</summary>
-  
+
   {tgt_raw.to_markdown(disable_numparse=disable_numparse)}
 </details>
 """
