@@ -29,7 +29,7 @@ setup(
     packages=["cimetrics"],
     python_requires=">=3.6",
     install_requires=[
-        "pymongo",
+        "pymongo<4,>=3.12.1",  # 4.0 has wire incompatibility with CosmosDB
         "pyyaml",
         "gitpython",
         "requests",
