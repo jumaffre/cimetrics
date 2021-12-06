@@ -394,14 +394,22 @@ def trend_view(env, tgt_only=False):
         comment = f"WARNING: {env.target_branch} does not have any data"
     print(comment)
 
-    build_number = [tick_map[tgt_raw.index.values[i]] for i in range(len(tgt_raw))]
-    tgt_raw.insert(loc=0, column="build_number", value=build_number)
     disable_numparse = [1]  # 0 is the index (build_id), 1 is build_number
+    tgt_build_number = [tick_map[tgt_raw.index.values[i]] for i in range(len(tgt_raw))]
+    tgt_raw.insert(loc=0, column="build_number", value=tgt_build_number)
+    if tgt_only:
+        branch_md = ""
+    else:
+        branch_build_number = [tick_map[branch_series.index.values[i]] for i in range(len(branch_series))]
+        branch_series.insert(loc=0, column="build_number", value=branch_build_number)
+        branch_md = branch_series.to_markdown(disable_numparse=disable_numparse)
     md = f"""
 <details>
   <summary>Click to see table</summary>
 
   {tgt_raw.to_markdown(disable_numparse=disable_numparse)}
+  
+  {branch_md}
 </details>
 """
 
