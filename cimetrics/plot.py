@@ -400,7 +400,9 @@ def trend_view(env, tgt_only=False):
     if tgt_only:
         branch_md = ""
     else:
-        branch_build_number = [tick_map[branch_series.index.values[i]] for i in range(len(branch_series))]
+        branch_build_number = [
+            tick_map[branch_series.index.values[i]] for i in range(len(branch_series))
+        ]
         branch_series.insert(loc=0, column="build_number", value=branch_build_number)
         branch_md = branch_series.to_markdown(disable_numparse=disable_numparse)
     md = f"""
