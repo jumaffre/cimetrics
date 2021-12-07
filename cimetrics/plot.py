@@ -404,11 +404,14 @@ def trend_view(env, tgt_only=False):
             tick_map[branch_series.index.values[i]] for i in range(len(branch_series))
         ]
         branch_series.insert(loc=0, column="build_number", value=branch_build_number)
-        branch_md = branch_series.to_markdown(disable_numparse=disable_numparse)
+        branch_md = f"{env.branch}\n\n"
+        branch_md += branch_series.to_markdown(disable_numparse=disable_numparse)
     md = f"""
 <details>
   <summary>Click to see table</summary>
-
+  
+  {env.target_branch}
+  
   {tgt_raw.to_markdown(disable_numparse=disable_numparse)}
   
   {branch_md}
