@@ -221,9 +221,8 @@ def trend_view(env, tgt_only=False):
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
-        nplot = len(columns)
         for index, col in enumerate(group_columns):
-            nrow = math.ceil(float(nplot) / ncol)
+            nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
             if not tgt_only:
                 share["sharex"] = first_ax
@@ -253,7 +252,9 @@ def trend_view(env, tgt_only=False):
                 if tgt_only:
                     for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
                         interesting_ticks.append(anomaly)
-                        ax.axvline(x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5)
+                        ax.axvline(
+                            x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5
+                        )
                         ev = tgt_ewma[col].iloc[anomaly]
                         ax.text(
                             anomaly,
@@ -275,7 +276,9 @@ def trend_view(env, tgt_only=False):
                     # Pick a marker, either caret up, down, or circle for new metrics
                     if col in tgt_cols:
                         lewm = tgt_ewma[col][tgt_ewma.index[-1]]
-                        marker, color = (1, good_col) if branch_val < lewm else (1, bad_col)
+                        marker, color = (
+                            (1, good_col) if branch_val < lewm else (1, bad_col)
+                        )
                     else:
                         lewm = branch_val
                         marker, color = (1, Color.GOOD)
@@ -300,7 +303,9 @@ def trend_view(env, tgt_only=False):
                     )
 
                     # Plot previous branch runs
-                    for bx, by in zip(range(len(tgt_raw), marker_x), branch_series[col]):
+                    for bx, by in zip(
+                        range(len(tgt_raw), marker_x), branch_series[col]
+                    ):
                         s = ax.plot(
                             [bx, bx],
                             [lewm, by],
@@ -318,7 +323,10 @@ def trend_view(env, tgt_only=False):
                         plt.annotate(
                             f"{sign}{percent_change:.0f}%",
                             (len(tgt_raw) - 1, branch_val),
-                            xytext=(offset + 10, offset if percent_change > 0 else -offset),
+                            xytext=(
+                                offset + 10,
+                                offset if percent_change > 0 else -offset,
+                            ),
                             textcoords="offset points",
                             va="center",
                             ha="left",
@@ -383,7 +391,9 @@ def trend_view(env, tgt_only=False):
                 plt.setp(ax.spines.values(), visible=False)
 
             xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
-            xticks_labels = [fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks]
+            xticks_labels = [
+                fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks
+            ]
 
             if tgt_only:
                 plt.xticks(rotation=-30, ha="left")
@@ -391,15 +401,14 @@ def trend_view(env, tgt_only=False):
                 plt.xticks(ha="left")
             ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
 
+        plt.title(group_name)
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
         plt.savefig(path, dpi=200 * dpi_adjust)
         plt.close(fig)
         files.append(path)
 
-    stack_vertically(files).save(
-        os.path.join(metrics_path, "diff.png")
-    )
+    stack_vertically(files).save(os.path.join(metrics_path, "diff.png"))
 
     build_ids = sorted(tgt_raw.index)
     if build_ids:
