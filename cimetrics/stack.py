@@ -11,7 +11,7 @@ def stack_vertically(img_paths):
     yedge = 0
     for img in imgs:
         stacked_img.paste(img, (0, yedge))
-        yedge += (img.height + padding)
+        yedge += img.height + padding
     return stacked_img
 
 

@@ -55,9 +55,13 @@ def ticklabel_format(value):
         return "{value:.1e}"
 
 
-def make_ticklabel_formatter(value):
+def make_ticklabel_formatter(value, match_value=None, append=None):
     def ticklabel_formatter(val, _):
-        return ticklabel_format(value).format(value=val)
+        rv = ticklabel_format(value).format(value=val)
+        if match_value is not None and val == match_value:
+            rv = f"{rv}\n{append}"
+        return rv
+
     return ticklabel_formatter
 
 
@@ -227,8 +231,8 @@ def trend_view(env, tgt_only=False):
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
-        fig.set_facecolor('whitesmoke')
-        fig.suptitle(group_name, y=0.99, fontweight="bold", fontsize="large")
+        fig.set_facecolor("azure")
+        fig.suptitle(group_name, y=0.97, fontweight="bold", fontsize="large")
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
@@ -353,8 +357,14 @@ def trend_view(env, tgt_only=False):
             if col in tgt_cols:
                 yticks.append(tgt_ewma[col].values[-1])
             ax.yaxis.set_ticks(yticks, fontsize="small")
+            mv, rv = None, None
+            if col in tgt_ewma:
+                percent_change = 100 * (branch_val - lewm) / lewm
+                sign = "+" if percent_change > 0 else ""
+                mv = tgt_ewma[col].values[-1]
+                rv = f"{sign}{percent_change:.0f}%"
             ax.yaxis.set_major_formatter(
-                mtick.FuncFormatter(make_ticklabel_formatter(yticks[0]))
+                mtick.FuncFormatter(make_ticklabel_formatter(yticks[0], mv, rv))
             )
             padding = {}
             if tgt_only:
