@@ -185,10 +185,15 @@ def trend_view(env, tgt_only=False):
     tgt_ewma = tgt_ewma.tail(span)
     first_ax = None
 
+    groupby = {
+        "Percentages": lambda col: "(%)" in col,
+        "Others": lambda col: "(%)" not in col,
+    }
+
     if tgt_only:
         columns = sorted(tgt_raw.columns)
         ncol = env.monitoring_columns
-        fsize = matplotlib.figure.figaspect(env.columns * 1.2)
+        fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         font_size = SmallFontSize
     else:
@@ -203,7 +208,7 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        fsize = matplotlib.figure.figaspect(1)
+        fsize = matplotlib.figure.figaspect(1. / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         font_size = StandardFontSize
 
@@ -211,17 +216,13 @@ def trend_view(env, tgt_only=False):
     # otherwise explicitly set the size on each text element
     matplotlib.rcParams.update({"font.size": font_size.DEFAULT})
 
-    groupby = {
-        "Percentages": lambda col: "(%)" in col,
-        "Others": lambda col: "(%)" not in col,
-    }
 
     files = []
 
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
-        fig = plt.figure(figsize=fsize, y=0.01, fontweight="bold", fontsize="large")
-        fig.suptitle(group_name)
+        fig = plt.figure(figsize=fsize)
+        fig.suptitle(group_name, y=0.01, fontweight="bold", fontsize="large")
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
