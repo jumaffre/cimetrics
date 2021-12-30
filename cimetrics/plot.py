@@ -244,7 +244,7 @@ def trend_view(env, tgt_only=False):
             # Plot ewma of target branch data
             ax.plot(tgt_ewma[col].values, color=Color.TARGET_TREND, linewidth=0.5)
 
-            _, ymax = plt.ylim()
+            #_, ymax = plt.ylim()
             if tgt_only:
                 for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
                     interesting_ticks.append(anomaly)
@@ -252,7 +252,7 @@ def trend_view(env, tgt_only=False):
                     ev = tgt_ewma[col].iloc[anomaly]
                     ax.text(
                         anomaly,
-                        ymax,
+                        0,
                         ticklabel_format(ev) % ev,
                         color=Color.BAD,
                         rotation=-30,
