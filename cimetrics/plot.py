@@ -157,7 +157,7 @@ def anomalies(series, window_size):
         return []
 
 
-def trend_view(env, tgt_only=False):
+def trend_data(env, tgt_only):
     if env is None:
         print("Skipping plotting (env)")
         return
@@ -179,9 +179,12 @@ def trend_view(env, tgt_only=False):
         {"branch": env.target_branch}, max_builds=build_span
     )
     tgt_ewma = tgt_raw.ewm(span=env.ewma_span).mean()
-    tgt_cols = tgt_raw.columns
     tgt_raw = tgt_raw.tail(span)
     tgt_ewma = tgt_ewma.tail(span)
+    return tgt_raw, tick_map, tgt_ewma
+
+
+def trend_view(env, tgt_raw, tick_map, tgt_ewma, tgt_only):
     first_ax = None
 
     if tgt_only:
@@ -228,7 +231,7 @@ def trend_view(env, tgt_only=False):
 
         interesting_ticks = []
 
-        if col in tgt_cols:
+        if col in tgt_raw.columns:
             # Plot raw target branch data
             ax.plot(
                 tgt_raw[col].values,
@@ -264,7 +267,7 @@ def trend_view(env, tgt_only=False):
             if col in branch_series.columns:
                 branch_val = branch_series[col].values[-1]
                 # Pick a marker, either caret up, down, or circle for new metrics
-                if col in tgt_cols:
+                if col in tgt_raw.columns:
                     lewm = tgt_ewma[col][tgt_ewma.index[-1]]
                     marker, color = (1, good_col) if branch_val < lewm else (1, bad_col)
                 else:
@@ -324,7 +327,7 @@ def trend_view(env, tgt_only=False):
             yticks.append(yvals.max())
         else:
             yticks.append(branch_val)
-        if col in tgt_cols:
+        if col in tgt_raw.columns:
             yticks.append(tgt_ewma[col].values[-1])
         ax.yaxis.set_ticks(yticks, fontsize=font_size.YTICKS)
 
@@ -424,4 +427,5 @@ def trend_view(env, tgt_only=False):
 
 
 if __name__ == "__main__":
-    trend_view(get_env(), not get_env().is_pr)
+    tgt_raw, tick_map, tgt_ewma = trend_data(get_env(), not get_env().is_pr)
+    trend_view(get_env(), tgt_raw, tick_map, tgt_ewma, not get_env().is_pr)
