@@ -208,7 +208,7 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
+        fsize = matplotlib.figure.figaspect(1. / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         font_size = StandardFontSize
 
@@ -216,12 +216,13 @@ def trend_view(env, tgt_only=False):
     # otherwise explicitly set the size on each text element
     # matplotlib.rcParams.update({"font.size": font_size.DEFAULT})
 
+
     files = []
 
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
-        fig.suptitle(group_name, y=-0.01, fontweight="bold", fontsize="large")
+        fig.suptitle(group_name, y=0.99, fontweight="bold", fontsize="large")
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
@@ -333,6 +334,7 @@ def trend_view(env, tgt_only=False):
                             ha="left",
                             color=color,
                             weight="bold",
+                            fontsize="small"
                         )
             # Set yticks to branch value and last ewma when applicable
             yticks = []
