@@ -55,8 +55,10 @@ def ticklabel_format(value):
         return "{{value:.1e}}"
 
 
-def ticklabel_formatter(value, _):
-    return ticklabel_format(value).format(value=value)
+def make_ticklabel_formatter(value):
+    def ticklabel_formatter(val, _):
+        return ticklabel_format(value).format(value=val)
+    return ticklabel_formatter
 
 
 def fancy_date(ds):
@@ -351,7 +353,7 @@ def trend_view(env, tgt_only=False):
                 yticks.append(tgt_ewma[col].values[-1])
             ax.yaxis.set_ticks(yticks, fontsize="small")
             ax.yaxis.set_major_formatter(
-                mtick.FuncFormatter(ticklabel_formatter(yticks[0]))
+                mtick.FuncFormatter(make_ticklabel_formatter(yticks[0]))
             )
             padding = {}
             if tgt_only:
