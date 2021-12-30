@@ -23,22 +23,8 @@ class Color:
     TARGET_TREND = "slategrey"
     GOOD = "forestgreen"
     BAD = "firebrick"
-    TICK = "silver"
+    TITLES = "dimgray"
     BACKGROUND = "white"
-
-
-class SmallFontSize:
-    XTICKS = 4
-    YTICKS = 4
-    TITLE = 4
-    DEFAULT = 4
-
-
-class StandardFontSize:
-    XTICKS = 4
-    YTICKS = 4
-    TITLE = 5
-    DEFAULT = 4
 
 
 def ticklabel_format(value):
@@ -205,7 +191,6 @@ def trend_view(env, tgt_only=False):
         ncol = env.monitoring_columns
         fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
-        font_size = SmallFontSize
     else:
         # On a PR, select older builds with the same PR id (assumed unique)
         # failing that, use the branch name, in which case we may pick up
@@ -220,7 +205,6 @@ def trend_view(env, tgt_only=False):
         ncol = env.columns
         fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
-        font_size = StandardFontSize
 
     files = []
 
@@ -230,10 +214,11 @@ def trend_view(env, tgt_only=False):
         fig.suptitle(
             group_name,
             horizontalalignment="left",
+            x=0.01,
             y=0.97,
             fontweight="bold",
             fontsize="large",
-            color="dimgray",
+            color=Color.TITLES,
         )
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
@@ -355,7 +340,7 @@ def trend_view(env, tgt_only=False):
                 col.strip("^").strip(),
                 loc="left",
                 fontdict={"fontweight": "bold"},
-                color="dimgray",
+                color=Color.TITLES,
                 fontsize="small",
                 **padding,
             )
