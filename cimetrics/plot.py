@@ -52,7 +52,7 @@ def ticklabel_format(value):
         fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
         return f"{{value:.{fp}f}}"
     else:
-        return "{{value:.1e}}"
+        return "{value:.1e}"
 
 
 def make_ticklabel_formatter(value):
@@ -227,6 +227,7 @@ def trend_view(env, tgt_only=False):
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
+        fig.set_facecolor('whitesmoke')
         fig.suptitle(group_name, y=0.99, fontweight="bold", fontsize="large")
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
