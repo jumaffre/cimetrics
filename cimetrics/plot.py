@@ -231,7 +231,6 @@ def trend_view(env, tgt_only=False):
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
-        fig.set_facecolor("azure")
         fig.suptitle(group_name, y=0.97, fontweight="bold", fontsize="large")
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
@@ -361,7 +360,7 @@ def trend_view(env, tgt_only=False):
             if col in tgt_ewma:
                 percent_change = 100 * (branch_val - lewm) / lewm
                 sign = "+" if percent_change > 0 else ""
-                mv = tgt_ewma[col].values[-1]
+                mv = branch_val
                 rv = f"{sign}{percent_change:.0f}%"
             ax.yaxis.set_major_formatter(
                 mtick.FuncFormatter(make_ticklabel_formatter(yticks[0], mv, rv))
