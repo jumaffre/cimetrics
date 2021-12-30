@@ -1,14 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-import yaml
 import pymongo
 import pandas
 import os
 import sys
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 import sys
 import math
 import matplotlib.ticker as mtick
@@ -17,7 +15,6 @@ from adtk.detector import LevelShiftAD
 from cimetrics.env import get_env
 
 plt.style.use("ggplot")
-matplotlib.rcParams["text.hinting"] = 1
 
 
 class Color:
@@ -29,17 +26,17 @@ class Color:
     BACKGROUND = "white"
 
 
-class StandardFontSize:
-    XTICKS = 6
-    YTICKS = 6
-    TITLE = 8
-    DEFAULT = 6
-
-
 class SmallFontSize:
     XTICKS = 4
     YTICKS = 4
     TITLE = 4
+    DEFAULT = 4
+
+
+class StandardFontSize:
+    XTICKS = 4
+    YTICKS = 4
+    TITLE = 5
     DEFAULT = 4
 
 
@@ -206,9 +203,14 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        dpi_adjust = 1
-        fig = plt.figure()
+        fsize = matplotlib.figure.figaspect(1)
+        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
+        fig = plt.figure(figsize=fsize)
         font_size = StandardFontSize
+
+    subfigs = fig.subfigures(1, 2, wspace=0.07)
+    subfigs[0].suptitle('Even')
+    subfigs[0].suptitle('Odd')
 
     # There is no easy way to set the size on annotate(), but we
     # otherwise explicitly set the size on each text element
@@ -220,7 +222,7 @@ def trend_view(env, tgt_only=False):
         share = {}
         if not tgt_only:
             share["sharex"] = first_ax
-        ax = fig.add_subplot(nrow, ncol, index + 1, **share)
+        ax = subfigs[index % 2].add_subplot(nrow, ncol, index + 1, **share)
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
@@ -319,19 +321,18 @@ def trend_view(env, tgt_only=False):
                         weight="bold",
                     )
         # Set yticks to branch value and last ewma when applicable
-        yt = []
+        yticks = []
         if tgt_only:
             yvals = tgt_raw[col].dropna().values
-            yt.append(yvals.min())
-            yt.append(yvals.max())
+            yticks.append(yvals.min())
+            yticks.append(yvals.max())
         else:
-            yt.append(branch_val)
+            yticks.append(branch_val)
         if col in tgt_cols:
-            yt.append(tgt_ewma[col].values[-1])
-        ax.set_yticks(yt)
-        ax.set_yticklabels(yt, {"fontsize": font_size.YTICKS})
+            yticks.append(tgt_ewma[col].values[-1])
+        ax.yaxis.set_ticks(yticks, fontsize=font_size.YTICKS)
 
-        fmt = ticklabel_format(yt[0])
+        fmt = ticklabel_format(yticks[0])
         ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
         padding = {}
         if tgt_only:
@@ -383,11 +384,7 @@ def trend_view(env, tgt_only=False):
             plt.xticks(rotation=-30, ha="left")
         else:
             plt.xticks(ha="left")
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(
-            xticks_labels,
-            {"fontsize": font_size.XTICKS},
-        )
+        ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
 
     plt.tight_layout()
     plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200 * dpi_adjust)
@@ -400,8 +397,34 @@ def trend_view(env, tgt_only=False):
     else:
         comment = f"WARNING: {env.target_branch} does not have any data"
     print(comment)
+
+    disable_numparse = [1]  # 0 is the index (build_id), 1 is build_number
+    tgt_build_number = [tick_map[tgt_raw.index.values[i]] for i in range(len(tgt_raw))]
+    tgt_raw.insert(loc=0, column="build_number", value=tgt_build_number)
+    if tgt_only:
+        branch_md = ""
+    else:
+        branch_build_number = [
+            tick_map[branch_series.index.values[i]] for i in range(len(branch_series))
+        ]
+        branch_series.insert(loc=0, column="build_number", value=branch_build_number)
+        branch_md = f"{env.branch}\n\n"
+        branch_md += branch_series.to_markdown(disable_numparse=disable_numparse)
+    md = f"""
+<details>
+  <summary>Click to see table</summary>
+  
+  {env.target_branch}
+  
+  {tgt_raw.to_markdown(disable_numparse=disable_numparse)}
+  
+  {branch_md}
+</details>
+"""
+
     with open(os.path.join(metrics_path, "diff.txt"), "w") as dtext:
         dtext.write(comment)
+        dtext.write(md)
 
 
 if __name__ == "__main__":

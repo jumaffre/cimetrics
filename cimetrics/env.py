@@ -24,7 +24,7 @@ class Env(object):
     def __init__(self) -> None:
         root = self.repo_root
         self.CONFIG_FILE = "metrics.yml"
-        self.DEFAULT_TARGET_BRANCH = "master"
+        self.DEFAULT_TARGET_BRANCH = "main"
 
         config_file_path = os.path.join(root, self.CONFIG_FILE)
         if os.path.exists(config_file_path):
@@ -196,6 +196,10 @@ class AzurePipelinesEnv(GitEnv):
     @property
     def repo_id(self) -> str:
         return os.environ["BUILD_REPOSITORY_ID"]
+
+    @property
+    def repo_name(self) -> str:
+        return os.environ["BUILD_REPOSITORY_NAME"]
 
     def build_url_by_id(self, build_id) -> str:
         prefix = os.environ["SYSTEM_TEAMFOUNDATIONSERVERURI"]

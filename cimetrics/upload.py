@@ -1,13 +1,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-import os
-import sys
 import datetime
 import contextlib
-import yaml
 import pymongo
-from typing import Dict, Union, Iterator
+from typing import Dict, Iterator
 from dataclasses import dataclass, asdict
 
 from typing import Optional
