@@ -220,7 +220,7 @@ def trend_view(env, tgt_only=False):
 
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
-        fig = plt.figure(figsize=fsize)
+        fig = plt.figure(figsize=fsize, y=0.01, fontweight="bold", fontsize="large")
         fig.suptitle(group_name)
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
