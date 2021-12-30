@@ -50,9 +50,13 @@ def ticklabel_format(value):
     bvs = str(value)
     if len(bvs) < 7:
         fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
-        return f"%.{fp}f"
+        return f"{{value:.{fp}f}}"
     else:
-        return "%.1e"
+        return "{{value:.1e}}"
+
+
+def ticklabel_formatter(value, _):
+    return ticklabel_format(value).format(value=value)
 
 
 def fancy_date(ds):
@@ -208,14 +212,13 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        fsize = matplotlib.figure.figaspect(1. / len(groupby))
+        fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         font_size = StandardFontSize
 
     # There is no easy way to set the size on annotate(), but we
     # otherwise explicitly set the size on each text element
     # matplotlib.rcParams.update({"font.size": font_size.DEFAULT})
-
 
     files = []
 
@@ -334,7 +337,7 @@ def trend_view(env, tgt_only=False):
                             ha="left",
                             color=color,
                             weight="bold",
-                            fontsize="small"
+                            fontsize="small",
                         )
             # Set yticks to branch value and last ewma when applicable
             yticks = []
@@ -347,10 +350,9 @@ def trend_view(env, tgt_only=False):
             if col in tgt_cols:
                 yticks.append(tgt_ewma[col].values[-1])
             ax.yaxis.set_ticks(yticks, fontsize="small")
-            #ax.yaxis.tick_params(which="major", labelsize=5)
-
-            fmt = ticklabel_format(yticks[0])
-            #ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
+            ax.yaxis.set_major_formatter(
+                mtick.FuncFormatter(ticklabel_formatter(yticks[0]))
+            )
             padding = {}
             if tgt_only:
                 padding["pad"] = 14
