@@ -330,6 +330,7 @@ def trend_view(env, tgt_only=False):
             yticks.append(branch_val)
         if col in tgt_cols:
             yticks.append(tgt_ewma[col].values[-1])
+
         #ax.yaxis.set_ticks(yticks, fontsize=font_size.YTICKS)
 
         fmt = ticklabel_format(yticks[0])
