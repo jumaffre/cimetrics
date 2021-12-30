@@ -26,9 +26,6 @@ steps:
 - script: pip install -r dev-requirements.txt
   displayName: 'Install dev dependencies'
 
-- script: black --check cimetrics
-  displayName: 'Check code format'
-
 - script: mypy -p cimetrics --ignore-missing-imports
   displayName: 'Type checking'
 
@@ -54,6 +51,9 @@ steps:
     AZURE_BLOB_URL: $(AZURE_BLOB_URL)
     AZURE_WEB_URL: $(AZURE_WEB_URL)
   displayName: 'Post metrics graphs as PR comment'
+
+- script: black --check cimetrics
+  displayName: 'Check code format'
 
 - task: PublishBuildArtifacts@1
   inputs:
