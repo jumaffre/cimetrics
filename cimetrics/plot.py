@@ -221,6 +221,7 @@ def trend_view(env, tgt_only=False):
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
+        fig.suptitle(group_name)
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
@@ -401,7 +402,6 @@ def trend_view(env, tgt_only=False):
                 plt.xticks(ha="left")
             ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
 
-        plt.title(group_name)
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
         plt.savefig(path, dpi=200 * dpi_adjust)
