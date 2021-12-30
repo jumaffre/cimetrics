@@ -387,7 +387,7 @@ def trend_view(env, tgt_only=False):
     plt.savefig(os.path.join(metrics_path, "diff_.png"), dpi=200 * dpi_adjust)
     plt.close(fig)
 
-    stack_vertically([os.path.join(metrics_path, "diff_.png")] * 3).save("diff.png")
+    stack_vertically([os.path.join(metrics_path, "diff_.png")] * 3).save(os.path.join(metrics_path, "diff.png"))
 
     build_ids = sorted(tgt_raw.index)
     if build_ids:
