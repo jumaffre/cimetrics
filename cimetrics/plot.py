@@ -218,7 +218,7 @@ def trend_view(env, tgt_only=False):
 
     for index, col in enumerate(columns):
         nrow = math.ceil(float(nplot) / ncol)
-        ax = subplots[index]
+        _, ax = subplots[index]
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
