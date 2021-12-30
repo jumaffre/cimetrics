@@ -227,7 +227,14 @@ def trend_view(env, tgt_only=False):
     for group_name, group_predicate in groupby.items():
         group_columns = [column for column in columns if group_predicate(column)]
         fig = plt.figure(figsize=fsize)
-        fig.suptitle(group_name, y=0.97, fontweight="bold", fontsize="large")
+        fig.suptitle(
+            group_name,
+            x=0.03,
+            y=0.97,
+            fontweight="bold",
+            fontsize="large",
+            color="dimgray",
+        )
         for index, col in enumerate(group_columns):
             nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
