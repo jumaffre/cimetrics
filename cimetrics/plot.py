@@ -347,6 +347,7 @@ def trend_view(env, tgt_only=False):
             if col in tgt_cols:
                 yticks.append(tgt_ewma[col].values[-1])
             ax.yaxis.set_ticks(yticks, fontsize="small")
+            ax.yaxis.tick_params(which="major", labelsize="small")
 
             fmt = ticklabel_format(yticks[0])
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
