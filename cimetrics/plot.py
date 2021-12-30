@@ -229,7 +229,6 @@ def trend_view(env, tgt_only=False):
         fig = plt.figure(figsize=fsize)
         fig.suptitle(
             group_name,
-            x=0.02,
             horizontalalignment="left",
             y=0.97,
             fontweight="bold",
