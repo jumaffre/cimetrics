@@ -372,10 +372,10 @@ def trend_view(env, tgt_only=False):
         #         tls[1].set_color(Color.TARGET_TREND)
         # Don't print xticks for rows other than bottom if not
         # in tgt_only mode
-        if (index < (ncol * (nrow - 1))) and not tgt_only:
-            plt.setp(ax.get_xticklabels(), visible=False)
-            plt.setp(ax.get_xticklines(), visible=False)
-            plt.setp(ax.spines.values(), visible=False)
+        # if (index < (ncol * (nrow - 1))) and not tgt_only:
+        #     plt.setp(ax.get_xticklabels(), visible=False)
+        #     plt.setp(ax.get_xticklines(), visible=False)
+        #     plt.setp(ax.spines.values(), visible=False)
 
         xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
         xticks_labels = [fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks]
