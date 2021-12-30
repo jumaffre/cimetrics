@@ -346,7 +346,7 @@ def trend_view(env, tgt_only=False):
                 yticks.append(branch_val)
             if col in tgt_cols:
                 yticks.append(tgt_ewma[col].values[-1])
-            ax.yaxis.set_ticks(yticks, fontsize=font_size.YTICKS)
+            ax.yaxis.set_ticks(yticks, fontsize="small")
 
             fmt = ticklabel_format(yticks[0])
             ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
@@ -358,7 +358,7 @@ def trend_view(env, tgt_only=False):
                 loc="left",
                 fontdict={"fontweight": "bold"},
                 color="dimgray",
-                fontsize=font_size.TITLE,
+                fontsize="small",
                 **padding,
             )
             if tgt_only:
@@ -402,7 +402,7 @@ def trend_view(env, tgt_only=False):
                 plt.xticks(rotation=-30, ha="left")
             else:
                 plt.xticks(ha="left")
-            ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
+            ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize="small")
 
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
