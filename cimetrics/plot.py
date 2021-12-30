@@ -13,6 +13,7 @@ import matplotlib.ticker as mtick
 from adtk.detector import LevelShiftAD
 
 from cimetrics.env import get_env
+from cimetrics.stack import stack_vertically
 
 plt.style.use("ggplot")
 
@@ -383,8 +384,10 @@ def trend_view(env, tgt_only=False):
         ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200 * dpi_adjust)
+    plt.savefig(os.path.join(metrics_path, "diff_.png"), dpi=200 * dpi_adjust)
     plt.close(fig)
+
+    stack_vertically(["diff_.png"] * 3).save("diff.png")
 
     build_ids = sorted(tgt_raw.index)
     if build_ids:
