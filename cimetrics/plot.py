@@ -59,7 +59,7 @@ def make_ticklabel_formatter(value, match_value=None, append=None):
     def ticklabel_formatter(val, _):
         rv = ticklabel_format(value).format(value=val)
         if match_value is not None and val == match_value:
-            rv = f"{rv}\n{append}"
+            rv = f"{rv}\n({append})"
         return rv
 
     return ticklabel_formatter
@@ -222,10 +222,6 @@ def trend_view(env, tgt_only=False):
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         font_size = StandardFontSize
 
-    # There is no easy way to set the size on annotate(), but we
-    # otherwise explicitly set the size on each text element
-    # matplotlib.rcParams.update({"font.size": font_size.DEFAULT})
-
     files = []
 
     for group_name, group_predicate in groupby.items():
@@ -324,26 +320,6 @@ def trend_view(env, tgt_only=False):
                             linestyle="-",
                             linewidth=1,
                             alpha=0.3,
-                        )
-
-                    if col in tgt_ewma:
-                        # Annotate plot with % change
-                        percent_change = 100 * (branch_val - lewm) / lewm
-                        sign = "+" if percent_change > 0 else ""
-                        offset = 10
-                        plt.annotate(
-                            f"{sign}{percent_change:.0f}%",
-                            (len(tgt_raw) - 1, branch_val),
-                            xytext=(
-                                offset + 10,
-                                offset if percent_change > 0 else -offset,
-                            ),
-                            textcoords="offset points",
-                            va="center",
-                            ha="left",
-                            color=color,
-                            weight="bold",
-                            fontsize="small",
                         )
             # Set yticks to branch value and last ewma when applicable
             yticks = []
