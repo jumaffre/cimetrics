@@ -214,10 +214,7 @@ def trend_view(env, tgt_only=False):
     nplot = len(columns)
 
     nrow = math.ceil(float(nplot) / ncol)
-    share = {}
-    if not tgt_only:
-        share["sharex"] = first_ax
-    subplots = fig.subplots(nrow, ncol, **share)
+    subplots = fig.subplots(nrow, ncol, sharex="none" if tgt_only else "all")
 
     for index, col in enumerate(columns):
         nrow = math.ceil(float(nplot) / ncol)
@@ -225,9 +222,6 @@ def trend_view(env, tgt_only=False):
         ax.set_facecolor(Color.BACKGROUND)
         ax.yaxis.set_label_position("right")
         ax.yaxis.tick_right()
-
-        if not first_ax:
-            first_ax = ax
 
         interesting_ticks = []
 
