@@ -209,8 +209,8 @@ def trend_view(env, tgt_only=False):
         font_size = StandardFontSize
 
     subfigs = fig.subfigures(1, 2, wspace=0.07)
-    subfigs[0].suptitle('Even')
-    subfigs[0].suptitle('Odd')
+    subfigs[0].suptitle("Even")
+    subfigs[0].suptitle("Odd")
 
     # There is no easy way to set the size on annotate(), but we
     # otherwise explicitly set the size on each text element
