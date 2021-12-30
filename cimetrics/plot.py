@@ -365,11 +365,11 @@ def trend_view(env, tgt_only=False):
             direction="in",
         )
         # Match tick colors with series they belong to
-        tls = ax.yaxis.get_ticklabels()
-        if not tgt_only:
-            tls[0].set_color(color)
-            if len(tls) > 1:
-                tls[1].set_color(Color.TARGET_TREND)
+        # tls = ax.yaxis.get_ticklabels()
+        # if not tgt_only:
+        #     tls[0].set_color(color)
+        #     if len(tls) > 1:
+        #         tls[1].set_color(Color.TARGET_TREND)
         # Don't print xticks for rows other than bottom if not
         # in tgt_only mode
         if (index < (ncol * (nrow - 1))) and not tgt_only:
