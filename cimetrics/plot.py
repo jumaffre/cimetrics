@@ -217,6 +217,12 @@ def trend_view(env, tgt_only=False):
     files = []
 
     for group_name, group_columns in groupby.items():
+        nrow = math.ceil(float(len(group_columns)) / ncol)
+        if tgt_only:
+            fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby) * nrow)
+        else:
+            fsize = matplotlib.figure.figaspect(1.0 / len(groupby) * nrow)
+        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         fig = plt.figure(figsize=fsize)
         fig.suptitle(
             group_name,
@@ -227,12 +233,6 @@ def trend_view(env, tgt_only=False):
             fontsize="large",
             color=Color.TITLES,
         )
-        nrow = math.ceil(float(len(group_columns)) / ncol)
-        if tgt_only:
-            fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby) * nrow)
-        else:
-            fsize = matplotlib.figure.figaspect(1.0 / len(groupby) * nrow)
-        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         for index, col in enumerate(group_columns):
             share = {}
             if not tgt_only:
@@ -270,7 +270,7 @@ def trend_view(env, tgt_only=False):
                         ax.text(
                             anomaly,
                             ymax,
-                            ticklabel_format(ev) % ev,
+                            ticklabel_format(ev).format(value=ev),
                             color=Color.BAD,
                             rotation=-30,
                             ha="right",
