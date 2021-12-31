@@ -220,8 +220,7 @@ def trend_view(env, tgt_only=False):
 
     files = []
 
-    for group_name, group_predicate in groupby.items():
-        group_columns = [column for column in columns if group_predicate(column)]
+    for group_name, group_columns in groupby.items():
         fig = plt.figure(figsize=fsize)
         fig.suptitle(
             group_name,
