@@ -220,9 +220,9 @@ def trend_view(env, tgt_only=False):
     for group_name, group_columns in groupby.items():
         nrow = math.ceil(float(len(group_columns)) / ncol)
         if tgt_only:
-            fsize = matplotlib.figure.figaspect(env.columns * .6 / len(groupby) * nrow)
+            fsize = matplotlib.figure.figaspect(env.columns * 0.6 / len(groupby) * nrow)
         else:
-            fsize = matplotlib.figure.figaspect(.5 / len(groupby) * nrow)
+            fsize = matplotlib.figure.figaspect(0.5 / len(groupby) * nrow)
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         fig = plt.figure(figsize=fsize)
         fig.suptitle(
