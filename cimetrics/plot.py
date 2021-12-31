@@ -11,6 +11,7 @@ import sys
 import math
 import matplotlib.ticker as mtick
 from adtk.detector import LevelShiftAD
+import re
 
 from cimetrics.env import get_env
 from cimetrics.stack import stack_vertically
@@ -154,6 +155,20 @@ def anomalies(series, window_size):
         return []
 
 
+def column_mapping(env, columns):
+    unmatched_columns = [column for column in columns]
+    mapping = {}
+    for group_name, group_re in env.groups.items():
+        matched = {
+            column for column in unmatched_columns if re.compile(group_re).match(column)
+        }
+        unmatched_columns = [
+            column for column in unmatched_columns if column not in matched
+        ]
+        mapping[group_name] = matched
+    return mapping
+
+
 def trend_view(env, tgt_only=False):
     if env is None:
         print("Skipping plotting (env)")
@@ -181,14 +196,10 @@ def trend_view(env, tgt_only=False):
     tgt_ewma = tgt_ewma.tail(span)
     first_ax = None
 
-    groupby = {
-        "Percentages": lambda col: "(%)" in col,
-        "Others": lambda col: "(%)" not in col,
-    }
-
     if tgt_only:
         columns = sorted(tgt_raw.columns)
         ncol = env.monitoring_columns
+        groupby = column_mapping(env, columns)
         fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
     else:
@@ -203,6 +214,7 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
+        groupby = column_mapping(env, columns)
         fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
 
