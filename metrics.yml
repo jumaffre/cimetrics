@@ -8,6 +8,6 @@ monitoring_span: 150
 pr_user: cimetrics
 monitoring_columns: 2
 groups:
-  "One-off": "new_metric"
+  "One-off": ".*new_metric.*"
   "Percentages": '.*\(%\).*'
   "Others": '.*'

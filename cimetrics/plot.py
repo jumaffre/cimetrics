@@ -165,7 +165,8 @@ def column_mapping(env, columns):
         unmatched_columns = [
             column for column in unmatched_columns if column not in matched
         ]
-        mapping[group_name] = matched
+        if matched:
+            mapping[group_name] = matched
     return mapping
 
 
