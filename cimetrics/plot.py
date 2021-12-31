@@ -11,8 +11,10 @@ import sys
 import math
 import matplotlib.ticker as mtick
 from adtk.detector import LevelShiftAD
+import re
 
 from cimetrics.env import get_env
+from cimetrics.stack import stack_vertically
 
 plt.style.use("ggplot")
 
@@ -22,22 +24,8 @@ class Color:
     TARGET_TREND = "slategrey"
     GOOD = "forestgreen"
     BAD = "firebrick"
-    TICK = "silver"
+    TITLES = "dimgray"
     BACKGROUND = "white"
-
-
-class SmallFontSize:
-    XTICKS = 4
-    YTICKS = 4
-    TITLE = 4
-    DEFAULT = 4
-
-
-class StandardFontSize:
-    XTICKS = 4
-    YTICKS = 4
-    TITLE = 5
-    DEFAULT = 4
 
 
 def ticklabel_format(value):
@@ -49,9 +37,19 @@ def ticklabel_format(value):
     bvs = str(value)
     if len(bvs) < 7:
         fp = len(bvs) - (bvs.index(".") + 1) if "." in bvs else 0
-        return f"%.{fp}f"
+        return f"{{value:.{fp}f}}"
     else:
-        return "%.1e"
+        return "{value:.1e}"
+
+
+def make_ticklabel_formatter(value, match_value=None, append=None):
+    def ticklabel_formatter(val, _):
+        rv = ticklabel_format(value).format(value=val)
+        if match_value is not None and val == match_value:
+            rv = f"{rv}\n({append})"
+        return rv
+
+    return ticklabel_formatter
 
 
 def fancy_date(ds):
@@ -157,6 +155,20 @@ def anomalies(series, window_size):
         return []
 
 
+def column_mapping(env, columns):
+    unmatched_columns = [column for column in columns]
+    mapping = {}
+    for group_name, group_re in env.groups.items():
+        matched = {
+            column for column in unmatched_columns if re.compile(group_re).match(column)
+        }
+        unmatched_columns = [
+            column for column in unmatched_columns if column not in matched
+        ]
+        mapping[group_name] = matched
+    return mapping
+
+
 def trend_view(env, tgt_only=False):
     if env is None:
         print("Skipping plotting (env)")
@@ -187,10 +199,9 @@ def trend_view(env, tgt_only=False):
     if tgt_only:
         columns = sorted(tgt_raw.columns)
         ncol = env.monitoring_columns
-        fsize = matplotlib.figure.figaspect(env.columns * 1.2)
+        groupby = column_mapping(env, columns)
+        fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
-        fig = plt.figure(figsize=fsize)
-        font_size = SmallFontSize
     else:
         # On a PR, select older builds with the same PR id (assumed unique)
         # failing that, use the branch name, in which case we may pick up
@@ -203,188 +214,198 @@ def trend_view(env, tgt_only=False):
         tick_map.update(branch_tick_map)
         columns = sorted(branch_series.columns)
         ncol = env.columns
-        fsize = matplotlib.figure.figaspect(1)
+        groupby = column_mapping(env, columns)
+        fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
         dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
+
+    files = []
+
+    for group_name, group_columns in groupby.items():
         fig = plt.figure(figsize=fsize)
-        font_size = StandardFontSize
+        fig.suptitle(
+            group_name,
+            horizontalalignment="left",
+            x=0.01,
+            y=0.97,
+            fontweight="bold",
+            fontsize="large",
+            color=Color.TITLES,
+        )
+        for index, col in enumerate(group_columns):
+            nrow = math.ceil(float(len(group_columns)) / ncol)
+            share = {}
+            if not tgt_only:
+                share["sharex"] = first_ax
+            ax = fig.add_subplot(nrow, ncol, index + 1, **share)
+            ax.set_facecolor(Color.BACKGROUND)
+            ax.yaxis.set_label_position("right")
+            ax.yaxis.tick_right()
 
-    # There is no easy way to set the size on annotate(), but we
-    # otherwise explicitly set the size on each text element
-    matplotlib.rcParams.update({"font.size": font_size.DEFAULT})
-    nplot = len(columns)
+            if not first_ax:
+                first_ax = ax
 
-    for index, col in enumerate(columns):
-        nrow = math.ceil(float(nplot) / ncol)
-        share = {}
-        if not tgt_only:
-            share["sharex"] = first_ax
-        ax = fig.add_subplot(nrow, ncol, index + 1, **share)
-        ax.set_facecolor(Color.BACKGROUND)
-        ax.yaxis.set_label_position("right")
-        ax.yaxis.tick_right()
+            interesting_ticks = []
 
-        if not first_ax:
-            first_ax = ax
-
-        interesting_ticks = []
-
-        if col in tgt_cols:
-            # Plot raw target branch data
-            ax.plot(
-                tgt_raw[col].values,
-                color=Color.TARGET_RAW,
-                marker="o",
-                markersize=0.5,
-                linestyle="",
-            )
-            # Plot ewma of target branch data
-            ax.plot(tgt_ewma[col].values, color=Color.TARGET_TREND, linewidth=0.5)
-
-            _, ymax = plt.ylim()
-            if tgt_only:
-                for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
-                    interesting_ticks.append(anomaly)
-                    ax.axvline(x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5)
-                    ev = tgt_ewma[col].iloc[anomaly]
-                    ax.text(
-                        anomaly,
-                        ymax,
-                        ticklabel_format(ev) % ev,
-                        color=Color.BAD,
-                        rotation=-30,
-                        ha="right",
-                    )
-
-        if not tgt_only:
-            # Pick color direction
-            good_col, bad_col = Color.GOOD, Color.BAD
-            if col.endswith("^"):
-                good_col, bad_col = bad_col, good_col
-
-            if col in branch_series.columns:
-                branch_val = branch_series[col].values[-1]
-                # Pick a marker, either caret up, down, or circle for new metrics
-                if col in tgt_cols:
-                    lewm = tgt_ewma[col][tgt_ewma.index[-1]]
-                    marker, color = (1, good_col) if branch_val < lewm else (1, bad_col)
-                else:
-                    lewm = branch_val
-                    marker, color = (1, Color.GOOD)
-
-                # Plot marker for branch value
-                marker_x = len(tgt_raw) + len(branch_series) - 1
-                s = ax.plot(
-                    marker_x,
-                    [branch_val],
-                    color=color,
-                    marker=marker,
-                    markersize=6,
+            if col in tgt_cols:
+                # Plot raw target branch data
+                ax.plot(
+                    tgt_raw[col].values,
+                    color=Color.TARGET_RAW,
+                    marker="o",
+                    markersize=0.5,
                     linestyle="",
                 )
-                # Plot stem of arrow for branch value
-                s = ax.plot(
-                    [marker_x, marker_x],
-                    [lewm, branch_val],
-                    color=color,
-                    linestyle="-",
-                    linewidth=1,
-                )
+                # Plot ewma of target branch data
+                ax.plot(tgt_ewma[col].values, color=Color.TARGET_TREND, linewidth=0.5)
 
-                # Plot previous branch runs
-                for bx, by in zip(range(len(tgt_raw), marker_x), branch_series[col]):
+                _, ymax = plt.ylim()
+                if tgt_only:
+                    for anomaly in anomalies(tgt_raw[col].to_frame(), env.ewma_span):
+                        interesting_ticks.append(anomaly)
+                        ax.axvline(
+                            x=anomaly, color=Color.BAD, linestyle=":", linewidth=0.5
+                        )
+                        ev = tgt_ewma[col].iloc[anomaly]
+                        ax.text(
+                            anomaly,
+                            ymax,
+                            ticklabel_format(ev) % ev,
+                            color=Color.BAD,
+                            rotation=-30,
+                            ha="right",
+                        )
+
+            if not tgt_only:
+                # Pick color direction
+                good_col, bad_col = Color.GOOD, Color.BAD
+                if col.endswith("^"):
+                    good_col, bad_col = bad_col, good_col
+
+                if col in branch_series.columns:
+                    branch_val = branch_series[col].values[-1]
+                    # Pick a marker, either caret up, down, or circle for new metrics
+                    if col in tgt_cols:
+                        lewm = tgt_ewma[col][tgt_ewma.index[-1]]
+                        marker, color = (
+                            (1, good_col) if branch_val < lewm else (1, bad_col)
+                        )
+                    else:
+                        lewm = branch_val
+                        marker, color = (1, Color.GOOD)
+
+                    # Plot marker for branch value
+                    marker_x = len(tgt_raw) + len(branch_series) - 1
                     s = ax.plot(
-                        [bx, bx],
-                        [lewm, by],
-                        color=good_col if by < lewm else bad_col,
+                        marker_x,
+                        [branch_val],
+                        color=color,
+                        marker=marker,
+                        markersize=6,
+                        linestyle="",
+                    )
+                    # Plot stem of arrow for branch value
+                    s = ax.plot(
+                        [marker_x, marker_x],
+                        [lewm, branch_val],
+                        color=color,
                         linestyle="-",
                         linewidth=1,
-                        alpha=0.3,
                     )
 
-                if col in tgt_ewma:
-                    # Annotate plot with % change
-                    percent_change = 100 * (branch_val - lewm) / lewm
-                    sign = "+" if percent_change > 0 else ""
-                    offset = 10
-                    plt.annotate(
-                        f"{sign}{percent_change:.0f}%",
-                        (len(tgt_raw) - 1, branch_val),
-                        xytext=(offset + 10, offset if percent_change > 0 else -offset),
-                        textcoords="offset points",
-                        va="center",
-                        ha="left",
-                        color=color,
-                        weight="bold",
-                    )
-        # Set yticks to branch value and last ewma when applicable
-        yticks = []
-        if tgt_only:
-            yvals = tgt_raw[col].dropna().values
-            yticks.append(yvals.min())
-            yticks.append(yvals.max())
-        else:
-            yticks.append(branch_val)
-        if col in tgt_cols:
-            yticks.append(tgt_ewma[col].values[-1])
-        ax.yaxis.set_ticks(yticks, fontsize=font_size.YTICKS)
-
-        fmt = ticklabel_format(yticks[0])
-        ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(fmt))
-        padding = {}
-        if tgt_only:
-            padding["pad"] = 14
-        ax.set_title(
-            col.strip("^").strip(),
-            loc="left",
-            fontdict={"fontweight": "bold"},
-            color="dimgray",
-            fontsize=font_size.TITLE,
-            **padding,
-        )
-        if tgt_only:
+                    # Plot previous branch runs
+                    for bx, by in zip(
+                        range(len(tgt_raw), marker_x), branch_series[col]
+                    ):
+                        s = ax.plot(
+                            [bx, bx],
+                            [lewm, by],
+                            color=good_col if by < lewm else bad_col,
+                            linestyle="-",
+                            linewidth=1,
+                            alpha=0.3,
+                        )
+            # Set yticks to branch value and last ewma when applicable
+            yticks = []
+            if tgt_only:
+                yvals = tgt_raw[col].dropna().values
+                yticks.append(yvals.min())
+                yticks.append(yvals.max())
+            else:
+                yticks.append(branch_val)
+            if col in tgt_cols:
+                yticks.append(tgt_ewma[col].values[-1])
+            ax.yaxis.set_ticks(yticks, fontsize="small")
+            mv, rv = None, None
+            if col in tgt_ewma:
+                percent_change = 100 * (branch_val - lewm) / lewm
+                sign = "+" if percent_change > 0 else ""
+                mv = branch_val
+                rv = f"{sign}{percent_change:.0f}%"
+            ax.yaxis.set_major_formatter(
+                mtick.FuncFormatter(make_ticklabel_formatter(yticks[0], mv, rv))
+            )
+            padding = {}
+            if tgt_only:
+                padding["pad"] = 14
+            ax.set_title(
+                col.strip("^").strip(),
+                loc="left",
+                fontdict={"fontweight": "bold"},
+                color=Color.TITLES,
+                fontsize="small",
+                **padding,
+            )
+            if tgt_only:
+                ax.tick_params(
+                    axis="y",
+                    which="both",
+                    color=Color.TARGET_TREND,
+                    length=3,
+                    width=1,
+                    direction="in",
+                )
+            else:
+                ax.tick_params(axis="y", right=False)
             ax.tick_params(
-                axis="y",
+                axis="x",
                 which="both",
                 color=Color.TARGET_TREND,
                 length=3,
                 width=1,
                 direction="in",
             )
-        else:
-            ax.tick_params(axis="y", right=False)
-        ax.tick_params(
-            axis="x",
-            which="both",
-            color=Color.TARGET_TREND,
-            length=3,
-            width=1,
-            direction="in",
-        )
-        # Match tick colors with series they belong to
-        tls = ax.yaxis.get_ticklabels()
-        if not tgt_only:
-            tls[0].set_color(color)
-            if len(tls) > 1:
-                tls[1].set_color(Color.TARGET_TREND)
-        # Don't print xticks for rows other than bottom if not
-        # in tgt_only mode
-        if (index < (ncol * (nrow - 1))) and not tgt_only:
-            plt.setp(ax.get_xticklabels(), visible=False)
-            plt.setp(ax.get_xticklines(), visible=False)
-            plt.setp(ax.spines.values(), visible=False)
+            # Match tick colors with series they belong to
+            tls = ax.yaxis.get_ticklabels()
+            if not tgt_only:
+                tls[0].set_color(color)
+                if len(tls) > 1:
+                    tls[1].set_color(Color.TARGET_TREND)
+            # Don't print xticks for rows other than bottom if not
+            # in tgt_only mode
+            if (index < (ncol * (nrow - 1))) and not tgt_only:
+                plt.setp(ax.get_xticklabels(), visible=False)
+                plt.setp(ax.get_xticklines(), visible=False)
+                plt.setp(ax.spines.values(), visible=False)
 
-        xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
-        xticks_labels = [fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks]
+            xticks = [0] + interesting_ticks + [len(tgt_raw) - 1]
+            xticks_labels = [
+                fancy_date(tick_map[tgt_raw.index.values[i]]) for i in xticks
+            ]
 
-        if tgt_only:
-            plt.xticks(rotation=-30, ha="left")
-        else:
-            plt.xticks(ha="left")
-        ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize=font_size.XTICKS)
+            if tgt_only:
+                plt.xticks(rotation=-30, ha="left")
+            else:
+                plt.xticks(ha="left")
+            ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize="small")
+            plt.yticks(fontsize="small")
 
-    plt.tight_layout()
-    plt.savefig(os.path.join(metrics_path, "diff.png"), dpi=200 * dpi_adjust)
-    plt.close(fig)
+        plt.tight_layout()
+        path = os.path.join(metrics_path, f"{group_name}.png")
+        plt.savefig(path, dpi=200 * dpi_adjust)
+        plt.close(fig)
+        files.append(path)
+
+    stack_vertically(files).save(os.path.join(metrics_path, "diff.png"))
 
     build_ids = sorted(tgt_raw.index)
     if build_ids:

@@ -96,6 +96,10 @@ class Env(object):
     def monitoring_columns(self) -> int:
         return self.cfg.get("monitoring_columns", 2)
 
+    @property
+    def groups(self) -> dict:
+        return self.cfg.get("groups", {"Metrics": ".*"})
+
 
 class GitEnv(Env):
     _target_branch = None
