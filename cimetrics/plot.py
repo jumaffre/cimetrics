@@ -398,7 +398,7 @@ def trend_view(env, tgt_only=False):
 
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
-        plt.savefig(path, dpi=200)
+        plt.savefig(path, dpi=72)
         plt.close(fig)
         files.append(path)
 
