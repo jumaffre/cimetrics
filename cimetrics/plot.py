@@ -220,16 +220,7 @@ def trend_view(env, tgt_only=False):
     for group_name, group_columns in groupby.items():
         nrow = math.ceil(float(len(group_columns)) / ncol)
         fig = plt.figure(figsize=(ncol * 3, nrow * 3))
-        fig.suptitle(
-            group_name,
-            horizontalalignment="left",
-            x=0.01,
-            y=0.97,
-            fontweight="bold",
-            fontsize="large",
-            color=Color.TITLES,
-        )
-        for index, col in enumerate(group_columns):
+        for index, col in enumerate(sorted(group_columns)):
             share = {}
             if not tgt_only:
                 share["sharex"] = first_ax
@@ -249,7 +240,7 @@ def trend_view(env, tgt_only=False):
                     tgt_raw[col].values,
                     color=Color.TARGET_RAW,
                     marker="o",
-                    markersize=0.5,
+                    markersize=1,
                     linestyle="",
                 )
                 # Plot ewma of target branch data
@@ -300,13 +291,13 @@ def trend_view(env, tgt_only=False):
                         markersize=6,
                         linestyle="",
                     )
-                    # Plot stem of arrow for branch value
+                    # Plot bar for branch value
                     s = ax.plot(
                         [marker_x, marker_x],
                         [lewm, branch_val],
                         color=color,
                         linestyle="-",
-                        linewidth=1,
+                        linewidth=2,
                     )
 
                     # Plot previous branch runs
@@ -318,7 +309,7 @@ def trend_view(env, tgt_only=False):
                             [lewm, by],
                             color=good_col if by < lewm else bad_col,
                             linestyle="-",
-                            linewidth=1,
+                            linewidth=2,
                             alpha=0.3,
                         )
             # Set yticks to branch value and last ewma when applicable
@@ -397,6 +388,15 @@ def trend_view(env, tgt_only=False):
             ax.xaxis.set_ticks(xticks, labels=xticks_labels, fontsize="small")
             plt.yticks(fontsize="small")
 
+        fig.suptitle(
+            group_name,
+            horizontalalignment="left",
+            x=0.01,
+            y=1.01,
+            fontweight="bold",
+            fontsize="large",
+            color=Color.TITLES,
+        )
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
         plt.savefig(path)
