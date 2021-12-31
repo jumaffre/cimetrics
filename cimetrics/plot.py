@@ -240,7 +240,7 @@ def trend_view(env, tgt_only=False):
                     tgt_raw[col].values,
                     color=Color.TARGET_RAW,
                     marker="o",
-                    markersize=1,
+                    markersize=2,
                     linestyle="",
                 )
                 # Plot ewma of target branch data
@@ -288,7 +288,7 @@ def trend_view(env, tgt_only=False):
                         [branch_val],
                         color=color,
                         marker=marker,
-                        markersize=6,
+                        markersize=8,
                         linestyle="",
                     )
                     # Plot bar for branch value
@@ -392,7 +392,7 @@ def trend_view(env, tgt_only=False):
             group_name,
             horizontalalignment="left",
             x=0.01,
-            y=1.01,
+            y=0.97,
             fontweight="bold",
             fontsize="large",
             color=Color.TITLES,
