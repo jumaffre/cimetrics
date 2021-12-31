@@ -165,7 +165,8 @@ def column_mapping(env, columns):
         unmatched_columns = [
             column for column in unmatched_columns if column not in matched
         ]
-        mapping[group_name] = matched
+        if matched:
+            mapping[group_name] = matched
     return mapping
 
 
@@ -200,8 +201,6 @@ def trend_view(env, tgt_only=False):
         columns = sorted(tgt_raw.columns)
         ncol = env.monitoring_columns
         groupby = column_mapping(env, columns)
-        fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby))
-        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
     else:
         # On a PR, select older builds with the same PR id (assumed unique)
         # failing that, use the branch name, in which case we may pick up
@@ -215,13 +214,12 @@ def trend_view(env, tgt_only=False):
         columns = sorted(branch_series.columns)
         ncol = env.columns
         groupby = column_mapping(env, columns)
-        fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
-        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
 
     files = []
 
     for group_name, group_columns in groupby.items():
-        fig = plt.figure(figsize=fsize)
+        nrow = math.ceil(float(len(group_columns)) / ncol)
+        fig = plt.figure(figsize=(ncol * 3, nrow * 3))
         fig.suptitle(
             group_name,
             horizontalalignment="left",
@@ -232,7 +230,6 @@ def trend_view(env, tgt_only=False):
             color=Color.TITLES,
         )
         for index, col in enumerate(group_columns):
-            nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
             if not tgt_only:
                 share["sharex"] = first_ax
@@ -269,7 +266,7 @@ def trend_view(env, tgt_only=False):
                         ax.text(
                             anomaly,
                             ymax,
-                            ticklabel_format(ev) % ev,
+                            ticklabel_format(ev).format(value=ev),
                             color=Color.BAD,
                             rotation=-30,
                             ha="right",
@@ -402,7 +399,7 @@ def trend_view(env, tgt_only=False):
 
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
-        plt.savefig(path, dpi=200 * dpi_adjust)
+        plt.savefig(path)
         plt.close(fig)
         files.append(path)
 
