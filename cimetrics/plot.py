@@ -200,8 +200,6 @@ def trend_view(env, tgt_only=False):
         columns = sorted(tgt_raw.columns)
         ncol = env.monitoring_columns
         groupby = column_mapping(env, columns)
-        fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby))
-        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
     else:
         # On a PR, select older builds with the same PR id (assumed unique)
         # failing that, use the branch name, in which case we may pick up
@@ -215,8 +213,6 @@ def trend_view(env, tgt_only=False):
         columns = sorted(branch_series.columns)
         ncol = env.columns
         groupby = column_mapping(env, columns)
-        fsize = matplotlib.figure.figaspect(1.0 / len(groupby))
-        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
 
     files = []
 
@@ -231,8 +227,13 @@ def trend_view(env, tgt_only=False):
             fontsize="large",
             color=Color.TITLES,
         )
+        nrow = math.ceil(float(len(group_columns)) / ncol)
+        if tgt_only:
+            fsize = matplotlib.figure.figaspect(env.columns * 1.2 / len(groupby) * nrow)
+        else:
+            fsize = matplotlib.figure.figaspect(1.0 / len(groupby) * nrow)
+        dpi_adjust = fsize[1] / matplotlib.rcParams["figure.figsize"][1]
         for index, col in enumerate(group_columns):
-            nrow = math.ceil(float(len(group_columns)) / ncol)
             share = {}
             if not tgt_only:
                 share["sharex"] = first_ax
