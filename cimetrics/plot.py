@@ -336,11 +336,12 @@ def trend_view(env, tgt_only=False):
                 yticks.append(tgt_ewma[col].values[-1])
             ax.yaxis.set_ticks(yticks, fontsize="small")
             mv, rv = None, None
-            if col in tgt_ewma:
-                percent_change = 100 * (branch_val - lewm) / lewm
-                sign = "+" if percent_change > 0 else ""
-                mv = branch_val
-                rv = f"{sign}{percent_change:.0f}%"
+            if not tgt_only:
+                if col in tgt_ewma:
+                    percent_change = 100 * (branch_val - lewm) / lewm
+                    sign = "+" if percent_change > 0 else ""
+                    mv = branch_val
+                    rv = f"{sign}{percent_change:.0f}%"
             ax.yaxis.set_major_formatter(
                 mtick.FuncFormatter(make_ticklabel_formatter(yticks[0], mv, rv))
             )
