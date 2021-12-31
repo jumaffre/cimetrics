@@ -8,5 +8,5 @@ monitoring_span: 150
 pr_user: cimetrics
 monitoring_columns: 2
 groups:
-  "Percentages": ".*\(%\).*"
-  "Others": ".*"
+  Percentages": '.*\(%\).*'
+  "Others": '.*'
