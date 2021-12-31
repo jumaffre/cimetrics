@@ -219,7 +219,7 @@ def trend_view(env, tgt_only=False):
 
     for group_name, group_columns in groupby.items():
         nrow = math.ceil(float(len(group_columns)) / ncol)
-        fig = plt.figure(figsize=(1, 0.3 * nrow))
+        fig = plt.figure(figsize=(ncol, nrow))
         fig.suptitle(
             group_name,
             horizontalalignment="left",
