@@ -219,7 +219,7 @@ def trend_view(env, tgt_only=False):
 
     for group_name, group_columns in groupby.items():
         nrow = math.ceil(float(len(group_columns)) / ncol)
-        fig = plt.figure(figsize=(ncol * 10, nrow * 10))
+        fig = plt.figure(figsize=(ncol * 5, nrow * 5))
         fig.suptitle(
             group_name,
             horizontalalignment="left",
@@ -398,7 +398,7 @@ def trend_view(env, tgt_only=False):
 
         plt.tight_layout()
         path = os.path.join(metrics_path, f"{group_name}.png")
-        plt.savefig(path, dpi=200)
+        plt.savefig(path)
         plt.close(fig)
         files.append(path)
 
