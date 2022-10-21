@@ -28,7 +28,7 @@ You can use the simple Python API to push your metrics to your storage:
 ```python
 import cimetrics.upload
 
-with cimetrics.upload.Metrics() as metrics:
+with cimetrics.upload.metrics() as metrics:
   # Run some tests and collect some data
   metrics.put("metric1 name (unit)", metric_1)
   metrics.put("metric2 name (unit)", metric_2)
@@ -45,15 +45,15 @@ For example:
 
 ```python
 # Job 1
-with cimetrics.upload.Metrics(complete=False) as metrics:
+with cimetrics.upload.metrics(complete=False) as metrics:
   metrics.put("metric1 name (unit)", metric_1)
 
 # Job 2
-with cimetrics.upload.Metrics(complete=False) as metrics:
+with cimetrics.upload.metrics(complete=False) as metrics:
   metrics.put("metric2 name (unit)", metric_2)
 
 # Job running after Job 1 and 2 are complete
-with cimetrics.upload.Metrics() as metrics:
+with cimetrics.upload.metrics() as metrics:
   pass
 ```
 
