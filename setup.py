@@ -29,6 +29,7 @@ setup(
     packages=["cimetrics"],
     python_requires=">=3.6",
     install_requires=[
+        "wheel",
         "pymongo",
         "pyyaml",
         "gitpython",
