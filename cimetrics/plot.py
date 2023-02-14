@@ -322,7 +322,7 @@ def trend_view(env, tgt_only=False):
                 yticks.append(branch_val)
             if col in tgt_cols:
                 yticks.append(tgt_ewma[col].values[-1])
-            ax.yaxis.set_ticks(yticks, fontsize="small")
+            ax.yaxis.set_ticks(yticks, labels=[], fontsize="small")
             mv, rv = None, None
             if not tgt_only:
                 if col in tgt_ewma:
