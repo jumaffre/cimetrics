@@ -81,7 +81,6 @@ class GithubPRPublisher(object):
 
 
 if __name__ == "__main__":
-
     env = get_env()
     if env is None:
         print("Skipping publishing of PR comment (env)")
